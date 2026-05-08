@@ -8,8 +8,17 @@
       name="description"
       content="Breeze Siding LLC provides siding replacement, siding installation, window replacement, exterior painting, and deck services across Seattle, Tacoma, and the Puget Sound area."
     >
-    <link rel="preload" as="image" href="assets/images/project-home.jpg">
+    <link rel="preload" as="image" href="assets/images/hero.jpg">
     <link rel="stylesheet" href="styles.css">
+    <style>
+      .hero-image{background:linear-gradient(90deg,rgba(20,32,51,.15),rgba(20,32,51,.8)),url("assets/images/hero.jpg") center/cover}
+      .top-project{display:grid;grid-template-columns:minmax(280px,.76fr) minmax(0,1.24fr);gap:clamp(24px,5vw,70px);align-items:center;background:#fff}
+      .top-project-copy{max-width:620px}
+      .top-project-copy p:not(.eyebrow){color:var(--muted);font-size:1.08rem}
+      .top-project img{width:100%;height:clamp(320px,38vw,520px);object-fit:cover;border-radius:8px;filter:contrast(1.04) saturate(1.03)}
+      @media(max-width:980px){.top-project{grid-template-columns:1fr}.top-project img{height:380px}}
+      @media(max-width:640px){.top-project img{height:300px}}
+    </style>
   </head>
   <body>
     <header class="site-header">
@@ -61,6 +70,17 @@
         <span>James Hardie preferred installer</span>
         <span>Free on-site estimates</span>
         <span>Seattle to Tacoma service</span>
+      </section>
+
+      <section class="section top-project" aria-label="Featured exterior project">
+        <div class="top-project-copy">
+          <p class="eyebrow">Featured Project</p>
+          <h2>Fresh siding, crisp trim, and a clean Northwest finish.</h2>
+          <p>
+            A finished exterior should look sharp from the curb and hold up through wet, windy seasons.
+          </p>
+        </div>
+        <img src="assets/images/ht4uwffxakqccg7ihv6a.jpeg" alt="Completed exterior siding project by Breeze Siding" loading="lazy" decoding="async">
       </section>
 
       <section class="section intro">
