@@ -290,10 +290,10 @@
           </p>
           <div class="contact-actions">
             <a class="button primary" href="tel:12532280531">Call 253-228-0531</a>
-            <a class="button secondary" href="mailto:service@breezesiding.com?subject=Free%20Estimate%20Request">Email service@breezesiding.com</a>
+            <button class="button secondary" type="button" onclick="window.location.href='mai'+'lto:service@breezesiding.com?subject=Free%20Estimate%20Request'">Email service@breezesiding.com</button>
           </div>
         </div>
-        <form class="estimate-form" action="mailto:service@breezesiding.com" method="post" enctype="text/plain">
+        <form class="estimate-form" onsubmit="event.preventDefault();const d=new FormData(this);const body=['Name: '+(d.get('name')||''),'Phone: '+(d.get('phone')||''),'Email: '+(d.get('email')||''),'Project type: '+(d.get('project')||''),'Project notes: '+(d.get('message')||'')].join('\n');window.location.href='mai'+'lto:service@breezesiding.com?subject=Free%20Estimate%20Request&body='+encodeURIComponent(body);">
           <label>
             Name
             <input name="name" autocomplete="name" required>
@@ -333,7 +333,7 @@
       </div>
       <address>
         <a href="tel:12532280531">253-228-0531</a>
-        <a href="mailto:service@breezesiding.com">service@breezesiding.com</a>
+        <span>service@breezesiding.com</span>
         <span>Spanaway, WA</span>
       </address>
     </footer>
