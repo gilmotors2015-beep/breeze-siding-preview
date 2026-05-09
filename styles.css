@@ -107,7 +107,7 @@ summary:focus-visible {
   min-height: 520px;
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.15), rgba(20, 32, 51, 0.8)),
-    url("assets/images/project-home.jpg") center / cover;
+    url("assets/images/Untitled%20design.jpg") center / cover;
   filter: contrast(1.04) saturate(1.03);
 }
 
@@ -677,9 +677,17 @@ textarea {
   background: #101a2a;
 }
 
+.footer > div {
+  min-width: 0;
+}
+
 .footer img {
-  width: 220px;
+  width: min(260px, 100%);
+  height: auto;
+  max-height: 78px;
+  object-fit: contain;
   margin-bottom: 12px;
+  padding: 6px 8px;
   background: var(--white);
   border-radius: 6px;
 }
