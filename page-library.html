@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Breeze Siding Page Library</title>
+    <meta name="description" content="Private page library for reviewing Breeze Siding preview pages.">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      body{background:#f5f7fb;color:var(--ink)}
+      .library-header{padding:28px clamp(18px,4vw,48px);background:#fff;border-bottom:1px solid #d9e0ea;display:flex;align-items:center;justify-content:space-between;gap:20px;position:sticky;top:0;z-index:5}
+      .library-header img{width:min(210px,54vw);height:auto;object-fit:contain}
+      .library-header a{color:var(--brand);font-weight:800;text-decoration:none}
+      .library-shell{max-width:1180px;margin:0 auto;padding:clamp(28px,5vw,60px) clamp(18px,4vw,48px)}
+      .library-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,420px);gap:28px;align-items:end;margin-bottom:28px}
+      .library-intro h1{font-size:clamp(2.1rem,4vw,4rem);line-height:.96;margin:0 0 16px}
+      .library-intro p{color:var(--muted);font-size:1.08rem;margin:0}
+      .library-search{background:#fff;border:1px solid #d9e0ea;border-radius:8px;padding:18px;box-shadow:0 16px 40px rgba(20,32,51,.08)}
+      .library-search label{font-weight:800;display:block;margin-bottom:8px}
+      .library-search input{width:100%;border:1px solid #c7d0dc;border-radius:6px;padding:13px 14px;font:inherit}
+      .library-count{display:block;color:var(--muted);font-size:.92rem;margin-top:8px}
+      .library-section{margin-top:28px}
+      .library-section h2{font-size:1.45rem;margin:0 0 14px}
+      .page-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+      .page-card{display:block;background:#fff;border:1px solid #d9e0ea;border-radius:8px;padding:18px;text-decoration:none;color:inherit;min-height:132px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+      .page-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(20,32,51,.1);border-color:#9fb2c8}
+      .page-card strong{display:block;font-size:1.05rem;margin-bottom:8px;color:var(--ink)}
+      .page-card span{display:block;color:var(--muted);font-size:.94rem;line-height:1.45;overflow-wrap:anywhere}
+      .page-card[hidden],.library-section[hidden]{display:none}
+      @media(max-width:900px){.library-intro{grid-template-columns:1fr}.page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      @media(max-width:620px){.library-header{align-items:flex-start;flex-direction:column}.page-grid{grid-template-columns:1fr}.page-card{min-height:0}}
+    </style>
+  </head>
+  <body>
+    <header class="library-header">
+      <img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257">
+      <a href="index.html">Back to homepage</a>
+    </header>
+
+    <main class="library-shell">
+      <section class="library-intro">
+        <div>
+          <p class="eyebrow">Private working library</p>
+          <h1>Page browser.</h1>
+          <p>Search and open the live preview pages without adding blog or city landing pages to the homepage navigation.</p>
+        </div>
+        <div class="library-search">
+          <label for="pageSearch">Search pages</label>
+          <input id="pageSearch" type="search" placeholder="Try Seattle, cost, flashing, windows..." autocomplete="off">
+          <span class="library-count" id="pageCount">33 pages available</span>
+        </div>
+      </section>
+
+      <section class="library-section" data-section>
+        <h2>Core Pages</h2>
+        <div class="page-grid">
+          <a class="page-card" href="index.html" data-page><strong>Homepage</strong><span>Main Breeze Siding preview page.</span></a>
+          <a class="page-card" href="siding-replacement.html" data-page><strong>Siding Replacement</strong><span>Primary siding service page.</span></a>
+          <a class="page-card" href="window-installation.html" data-page><strong>Window Installation</strong><span>Window replacement and installation service page.</span></a>
+          <a class="page-card" href="exterior-painting.html" data-page><strong>Exterior Painting</strong><span>Exterior paint and trim service page.</span></a>
+          <a class="page-card" href="deck-building.html" data-page><strong>Deck Building</strong><span>Deck construction and exterior upgrade page.</span></a>
+        </div>
+      </section>
+
+      <section class="library-section" data-section>
+        <h2>Location Pages</h2>
+        <div class="page-grid">
+          <a class="page-card" href="siding-replacement-seattle.html" data-page><strong>Siding Replacement Seattle</strong><span>Seattle location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-tacoma.html" data-page><strong>Siding Replacement Tacoma</strong><span>Tacoma location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-bellevue.html" data-page><strong>Siding Replacement Bellevue</strong><span>Bellevue location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-kirkland.html" data-page><strong>Siding Replacement Kirkland</strong><span>Kirkland location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-redmond.html" data-page><strong>Siding Replacement Redmond</strong><span>Redmond location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-kent.html" data-page><strong>Siding Replacement Kent</strong><span>Kent location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-renton.html" data-page><strong>Siding Replacement Renton</strong><span>Renton location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-federal-way.html" data-page><strong>Siding Replacement Federal Way</strong><span>Federal Way location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-auburn.html" data-page><strong>Siding Replacement Auburn</strong><span>Auburn location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-puyallup.html" data-page><strong>Siding Replacement Puyallup</strong><span>Puyallup location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-spanaway.html" data-page><strong>Siding Replacement Spanaway</strong><span>Spanaway location landing page.</span></a>
+          <a class="page-card" href="siding-replacement-gig-harbor.html" data-page><strong>Siding Replacement Gig Harbor</strong><span>Gig Harbor location landing page.</span></a>
+        </div>
+      </section>
+
+      <section class="library-section" data-section>
+        <h2>Resource Pages</h2>
+        <div class="page-grid">
+          <a class="page-card" href="seattle-siding-costs.html" data-page><strong>Seattle Siding Costs</strong><span>Siding cost guide for Seattle homeowners.</span></a>
+          <a class="page-card" href="hardieplank-siding-cost-seattle.html" data-page><strong>HardiePlank Siding Cost Seattle</strong><span>Cost page for HardiePlank siding.</span></a>
+          <a class="page-card" href="vinyl-siding-cost-seattle.html" data-page><strong>Vinyl Siding Cost Seattle</strong><span>Vinyl siding cost guide.</span></a>
+          <a class="page-card" href="hardie-board-vs-vinyl-seattle.html" data-page><strong>Hardie Board vs Vinyl Seattle</strong><span>Material comparison page.</span></a>
+          <a class="page-card" href="siding-materials-seattle.html" data-page><strong>Siding Materials Seattle</strong><span>Overview of siding materials.</span></a>
+          <a class="page-card" href="when-to-replace-siding.html" data-page><strong>When to Replace Siding</strong><span>Signs and timing for siding replacement.</span></a>
+          <a class="page-card" href="siding-measurement-guide.html" data-page><strong>Siding Measurement Guide</strong><span>Homeowner measurement guide.</span></a>
+          <a class="page-card" href="house-wrap-siding-replacement.html" data-page><strong>House Wrap and Siding Replacement</strong><span>Weather barrier resource page.</span></a>
+          <a class="page-card" href="siding-installation-process-seattle.html" data-page><strong>Siding Installation Process Seattle</strong><span>Installation process guide.</span></a>
+          <a class="page-card" href="siding-window-flashing-details.html" data-page><strong>Siding Window Flashing Details</strong><span>Window flashing and siding detail guide.</span></a>
+          <a class="page-card" href="dry-rot-repair-seattle.html" data-page><strong>Dry Rot Repair Seattle</strong><span>Dry rot repair landing page.</span></a>
+          <a class="page-card" href="wood-rot-prevention-seattle.html" data-page><strong>Wood Rot Prevention Seattle</strong><span>Wood rot prevention resource page.</span></a>
+          <a class="page-card" href="window-leak-repair-seattle.html" data-page><strong>Window Leak Repair Seattle</strong><span>Window leak repair resource page.</span></a>
+          <a class="page-card" href="window-seal-repair-cost-seattle.html" data-page><strong>Window Seal Repair Cost Seattle</strong><span>Window seal repair cost guide.</span></a>
+          <a class="page-card" href="painting-vs-siding-replacement.html" data-page><strong>Painting vs Siding Replacement</strong><span>Decision guide for exterior updates.</span></a>
+          <a class="page-card" href="insulation-under-siding.html" data-page><strong>Insulation Under Siding</strong><span>Insulation and siding resource page.</span></a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const searchInput = document.querySelector('#pageSearch');
+      const pageCards = [...document.querySelectorAll('[data-page]')];
+      const sections = [...document.querySelectorAll('[data-section]')];
+      const pageCount = document.querySelector('#pageCount');
+
+      function filterPages() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        pageCards.forEach((card) => {
+          const matches = card.textContent.toLowerCase().includes(query) || card.getAttribute('href').toLowerCase().includes(query);
+          card.hidden = !matches;
+          if (matches) visibleCount += 1;
+        });
+
+        sections.forEach((section) => {
+          section.hidden = !section.querySelector('[data-page]:not([hidden])');
+        });
+
+        pageCount.textContent = `${visibleCount} ${visibleCount === 1 ? 'page' : 'pages'} available`;
+      }
+
+      searchInput.addEventListener('input', filterPages);
+      filterPages();
+    </script>
+  </body>
+</html>
