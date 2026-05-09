@@ -94,7 +94,7 @@
             <input name="name" autocomplete="name" required>
           </label>
           <label>
-            Phone
+            Phone (optional)
             <input name="phone" autocomplete="tel">
           </label>
           <label>
@@ -102,12 +102,13 @@
             <input type="email" name="email" autocomplete="email" required>
           </label>
           <label>
-            City
+            City (optional)
             <input name="city" autocomplete="address-level2" placeholder="Seattle, Tacoma, Spanaway...">
           </label>
           <label>
             Project type
             <select name="project" required>
+              <option value="" selected disabled>Choose project type</option>
               <option>Siding replacement</option>
               <option>Siding installation / new construction</option>
               <option>Window replacement / installation</option>
@@ -117,8 +118,9 @@
             </select>
           </label>
           <label>
-            Timeline
+            Timeline (optional)
             <select name="timeline">
+              <option value="">Choose timeline</option>
               <option>As soon as possible</option>
               <option>Within 1-3 months</option>
               <option>Planning ahead</option>
@@ -126,7 +128,7 @@
             </select>
           </label>
           <label class="wide">
-            Project notes
+            Project notes (optional)
             <textarea name="message" rows="5" placeholder="Tell us about the home, siding condition, photos you can provide, or what you want changed."></textarea>
           </label>
           <button class="button primary wide" type="submit">Request Free Estimate</button>
