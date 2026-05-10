@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gilmotors2015-beep.github.io/breeze-siding-preview/sitemap.xml
+Sitemap: https://breezesiding.com/sitemap.xml
