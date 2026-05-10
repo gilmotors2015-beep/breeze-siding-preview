@@ -8,6 +8,17 @@ const stages = [
   { id: 'lost', label: 'Lost' }
 ];
 
+const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
+const localHelperPath = 'C:\\Users\\gilmo.DESKTOP-S16VIV1\\Documents\\Codex\\2026-05-04\\can-you-leave-off-from-our\\new-customer-folder-builder.ps1';
+
+const folderTasks = [
+  { key: 'folder', label: 'Customer folder created' },
+  { key: 'sections', label: 'Numbered sections created' },
+  { key: 'starter', label: 'Starter pack copied' },
+  { key: 'template', label: 'Email templates linked from master folder' },
+  { key: 'estimate', label: 'Estimate workbook ready' }
+];
+
 const sampleLeads = [
   {
     id: 'lead-1001',
@@ -17,6 +28,8 @@ const sampleLeads = [
     city: 'Tacoma',
     project: 'Siding replacement',
     stage: 'new',
+    folderStatus: 'Not started',
+    folderTasksDone: [],
     nextStep: 'Call back and request photos',
     notes: 'Interested in fiber cement siding and trim around front windows.',
     createdAt: '2026-05-10T09:20:00'
@@ -29,6 +42,8 @@ const sampleLeads = [
     city: 'Seattle',
     project: 'Window and siding estimate',
     stage: 'contacted',
+    folderStatus: 'Created',
+    folderTasksDone: ['folder', 'sections'],
     nextStep: 'Prepare estimate after walkthrough',
     notes: 'Older home. Wants better weather protection and a cleaner front elevation.',
     createdAt: '2026-05-09T15:40:00'
@@ -41,6 +56,8 @@ const sampleLeads = [
     city: 'Bellevue',
     project: 'Exterior paint and trim',
     stage: 'estimate-sent',
+    folderStatus: 'Estimate ready',
+    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Follow up on estimate in two days',
     notes: 'Asked for separate siding repair and paint options.',
     createdAt: '2026-05-08T11:05:00'
@@ -53,6 +70,8 @@ const sampleLeads = [
     city: 'Puyallup',
     project: 'Repair visit',
     stage: 'scheduled',
+    folderStatus: 'Starter pack copied',
+    folderTasksDone: ['folder', 'sections', 'starter', 'template'],
     nextStep: 'Service visit scheduled',
     notes: 'Small leak-prone trim area near second-story window.',
     createdAt: '2026-05-07T16:30:00'
@@ -65,6 +84,8 @@ const sampleLeads = [
     city: 'Spanaway',
     project: 'Completed siding project',
     stage: 'review',
+    folderStatus: 'Invoice ready',
+    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Send review request link',
     notes: 'Project completed. Customer sounded happy at final walkthrough.',
     createdAt: '2026-05-05T14:10:00'
@@ -177,6 +198,7 @@ const performancePlan = [
 
 let leads = [...sampleLeads];
 let slots = [...sampleSlots];
+let activeLead = null;
 
 const board = document.querySelector('#pipeline-board');
 const searchInput = document.querySelector('#lead-search');
@@ -188,9 +210,22 @@ const addSlotButton = document.querySelector('#add-slot-button');
 const dialog = document.querySelector('#lead-dialog');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('[data-tab-panel]');
+const copyFolderCommandButton = document.querySelector('#copy-folder-command');
 
 function stageLabel(stageId) {
   return stages.find((stage) => stage.id === stageId)?.label || 'Unknown';
+}
+
+function safeFolderName(name) {
+  return name.replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim();
+}
+
+function folderPathForLead(lead) {
+  return `${customerRootPath}\\${safeFolderName(lead.name)}`;
+}
+
+function commandForLead(lead) {
+  return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`;
 }
 
 function filteredLeads() {
@@ -342,7 +377,21 @@ function renderPerformance() {
   renderPerformancePlan();
 }
 
+function renderFolderChecklist(lead) {
+  const list = document.querySelector('#dialog-folder-checklist');
+  list.innerHTML = '';
+
+  folderTasks.forEach((task) => {
+    const done = lead.folderTasksDone.includes(task.key);
+    const item = document.createElement('li');
+    item.className = done ? 'is-done' : '';
+    item.innerHTML = `<span>${done ? 'Done' : 'Next'}</span>${task.label}`;
+    list.append(item);
+  });
+}
+
 function showLead(lead) {
+  activeLead = lead;
   document.querySelector('#dialog-name').textContent = lead.name;
   document.querySelector('#dialog-stage').textContent = stageLabel(lead.stage);
   document.querySelector('#dialog-project').textContent = lead.project;
@@ -350,7 +399,24 @@ function showLead(lead) {
   document.querySelector('#dialog-city').textContent = lead.city;
   document.querySelector('#dialog-next').textContent = lead.nextStep;
   document.querySelector('#dialog-notes').textContent = lead.notes;
+  document.querySelector('#dialog-folder-status').textContent = lead.folderStatus;
+  document.querySelector('#dialog-folder-path').textContent = folderPathForLead(lead);
+  document.querySelector('#dialog-folder-command').textContent = commandForLead(lead);
+  copyFolderCommandButton.textContent = 'Copy folder command';
+  renderFolderChecklist(lead);
   dialog.showModal();
+}
+
+async function copyFolderCommand() {
+  if (!activeLead) return;
+  const command = commandForLead(activeLead);
+
+  try {
+    await navigator.clipboard.writeText(command);
+    copyFolderCommandButton.textContent = 'Copied';
+  } catch {
+    copyFolderCommandButton.textContent = 'Copy failed';
+  }
 }
 
 function addSampleLead() {
@@ -364,6 +430,8 @@ function addSampleLead() {
       city: 'Federal Way',
       project: 'Siding estimate',
       stage: 'new',
+      folderStatus: 'Not started',
+      folderTasksDone: [],
       nextStep: 'Call to qualify project',
       notes: 'Sample record added in demo mode.',
       createdAt: new Date().toISOString()
@@ -412,6 +480,7 @@ searchInput.addEventListener('input', renderBoard);
 stageFilter.addEventListener('change', renderBoard);
 addLeadButton.addEventListener('click', addSampleLead);
 addSlotButton.addEventListener('click', addSampleSlot);
+copyFolderCommandButton.addEventListener('click', copyFolderCommand);
 tabButtons.forEach((button) => {
   button.addEventListener('click', () => activateTab(button.dataset.tab));
 });
