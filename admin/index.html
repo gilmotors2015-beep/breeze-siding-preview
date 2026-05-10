@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Breeze Siding Admin | Lead Board</title>
+    <title>Breeze Siding Admin | Command Center</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="admin.css">
   </head>
@@ -11,7 +11,7 @@
     <header class="admin-header">
       <div>
         <p class="eyebrow">Breeze Siding Admin</p>
-        <h1>Lead and schedule board</h1>
+        <h1>Business command center</h1>
       </div>
       <div class="admin-actions">
         <span class="mode-pill" id="mode-pill">Demo mode</span>
@@ -22,81 +22,169 @@
     <main>
       <section class="notice" id="setup-notice">
         <strong>Foundation only.</strong>
-        This dashboard is ready for real lead data, but it is currently showing sample records until a secure database connection is added.
+        This dashboard is ready for real lead, schedule, Analytics, and Search Console data. It is currently showing sample records until secure connections are added.
       </section>
 
-      <section class="metrics" aria-label="Lead summary">
-        <article>
-          <span>New leads</span>
-          <strong id="metric-new">0</strong>
-        </article>
-        <article>
-          <span>Estimates pending</span>
-          <strong id="metric-estimates">0</strong>
-        </article>
-        <article>
-          <span>Scheduled</span>
-          <strong id="metric-scheduled">0</strong>
-        </article>
-        <article>
-          <span>Review follow-up</span>
-          <strong id="metric-review">0</strong>
-        </article>
-      </section>
+      <nav class="dashboard-tabs" aria-label="Admin dashboard sections">
+        <button class="tab-button is-active" type="button" data-tab="operations" aria-controls="operations-tab" aria-selected="true">Leads and Schedule</button>
+        <button class="tab-button" type="button" data-tab="performance" aria-controls="performance-tab" aria-selected="false">Website Performance</button>
+      </nav>
 
-      <section class="workspace">
-        <aside class="sidebar" aria-label="Dashboard filters">
-          <label>
-            Search leads
-            <input id="lead-search" type="search" placeholder="Name, city, project...">
-          </label>
-          <label>
-            Pipeline stage
-            <select id="stage-filter">
-              <option value="all">All stages</option>
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="estimate-sent">Estimate sent</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="won">Won</option>
-              <option value="lost">Lost</option>
-              <option value="review">Review follow-up</option>
-            </select>
-          </label>
-          <button class="button primary" id="add-lead-button" type="button">Add sample lead</button>
-        </aside>
+      <section class="tab-panel is-active" id="operations-tab" data-tab-panel="operations">
+        <section class="metrics" aria-label="Lead summary">
+          <article>
+            <span>New leads</span>
+            <strong id="metric-new">0</strong>
+          </article>
+          <article>
+            <span>Estimates pending</span>
+            <strong id="metric-estimates">0</strong>
+          </article>
+          <article>
+            <span>Scheduled</span>
+            <strong id="metric-scheduled">0</strong>
+          </article>
+          <article>
+            <span>Review follow-up</span>
+            <strong id="metric-review">0</strong>
+          </article>
+        </section>
 
-        <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Pipeline</p>
-              <h2 id="pipeline-title">Customer journey</h2>
+        <section class="workspace">
+          <aside class="sidebar" aria-label="Dashboard filters">
+            <label>
+              Search leads
+              <input id="lead-search" type="search" placeholder="Name, city, project...">
+            </label>
+            <label>
+              Pipeline stage
+              <select id="stage-filter">
+                <option value="all">All stages</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="estimate-sent">Estimate sent</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="won">Won</option>
+                <option value="lost">Lost</option>
+                <option value="review">Review follow-up</option>
+              </select>
+            </label>
+            <button class="button primary" id="add-lead-button" type="button">Add sample lead</button>
+          </aside>
+
+          <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Pipeline</p>
+                <h2 id="pipeline-title">Customer journey</h2>
+              </div>
             </div>
-          </div>
-          <div class="pipeline" id="pipeline-board"></div>
+            <div class="pipeline" id="pipeline-board"></div>
+          </section>
+        </section>
+
+        <section class="lower-grid">
+          <section class="panel" aria-labelledby="schedule-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Schedule</p>
+                <h2 id="schedule-title">Upcoming slots</h2>
+              </div>
+              <button class="button secondary" id="add-slot-button" type="button">Add sample slot</button>
+            </div>
+            <div class="schedule-list" id="schedule-list"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="activity-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Follow-up</p>
+                <h2 id="activity-title">Recent activity</h2>
+              </div>
+            </div>
+            <div class="activity-list" id="activity-list"></div>
+          </section>
         </section>
       </section>
 
-      <section class="lower-grid">
-        <section class="panel" aria-labelledby="schedule-title">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Schedule</p>
-              <h2 id="schedule-title">Upcoming slots</h2>
-            </div>
-            <button class="button secondary" id="add-slot-button" type="button">Add sample slot</button>
-          </div>
-          <div class="schedule-list" id="schedule-list"></div>
+      <section class="tab-panel" id="performance-tab" data-tab-panel="performance">
+        <section class="metrics performance-metrics" aria-label="Website performance summary">
+          <article>
+            <span>Visitors</span>
+            <strong id="metric-visitors">0</strong>
+            <small>Last 30 days</small>
+          </article>
+          <article>
+            <span>Search clicks</span>
+            <strong id="metric-clicks">0</strong>
+            <small>Google Search Console</small>
+          </article>
+          <article>
+            <span>Search impressions</span>
+            <strong id="metric-impressions">0</strong>
+            <small>Google Search Console</small>
+          </article>
+          <article>
+            <span>Average position</span>
+            <strong id="metric-position">0</strong>
+            <small>Top tracked keywords</small>
+          </article>
         </section>
 
-        <section class="panel" aria-labelledby="activity-title">
+        <section class="performance-grid">
+          <section class="panel" aria-labelledby="traffic-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Analytics</p>
+                <h2 id="traffic-title">Visitor markers</h2>
+              </div>
+            </div>
+            <div class="marker-list" id="traffic-markers"></div>
+          </section>
+
+          <section class="panel" aria-labelledby="search-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Search Console</p>
+                <h2 id="search-title">Index and search markers</h2>
+              </div>
+            </div>
+            <div class="marker-list" id="search-markers"></div>
+          </section>
+        </section>
+
+        <section class="panel" aria-labelledby="keyword-title">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Follow-up</p>
-              <h2 id="activity-title">Recent activity</h2>
+              <p class="eyebrow">Keyword Tracking</p>
+              <h2 id="keyword-title">Top three targets</h2>
             </div>
           </div>
-          <div class="activity-list" id="activity-list"></div>
+          <div class="table-wrap">
+            <table class="keyword-table">
+              <thead>
+                <tr>
+                  <th>Keyword</th>
+                  <th>Best page</th>
+                  <th>Position</th>
+                  <th>Clicks</th>
+                  <th>Impressions</th>
+                  <th>Plan</th>
+                </tr>
+              </thead>
+              <tbody id="keyword-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="plan-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Next Moves</p>
+              <h2 id="plan-title">Performance action plan</h2>
+            </div>
+          </div>
+          <div class="action-plan" id="performance-plan"></div>
         </section>
       </section>
     </main>
