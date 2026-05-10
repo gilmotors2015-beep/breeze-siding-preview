@@ -329,7 +329,8 @@ select {
 .schedule-list,
 .activity-list,
 .marker-list,
-.action-plan {
+.action-plan,
+.workflow-steps {
   display: grid;
   gap: 10px;
   padding: 16px;
@@ -338,7 +339,8 @@ select {
 .schedule-item,
 .activity-item,
 .marker-item,
-.plan-item {
+.plan-item,
+.workflow-step {
   display: grid;
   gap: 5px;
   padding: 14px;
@@ -350,15 +352,45 @@ select {
 .schedule-item strong,
 .activity-item strong,
 .marker-item strong,
-.plan-item strong {
+.plan-item strong,
+.workflow-step strong {
   color: var(--ink);
 }
 
 .schedule-item span,
 .activity-item span,
 .marker-item span,
-.plan-item span {
+.plan-item span,
+.workflow-step span {
   color: var(--muted);
+}
+
+.workflow-step {
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.workflow-number {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--blue-dark);
+  font-weight: 900;
+}
+
+.workflow-template {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--blue-dark);
+  background: #e8f1ff;
+  font-weight: 900;
 }
 
 .marker-item {
@@ -508,7 +540,8 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .lead-details {
+  .lead-details,
+  .workflow-step {
     grid-template-columns: 1fr;
   }
 
