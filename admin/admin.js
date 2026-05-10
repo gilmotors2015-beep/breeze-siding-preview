@@ -9,7 +9,7 @@ const stages = [
 ];
 
 const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
-const localHelperPath = 'C:\\Users\\gilmo.DESKTOP-S16VIV1\\Documents\\Codex\\2026-05-04\\can-you-leave-off-from-our\\new-customer-folder-builder.ps1';
+const localHelperPath = '.\\new-customer-folder-builder.ps1';
 
 const folderTasks = [
   { key: 'folder', label: 'Customer folder created' },
@@ -23,21 +23,21 @@ const sampleLeads = [
   {
     id: 'lead-evergreen-lutheran',
     name: 'Evergreen Lutheran High School',
-    contactPerson: 'Ricardo "Rick"',
-    email: 'rpasillas@elhs.org',
-    phone: '2539464488',
-    address: '7306 Waller Rd E',
-    city: 'Tacoma, WA 98443',
-    project: 'Evergreen High School siding replacement',
-    estimateNo: '545049',
+    contactPerson: 'Rick',
+    email: 'Stored in local customer record',
+    phone: 'Stored in local customer record',
+    address: 'Stored in local customer record',
+    city: 'Tacoma, WA',
+    project: 'Siding replacement proposal',
+    estimateNo: 'Stored locally',
     estimateDate: '5/8/2026',
     dueDate: '5/23/2026',
-    proposalTotal: '$29,132.46',
+    proposalTotal: 'Stored locally',
     stage: 'estimate-sent',
     folderStatus: 'Estimate sent',
     folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
-    notes: 'Proposal includes 2,160 quantity at $12.25 for siding replacement plus paint. Bid notes include removal of existing siding, installation of new James Hardie lap siding, exterior paint, and waste removal. Product match to existing siding is not available. All materials provided.',
+    notes: 'Real proposal details are saved in the local private customer record, not on the public admin demo.',
     createdAt: '2026-05-08T12:00:00'
   },
   {
@@ -129,7 +129,7 @@ const sampleSlots = [
 ];
 
 const sampleActivity = [
-  { title: 'Proposal sent', detail: 'Evergreen Lutheran High School estimate 545049 is out and waiting for response.' },
+  { title: 'Proposal sent', detail: 'Evergreen Lutheran High School proposal is out and waiting for response.' },
   { title: 'New lead received', detail: 'Homepage estimate form added Sarah M. to New.' },
   { title: 'Review request ready', detail: 'Alicia T. is ready for rate-us follow-up.' }
 ];
