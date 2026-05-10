@@ -21,12 +21,38 @@ const folderTasks = [
 
 const sampleLeads = [
   {
+    id: 'lead-evergreen-lutheran',
+    name: 'Evergreen Lutheran High School',
+    contactPerson: 'Ricardo "Rick"',
+    email: 'rpasillas@elhs.org',
+    phone: '2539464488',
+    address: '7306 Waller Rd E',
+    city: 'Tacoma, WA 98443',
+    project: 'Evergreen High School siding replacement',
+    estimateNo: '545049',
+    estimateDate: '5/8/2026',
+    dueDate: '5/23/2026',
+    proposalTotal: '$29,132.46',
+    stage: 'estimate-sent',
+    folderStatus: 'Estimate sent',
+    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
+    nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
+    notes: 'Proposal includes 2,160 quantity at $12.25 for siding replacement plus paint. Bid notes include removal of existing siding, installation of new James Hardie lap siding, exterior paint, and waste removal. Product match to existing siding is not available. All materials provided.',
+    createdAt: '2026-05-08T12:00:00'
+  },
+  {
     id: 'lead-1001',
     name: 'Sarah M.',
+    contactPerson: 'Sarah M.',
     email: 'sarah@example.com',
     phone: '253-555-0188',
+    address: '',
     city: 'Tacoma',
     project: 'Siding replacement',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
     stage: 'new',
     folderStatus: 'Not started',
     folderTasksDone: [],
@@ -37,10 +63,16 @@ const sampleLeads = [
   {
     id: 'lead-1002',
     name: 'Daniel R.',
+    contactPerson: 'Daniel R.',
     email: 'daniel@example.com',
     phone: '206-555-0144',
+    address: '',
     city: 'Seattle',
     project: 'Window and siding estimate',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
     stage: 'contacted',
     folderStatus: 'Created',
     folderTasksDone: ['folder', 'sections'],
@@ -49,26 +81,18 @@ const sampleLeads = [
     createdAt: '2026-05-09T15:40:00'
   },
   {
-    id: 'lead-1003',
-    name: 'Melissa K.',
-    email: 'melissa@example.com',
-    phone: '425-555-0169',
-    city: 'Bellevue',
-    project: 'Exterior paint and trim',
-    stage: 'estimate-sent',
-    folderStatus: 'Estimate ready',
-    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
-    nextStep: 'Follow up on estimate in two days',
-    notes: 'Asked for separate siding repair and paint options.',
-    createdAt: '2026-05-08T11:05:00'
-  },
-  {
     id: 'lead-1004',
     name: 'Jon P.',
+    contactPerson: 'Jon P.',
     email: 'jon@example.com',
     phone: '360-555-0126',
+    address: '',
     city: 'Puyallup',
     project: 'Repair visit',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
     stage: 'scheduled',
     folderStatus: 'Starter pack copied',
     folderTasksDone: ['folder', 'sections', 'starter', 'template'],
@@ -79,10 +103,16 @@ const sampleLeads = [
   {
     id: 'lead-1005',
     name: 'Alicia T.',
+    contactPerson: 'Alicia T.',
     email: 'alicia@example.com',
     phone: '253-555-0191',
+    address: '',
     city: 'Spanaway',
     project: 'Completed siding project',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
     stage: 'review',
     folderStatus: 'Invoice ready',
     folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
@@ -99,8 +129,8 @@ const sampleSlots = [
 ];
 
 const sampleActivity = [
+  { title: 'Proposal sent', detail: 'Evergreen Lutheran High School estimate 545049 is out and waiting for response.' },
   { title: 'New lead received', detail: 'Homepage estimate form added Sarah M. to New.' },
-  { title: 'Estimate follow-up needed', detail: 'Melissa K. should be contacted after estimate review.' },
   { title: 'Review request ready', detail: 'Alicia T. is ready for rate-us follow-up.' }
 ];
 
@@ -228,13 +258,18 @@ function commandForLead(lead) {
   return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`;
 }
 
+function setText(selector, value) {
+  const element = document.querySelector(selector);
+  if (element) element.textContent = value || 'Not set';
+}
+
 function filteredLeads() {
   const search = searchInput.value.trim().toLowerCase();
   const stage = stageFilter.value;
 
   return leads.filter((lead) => {
     const matchesStage = stage === 'all' || lead.stage === stage;
-    const haystack = `${lead.name} ${lead.city} ${lead.project} ${lead.email} ${lead.phone}`.toLowerCase();
+    const haystack = `${lead.name} ${lead.contactPerson} ${lead.city} ${lead.project} ${lead.email} ${lead.phone} ${lead.estimateNo}`.toLowerCase();
     return matchesStage && (!search || haystack.includes(search));
   });
 }
@@ -392,23 +427,28 @@ function renderFolderChecklist(lead) {
 
 function showLead(lead) {
   activeLead = lead;
-  document.querySelector('#dialog-name').textContent = lead.name;
-  document.querySelector('#dialog-stage').textContent = stageLabel(lead.stage);
-  document.querySelector('#dialog-project').textContent = lead.project;
-  document.querySelector('#dialog-contact').textContent = `${lead.phone} - ${lead.email}`;
-  document.querySelector('#dialog-city').textContent = lead.city;
-  document.querySelector('#dialog-next').textContent = lead.nextStep;
-  document.querySelector('#dialog-notes').textContent = lead.notes;
-  document.querySelector('#dialog-folder-status').textContent = lead.folderStatus;
-  document.querySelector('#dialog-folder-path').textContent = folderPathForLead(lead);
-  document.querySelector('#dialog-folder-command').textContent = commandForLead(lead);
-  copyFolderCommandButton.textContent = 'Copy folder command';
+  setText('#dialog-name', lead.name);
+  setText('#dialog-stage', stageLabel(lead.stage));
+  setText('#dialog-project', lead.project);
+  setText('#dialog-contact-person', lead.contactPerson);
+  setText('#dialog-contact', `${lead.phone} - ${lead.email}`);
+  setText('#dialog-address', lead.address);
+  setText('#dialog-city', lead.city);
+  setText('#dialog-estimate', lead.estimateNo ? `${lead.estimateNo} - ${lead.estimateDate}` : 'Not sent');
+  setText('#dialog-total', lead.proposalTotal);
+  setText('#dialog-due', lead.dueDate);
+  setText('#dialog-next', lead.nextStep);
+  setText('#dialog-notes', lead.notes);
+  setText('#dialog-folder-status', lead.folderStatus);
+  setText('#dialog-folder-path', folderPathForLead(lead));
+  setText('#dialog-folder-command', commandForLead(lead));
+  if (copyFolderCommandButton) copyFolderCommandButton.textContent = 'Copy folder command';
   renderFolderChecklist(lead);
   dialog.showModal();
 }
 
 async function copyFolderCommand() {
-  if (!activeLead) return;
+  if (!activeLead || !copyFolderCommandButton) return;
   const command = commandForLead(activeLead);
 
   try {
@@ -425,10 +465,16 @@ function addSampleLead() {
     {
       id: `lead-${nextNumber}`,
       name: `Sample Lead ${leads.length + 1}`,
+      contactPerson: `Sample Lead ${leads.length + 1}`,
       email: 'sample@example.com',
       phone: '253-555-0100',
+      address: '',
       city: 'Federal Way',
       project: 'Siding estimate',
+      estimateNo: '',
+      estimateDate: '',
+      dueDate: '',
+      proposalTotal: '',
       stage: 'new',
       folderStatus: 'Not started',
       folderTasksDone: [],
@@ -480,7 +526,7 @@ searchInput.addEventListener('input', renderBoard);
 stageFilter.addEventListener('change', renderBoard);
 addLeadButton.addEventListener('click', addSampleLead);
 addSlotButton.addEventListener('click', addSampleSlot);
-copyFolderCommandButton.addEventListener('click', copyFolderCommand);
+if (copyFolderCommandButton) copyFolderCommandButton.addEventListener('click', copyFolderCommand);
 tabButtons.forEach((button) => {
   button.addEventListener('click', () => activateTab(button.dataset.tab));
 });
