@@ -40,6 +40,16 @@ create type performance_source as enum (
   'manual'
 );
 
+create type workflow_trigger as enum (
+  'first_contact',
+  'schedule_ready',
+  'estimate_ready',
+  'bid_accepted',
+  'final_walkthrough',
+  'feedback_or_review',
+  'maintenance_checkup'
+);
+
 create table public.leads (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
@@ -77,6 +87,42 @@ create table public.lead_events (
   title text not null,
   detail text,
   metadata jsonb not null default '{}'
+);
+
+create table public.email_templates (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  template_name text not null unique,
+  template_file text not null,
+  trigger_key workflow_trigger not null,
+  description text,
+  active boolean not null default true
+);
+
+create table public.workflow_steps (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  step_order int not null unique,
+  title text not null,
+  trigger_key workflow_trigger not null,
+  recommended_template_id uuid references public.email_templates(id) on delete set null,
+  lead_stage lead_stage,
+  next_stage lead_stage,
+  action_summary text,
+  active boolean not null default true
+);
+
+create table public.lead_template_events (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid not null references public.leads(id) on delete cascade,
+  template_id uuid references public.email_templates(id) on delete set null,
+  created_at timestamptz not null default now(),
+  sent_at timestamptz,
+  subject text,
+  attachment_name text,
+  sent_by text,
+  status text not null default 'planned',
+  notes text
 );
 
 create table public.schedule_slots (
@@ -160,11 +206,32 @@ create table public.keyword_rank_snapshots (
 create index leads_stage_idx on public.leads(stage);
 create index leads_source_idx on public.leads(source);
 create index leads_created_at_idx on public.leads(created_at desc);
+create index lead_template_events_lead_id_created_at_idx on public.lead_template_events(lead_id, created_at desc);
 create index schedule_slots_starts_at_idx on public.schedule_slots(starts_at);
 create index appointments_starts_at_idx on public.appointments(starts_at);
 create index lead_events_lead_id_created_at_idx on public.lead_events(lead_id, created_at desc);
 create index website_metric_period_idx on public.website_metric_snapshots(period_end desc);
 create index keyword_rank_keyword_period_idx on public.keyword_rank_snapshots(keyword_id, period_end desc);
+
+insert into public.email_templates (template_name, template_file, trigger_key, description)
+values
+  ('Welcome', 'Welcome.oft', 'first_contact', 'Initial response after a form submission, phone call, or manually entered lead.'),
+  ('Schedule', 'schedule.oft', 'schedule_ready', 'Appointment scheduling, confirmation, and visit expectations.'),
+  ('Estimate', 'Estimate.oft', 'estimate_ready', 'Bid email sent with estimate PDF attachment.'),
+  ('Bid Accepted', 'bid accepted.oft', 'bid_accepted', 'Accepted estimate next steps, job expectations, and start date planning.'),
+  ('Final Invoice', 'Final invoice.oft', 'final_walkthrough', 'Final walkthrough, invoice, and payment options.'),
+  ('Feedback', 'feedback.oft', 'feedback_or_review', 'Feedback request, review request, or lost-estimate follow-up.')
+on conflict (template_name) do nothing;
+
+insert into public.workflow_steps (step_order, title, trigger_key, lead_stage, next_stage, action_summary)
+values
+  (1, 'First contact received', 'first_contact', 'new', 'contacted', 'Confirm the request, set expectations, and move the lead toward scheduling.'),
+  (2, 'Appointment scheduling', 'schedule_ready', 'contacted', 'scheduled', 'Send scheduling instructions or appointment confirmation.'),
+  (3, 'Bid sent', 'estimate_ready', 'scheduled', 'estimate_sent', 'Send estimate email with the PDF attachment and track follow-up.'),
+  (4, 'Bid accepted', 'bid_accepted', 'estimate_sent', 'won', 'Lay out job expectations, next steps, start date planning, and prep details.'),
+  (5, 'Final walkthrough and invoice', 'final_walkthrough', 'won', 'review_follow_up', 'Schedule final walkthrough, send invoice, and include payment options.'),
+  (6, 'Feedback, review, and maintenance loop', 'feedback_or_review', 'review_follow_up', 'review_follow_up', 'Request feedback, review, or future maintenance/checkup follow-up.')
+on conflict (step_order) do nothing;
 
 insert into public.keyword_targets (keyword, target_url, priority, plan)
 values
@@ -191,6 +258,9 @@ for each row execute function public.set_updated_at();
 alter table public.leads enable row level security;
 alter table public.lead_notes enable row level security;
 alter table public.lead_events enable row level security;
+alter table public.email_templates enable row level security;
+alter table public.workflow_steps enable row level security;
+alter table public.lead_template_events enable row level security;
 alter table public.schedule_slots enable row level security;
 alter table public.appointments enable row level security;
 alter table public.feedback_responses enable row level security;
