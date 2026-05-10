@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Estimate Feedback | Breeze Siding LLC</title>
+    <meta name="description" content="Share quick feedback about a Breeze Siding estimate.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      .workflow-page{min-height:calc(100vh - 180px);display:grid;align-items:center;padding:clamp(58px,8vw,110px) clamp(18px,5vw,72px);background:linear-gradient(90deg,rgba(244,248,251,.96),rgba(244,248,251,.9)),url("assets/images/project-home.jpg") center/cover}
+      .workflow-layout{display:grid;grid-template-columns:minmax(0,.82fr) minmax(360px,1fr);gap:30px;align-items:start;width:100%}
+      .workflow-card,.workflow-form{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}
+      .workflow-card{padding:clamp(28px,4vw,46px)}
+      .workflow-card h1{max-width:13ch;color:var(--ink)}
+      .workflow-card p{max-width:42rem;color:var(--muted);font-size:1.08rem}
+      .workflow-form{display:grid;gap:16px;padding:clamp(22px,4vw,34px)}
+      .choice-grid{display:grid;gap:10px}
+      .choice-grid label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font-weight:800}
+      .choice-grid input{width:auto;min-height:auto}
+      @media(max-width:900px){.workflow-layout{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <header class="site-header"><a class="brand" href="index.html#top" aria-label="Breeze Siding home"><img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257"></a><nav class="nav" aria-label="Main navigation"><a href="index.html#services">Services</a><a href="index.html#work">Projects</a><a href="index.html#areas">Areas</a><a href="index.html#faq">FAQ</a><a href="index.html#estimate">Estimate</a></nav><a class="header-call" href="tel:12532280531">Call 253-228-0531</a></header>
+    <main class="workflow-page">
+      <div class="workflow-layout">
+        <section class="workflow-card">
+          <p class="eyebrow">Quick feedback</p>
+          <h1>Help us improve.</h1>
+          <p>If Breeze Siding prepared an estimate for you, a quick note helps us understand what worked, what did not, and how we can improve the experience for future homeowners.</p>
+          <div class="hero-actions"><a class="button secondary" href="tel:12532280531">Call 253-228-0531</a></div>
+        </section>
+        <form class="workflow-form" action="https://formsubmit.co/service@breezesiding.com" method="POST">
+          <input type="hidden" name="_subject" value="Breeze Siding estimate feedback">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://breezesiding.com/thank-you-feedback.html">
+          <input class="form-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <label>Name<input name="name" autocomplete="name"></label>
+          <label>Email<input type="email" name="email" autocomplete="email"></label>
+          <fieldset class="choice-grid">
+            <legend>What was the main reason you did not move forward?</legend>
+            <label><input type="radio" name="reason" value="Price was higher than expected"> Price was higher than expected</label>
+            <label><input type="radio" name="reason" value="Chose another contractor"> Chose another contractor</label>
+            <label><input type="radio" name="reason" value="Timing was not right"> Timing was not right</label>
+            <label><input type="radio" name="reason" value="Needed more communication"> Needed more communication</label>
+            <label><input type="radio" name="reason" value="Scope or estimate was unclear"> Scope or estimate was unclear</label>
+            <label><input type="radio" name="reason" value="Still deciding"> Still deciding</label>
+            <label><input type="radio" name="reason" value="Other"> Other</label>
+          </fieldset>
+          <label>What could we have done better?<textarea name="message" rows="5"></textarea></label>
+          <button class="button primary" type="submit">Send Feedback</button>
+        </form>
+      </div>
+    </main>
+    <footer class="footer"><div><img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257"><p>Exterior renovation services for Seattle, Tacoma, and the greater Puget Sound area.</p></div><address><a href="tel:12532280531">253-228-0531</a><span>service@breezesiding.com</span><span>Spanaway, WA</span></address></footer><a class="mobile-call" href="tel:12532280531">Call Breeze Siding</a>
+  </body>
+</html>
