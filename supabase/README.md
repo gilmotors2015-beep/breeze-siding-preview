@@ -13,9 +13,25 @@ The live website currently still uses email form delivery. The admin dashboard a
 - Schedule requests and appointment slots
 - Lead notes, follow-up history, and status tracking
 - A private admin board for moving customers through the pipeline
+- Outlook/OFT template workflow stages
 - Google Analytics-style website markers
 - Search Console-style indexing and keyword markers
 - Top keyword targets with page-level action plans
+
+## Current OFT template map
+
+The current local template folder is:
+
+`D:\OneDrive\Breeze Siding documents\Marketing\emails\Templates`
+
+Known templates:
+
+- `Welcome.oft`: first response after form submission, call, or manual lead entry
+- `schedule.oft`: appointment scheduling or confirmation
+- `Estimate.oft`: estimate/bid email with PDF attachment
+- `bid accepted.oft`: accepted bid next steps, expectations, and start date planning
+- `Final invoice.oft`: final walkthrough, invoice, and payment options
+- `feedback.oft`: feedback request, review request, or lost-estimate follow-up
 
 ## Recommended setup order
 
@@ -26,7 +42,8 @@ The live website currently still uses email form delivery. The admin dashboard a
 5. Add the public Supabase URL and anon key to a new admin config file.
 6. Connect the homepage, feedback, rate-us, and schedule forms to insert records.
 7. Keep email notifications active until the database workflow is fully tested.
-8. Connect or import Search Console and Analytics data after the dashboard is secured.
+8. Connect the Outlook template workflow after lead records are stable.
+9. Connect or import Search Console and Analytics data after the dashboard is secured.
 
 ## Security notes
 
@@ -37,6 +54,8 @@ The public forms should be allowed to insert new leads, but should not be allowe
 The admin dashboard should require login before real customer data is visible.
 
 Google Analytics and Search Console API keys or service credentials should not be placed in public website files. Use a backend function, scheduled import, or manual export/import workflow.
+
+Outlook template files and estimate PDFs should not be exposed in the public website repository. Use them from Outlook, OneDrive, Microsoft Graph, or a secure backend workflow.
 
 ## Suggested pipeline stages
 
@@ -65,3 +84,5 @@ These can change after real Search Console data shows which pages and queries ar
 - Re-engagement reminders for older leads
 - Weekly Search Console keyword snapshot
 - Monthly performance review with next-page SEO priorities
+- One-click or guided Outlook template send from a lead record
+- Attachment tracking for estimate PDFs and final invoice PDFs
