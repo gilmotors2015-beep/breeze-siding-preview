@@ -83,6 +83,59 @@ const sampleActivity = [
   { title: 'Review request ready', detail: 'Alicia T. is ready for rate-us follow-up.' }
 ];
 
+const performanceSummary = {
+  visitors: 128,
+  clicks: 42,
+  impressions: 1840,
+  averagePosition: 18.6
+};
+
+const trafficMarkers = [
+  { label: 'Organic search visitors', value: '74', detail: 'Primary traffic source to watch after launch', change: '+12%', tone: 'good' },
+  { label: 'Estimate form starts', value: '9', detail: 'Track from homepage and service pages', change: 'watch', tone: 'watch' },
+  { label: 'Mobile visitors', value: '68%', detail: 'Keep mobile speed and form usability high', change: '+5%', tone: 'good' }
+];
+
+const searchMarkers = [
+  { label: 'Indexed pages', value: '37', detail: 'Watch new static pages as Google recrawls', change: 'stable', tone: 'good' },
+  { label: 'Not indexed pages', value: '263', detail: 'Mostly old WordPress tag and missing URLs', change: 'cleanup', tone: 'watch' },
+  { label: 'Sitemap status', value: 'Live', detail: 'Submitted under breezesiding.com', change: 'ok', tone: 'good' }
+];
+
+const keywordTargets = [
+  {
+    keyword: 'siding replacement seattle',
+    page: '/siding-replacement-seattle.html',
+    position: 16,
+    clicks: 8,
+    impressions: 420,
+    plan: 'Strengthen city page content and add internal links from related blog posts.'
+  },
+  {
+    keyword: 'siding contractor tacoma',
+    page: '/siding-replacement-tacoma.html',
+    position: 22,
+    clicks: 5,
+    impressions: 310,
+    plan: 'Build local proof, completed project references, and Tacoma-specific service copy.'
+  },
+  {
+    keyword: 'james hardie siding installer',
+    page: '/siding-replacement.html',
+    position: 18,
+    clicks: 6,
+    impressions: 275,
+    plan: 'Add stronger James Hardie sections, FAQs, and supporting comparison content.'
+  }
+];
+
+const performancePlan = [
+  { title: 'Connect real data', detail: 'Link Google Analytics and Search Console data after the admin database is secured.' },
+  { title: 'Track top three keyword pages', detail: 'Watch clicks, impressions, and position weekly before making heavy content changes.' },
+  { title: 'Prioritize pages near page one', detail: 'Improve pages ranking between positions 8 and 20 first because they usually move fastest.' },
+  { title: 'Keep conversion tied to SEO', detail: 'Compare keyword gains with estimate form submissions, calls, and scheduled appointments.' }
+];
+
 let leads = [...sampleLeads];
 let slots = [...sampleSlots];
 
@@ -94,6 +147,8 @@ const activityList = document.querySelector('#activity-list');
 const addLeadButton = document.querySelector('#add-lead-button');
 const addSlotButton = document.querySelector('#add-slot-button');
 const dialog = document.querySelector('#lead-dialog');
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabPanels = document.querySelectorAll('[data-tab-panel]');
 
 function stageLabel(stageId) {
   return stages.find((stage) => stage.id === stageId)?.label || 'Unknown';
@@ -135,7 +190,7 @@ function renderBoard() {
     stageLeads.forEach((lead) => {
       const card = template.content.firstElementChild.cloneNode(true);
       card.querySelector('.lead-name').textContent = lead.name;
-      card.querySelector('.lead-meta').textContent = `${lead.city} · ${lead.phone}`;
+      card.querySelector('.lead-meta').textContent = `${lead.city} - ${lead.phone}`;
       card.querySelector('.lead-project').textContent = lead.project;
       card.querySelector('button').addEventListener('click', () => showLead(lead));
       column.append(card);
@@ -150,7 +205,7 @@ function renderSchedule() {
   slots.forEach((slot) => {
     const item = document.createElement('article');
     item.className = 'schedule-item';
-    item.innerHTML = `<strong>${slot.date} · ${slot.time}</strong><span>${slot.label} · ${slot.status}</span>`;
+    item.innerHTML = `<strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span>`;
     scheduleList.append(item);
   });
 }
@@ -165,11 +220,74 @@ function renderActivity() {
   });
 }
 
+function renderPerformanceMetrics() {
+  document.querySelector('#metric-visitors').textContent = performanceSummary.visitors.toLocaleString();
+  document.querySelector('#metric-clicks').textContent = performanceSummary.clicks.toLocaleString();
+  document.querySelector('#metric-impressions').textContent = performanceSummary.impressions.toLocaleString();
+  document.querySelector('#metric-position').textContent = performanceSummary.averagePosition.toFixed(1);
+}
+
+function renderMarkers(items, targetSelector) {
+  const target = document.querySelector(targetSelector);
+  target.innerHTML = '';
+
+  items.forEach((item) => {
+    const marker = document.createElement('article');
+    marker.className = 'marker-item';
+    marker.innerHTML = `
+      <div>
+        <strong>${item.label}: ${item.value}</strong>
+        <span>${item.detail}</span>
+      </div>
+      <span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span>
+    `;
+    target.append(marker);
+  });
+}
+
+function renderKeywords() {
+  const body = document.querySelector('#keyword-body');
+  body.innerHTML = '';
+
+  keywordTargets.forEach((target) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${target.keyword}</td>
+      <td>${target.page}</td>
+      <td><span class="position">${target.position}</span></td>
+      <td>${target.clicks}</td>
+      <td>${target.impressions}</td>
+      <td>${target.plan}</td>
+    `;
+    body.append(row);
+  });
+}
+
+function renderPerformancePlan() {
+  const target = document.querySelector('#performance-plan');
+  target.innerHTML = '';
+
+  performancePlan.forEach((item) => {
+    const plan = document.createElement('article');
+    plan.className = 'plan-item';
+    plan.innerHTML = `<strong>${item.title}</strong><span>${item.detail}</span>`;
+    target.append(plan);
+  });
+}
+
+function renderPerformance() {
+  renderPerformanceMetrics();
+  renderMarkers(trafficMarkers, '#traffic-markers');
+  renderMarkers(searchMarkers, '#search-markers');
+  renderKeywords();
+  renderPerformancePlan();
+}
+
 function showLead(lead) {
   document.querySelector('#dialog-name').textContent = lead.name;
   document.querySelector('#dialog-stage').textContent = stageLabel(lead.stage);
   document.querySelector('#dialog-project').textContent = lead.project;
-  document.querySelector('#dialog-contact').textContent = `${lead.phone} · ${lead.email}`;
+  document.querySelector('#dialog-contact').textContent = `${lead.phone} - ${lead.email}`;
   document.querySelector('#dialog-city').textContent = lead.city;
   document.querySelector('#dialog-next').textContent = lead.nextStep;
   document.querySelector('#dialog-notes').textContent = lead.notes;
@@ -210,16 +328,32 @@ function addSampleSlot() {
   renderSchedule();
 }
 
+function activateTab(tabName) {
+  tabButtons.forEach((button) => {
+    const isActive = button.dataset.tab === tabName;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  tabPanels.forEach((panel) => {
+    panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName);
+  });
+}
+
 function renderAll() {
   renderMetrics();
   renderBoard();
   renderSchedule();
   renderActivity();
+  renderPerformance();
 }
 
 searchInput.addEventListener('input', renderBoard);
 stageFilter.addEventListener('change', renderBoard);
 addLeadButton.addEventListener('click', addSampleLead);
 addSlotButton.addEventListener('click', addSampleSlot);
+tabButtons.forEach((button) => {
+  button.addEventListener('click', () => activateTab(button.dataset.tab));
+});
 
 renderAll();
