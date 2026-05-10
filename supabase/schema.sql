@@ -33,6 +33,13 @@ create type appointment_status as enum (
   'cancelled'
 );
 
+create type performance_source as enum (
+  'google_analytics',
+  'search_console',
+  'pagespeed',
+  'manual'
+);
+
 create table public.leads (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
@@ -109,12 +116,62 @@ create table public.feedback_responses (
   source text not null default 'feedback'
 );
 
+create table public.website_metric_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  period_start date not null,
+  period_end date not null,
+  source performance_source not null,
+  visitors int,
+  sessions int,
+  search_clicks int,
+  search_impressions int,
+  average_position numeric(6,2),
+  conversions int,
+  notes text,
+  metadata jsonb not null default '{}',
+  constraint website_metric_period_check check (period_end >= period_start)
+);
+
+create table public.keyword_targets (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  keyword text not null unique,
+  target_url text not null,
+  priority int not null default 1 check (priority between 1 and 5),
+  active boolean not null default true,
+  plan text
+);
+
+create table public.keyword_rank_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  keyword_id uuid not null references public.keyword_targets(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  period_start date not null,
+  period_end date not null,
+  position numeric(6,2),
+  clicks int,
+  impressions int,
+  ctr numeric(6,4),
+  source performance_source not null default 'search_console',
+  constraint keyword_rank_period_check check (period_end >= period_start)
+);
+
 create index leads_stage_idx on public.leads(stage);
 create index leads_source_idx on public.leads(source);
 create index leads_created_at_idx on public.leads(created_at desc);
 create index schedule_slots_starts_at_idx on public.schedule_slots(starts_at);
 create index appointments_starts_at_idx on public.appointments(starts_at);
 create index lead_events_lead_id_created_at_idx on public.lead_events(lead_id, created_at desc);
+create index website_metric_period_idx on public.website_metric_snapshots(period_end desc);
+create index keyword_rank_keyword_period_idx on public.keyword_rank_snapshots(keyword_id, period_end desc);
+
+insert into public.keyword_targets (keyword, target_url, priority, plan)
+values
+  ('siding replacement seattle', '/siding-replacement-seattle.html', 1, 'Strengthen city page content and add internal links from related blog posts.'),
+  ('siding contractor tacoma', '/siding-replacement-tacoma.html', 1, 'Build local proof, completed project references, and Tacoma-specific service copy.'),
+  ('james hardie siding installer', '/siding-replacement.html', 2, 'Add stronger James Hardie sections, FAQs, and supporting comparison content.')
+on conflict (keyword) do nothing;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -137,6 +194,9 @@ alter table public.lead_events enable row level security;
 alter table public.schedule_slots enable row level security;
 alter table public.appointments enable row level security;
 alter table public.feedback_responses enable row level security;
+alter table public.website_metric_snapshots enable row level security;
+alter table public.keyword_targets enable row level security;
+alter table public.keyword_rank_snapshots enable row level security;
 
 -- Public insert policies let website forms submit records without exposing existing leads.
 create policy "public can submit leads"
