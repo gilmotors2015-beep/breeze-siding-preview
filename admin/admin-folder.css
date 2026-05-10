@@ -1,0 +1,109 @@
+#lead-dialog {
+  width: min(940px, calc(100vw - 28px));
+}
+
+.lead-details .wide {
+  grid-column: 1 / -1;
+}
+
+.folder-workspace {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.folder-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.folder-heading h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.folder-status {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--green);
+  background: #e8f4ee;
+  font-weight: 900;
+}
+
+.folder-path-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+}
+
+.folder-path-card span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.folder-path-card code {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.9rem;
+}
+
+.folder-checklist {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folder-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  font-weight: 800;
+}
+
+.folder-checklist li span {
+  min-width: 54px;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--wood);
+  background: #fff2df;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.folder-checklist li.is-done span {
+  color: var(--green);
+  background: #e8f4ee;
+}
+
+@media (max-width: 720px) {
+  .folder-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
