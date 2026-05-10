@@ -129,7 +129,8 @@ main {
 .notice,
 .metrics article,
 .sidebar,
-.panel {
+.panel,
+.dashboard-tabs {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--white);
@@ -143,6 +144,37 @@ main {
 
 .notice strong {
   color: var(--ink);
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.tab-button {
+  min-height: 46px;
+  flex: 1 1 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tab-button.is-active {
+  color: var(--white);
+  background: var(--blue-dark);
+}
+
+.tab-panel {
+  display: none;
+  gap: 22px;
+}
+
+.tab-panel.is-active {
+  display: grid;
 }
 
 .metrics {
@@ -165,6 +197,11 @@ main {
 .metrics strong {
   font-size: 2.2rem;
   line-height: 1;
+}
+
+.metrics small {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .workspace {
@@ -282,21 +319,26 @@ select {
   font-size: 0.92rem;
 }
 
-.lower-grid {
+.lower-grid,
+.performance-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
   gap: 18px;
 }
 
 .schedule-list,
-.activity-list {
+.activity-list,
+.marker-list,
+.action-plan {
   display: grid;
   gap: 10px;
   padding: 16px;
 }
 
 .schedule-item,
-.activity-item {
+.activity-item,
+.marker-item,
+.plan-item {
   display: grid;
   gap: 5px;
   padding: 14px;
@@ -306,13 +348,79 @@ select {
 }
 
 .schedule-item strong,
-.activity-item strong {
+.activity-item strong,
+.marker-item strong,
+.plan-item strong {
   color: var(--ink);
 }
 
 .schedule-item span,
-.activity-item span {
+.activity-item span,
+.marker-item span,
+.plan-item span {
   color: var(--muted);
+}
+
+.marker-item {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.marker-item .change {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--green);
+  background: #e8f4ee;
+  font-weight: 900;
+}
+
+.marker-item .change.watch {
+  color: var(--wood);
+  background: #fff2df;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.keyword-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+.keyword-table th,
+.keyword-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.keyword-table th {
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.keyword-table td:first-child {
+  font-weight: 900;
+}
+
+.keyword-table .position {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--blue-dark);
+  font-weight: 900;
 }
 
 #lead-dialog {
@@ -373,7 +481,8 @@ select {
 @media (max-width: 1020px) {
   .metrics,
   .workspace,
-  .lower-grid {
+  .lower-grid,
+  .performance-grid {
     grid-template-columns: 1fr;
   }
 
@@ -385,7 +494,8 @@ select {
 @media (max-width: 720px) {
   .admin-header,
   .admin-actions,
-  .panel-heading {
+  .panel-heading,
+  .dashboard-tabs {
     align-items: stretch;
     flex-direction: column;
   }
@@ -399,6 +509,10 @@ select {
   }
 
   .lead-details {
+    grid-template-columns: 1fr;
+  }
+
+  .marker-item {
     grid-template-columns: 1fr;
   }
 }
