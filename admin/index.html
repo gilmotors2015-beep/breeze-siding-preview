@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Breeze Siding Admin | Lead Board</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body>
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Breeze Siding Admin</p>
+        <h1>Lead and schedule board</h1>
+      </div>
+      <div class="admin-actions">
+        <span class="mode-pill" id="mode-pill">Demo mode</span>
+        <a class="button secondary" href="/">View site</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="notice" id="setup-notice">
+        <strong>Foundation only.</strong>
+        This dashboard is ready for real lead data, but it is currently showing sample records until a secure database connection is added.
+      </section>
+
+      <section class="metrics" aria-label="Lead summary">
+        <article>
+          <span>New leads</span>
+          <strong id="metric-new">0</strong>
+        </article>
+        <article>
+          <span>Estimates pending</span>
+          <strong id="metric-estimates">0</strong>
+        </article>
+        <article>
+          <span>Scheduled</span>
+          <strong id="metric-scheduled">0</strong>
+        </article>
+        <article>
+          <span>Review follow-up</span>
+          <strong id="metric-review">0</strong>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar" aria-label="Dashboard filters">
+          <label>
+            Search leads
+            <input id="lead-search" type="search" placeholder="Name, city, project...">
+          </label>
+          <label>
+            Pipeline stage
+            <select id="stage-filter">
+              <option value="all">All stages</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="estimate-sent">Estimate sent</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+              <option value="review">Review follow-up</option>
+            </select>
+          </label>
+          <button class="button primary" id="add-lead-button" type="button">Add sample lead</button>
+        </aside>
+
+        <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Pipeline</p>
+              <h2 id="pipeline-title">Customer journey</h2>
+            </div>
+          </div>
+          <div class="pipeline" id="pipeline-board"></div>
+        </section>
+      </section>
+
+      <section class="lower-grid">
+        <section class="panel" aria-labelledby="schedule-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Schedule</p>
+              <h2 id="schedule-title">Upcoming slots</h2>
+            </div>
+            <button class="button secondary" id="add-slot-button" type="button">Add sample slot</button>
+          </div>
+          <div class="schedule-list" id="schedule-list"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="activity-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Follow-up</p>
+              <h2 id="activity-title">Recent activity</h2>
+            </div>
+          </div>
+          <div class="activity-list" id="activity-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <template id="lead-card-template">
+      <article class="lead-card">
+        <button type="button" class="lead-card-button">
+          <span class="lead-name"></span>
+          <span class="lead-meta"></span>
+          <span class="lead-project"></span>
+        </button>
+      </article>
+    </template>
+
+    <dialog id="lead-dialog">
+      <form method="dialog">
+        <button class="dialog-close" value="close" aria-label="Close lead details">x</button>
+        <p class="eyebrow">Lead details</p>
+        <h2 id="dialog-name"></h2>
+        <dl class="lead-details">
+          <div><dt>Stage</dt><dd id="dialog-stage"></dd></div>
+          <div><dt>Project</dt><dd id="dialog-project"></dd></div>
+          <div><dt>Contact</dt><dd id="dialog-contact"></dd></div>
+          <div><dt>City</dt><dd id="dialog-city"></dd></div>
+          <div><dt>Next step</dt><dd id="dialog-next"></dd></div>
+          <div><dt>Notes</dt><dd id="dialog-notes"></dd></div>
+        </dl>
+      </form>
+    </dialog>
+
+    <script src="admin.js" defer></script>
+  </body>
+</html>
