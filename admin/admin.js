@@ -83,6 +83,45 @@ const sampleActivity = [
   { title: 'Review request ready', detail: 'Alicia T. is ready for rate-us follow-up.' }
 ];
 
+const workflowSteps = [
+  {
+    template: 'Welcome.oft',
+    title: 'First contact received',
+    trigger: 'Customer fills out a form, calls, or is manually entered.',
+    action: 'Confirm the request, set expectations, and move the lead toward scheduling.'
+  },
+  {
+    template: 'schedule.oft',
+    title: 'Appointment scheduling',
+    trigger: 'Lead is qualified and ready for an estimate visit or walkthrough.',
+    action: 'Send scheduling instructions or appointment confirmation.'
+  },
+  {
+    template: 'Estimate.oft',
+    title: 'Bid sent',
+    trigger: 'Estimate PDF is ready after site visit or project review.',
+    action: 'Send estimate email with the PDF attachment and track follow-up.'
+  },
+  {
+    template: 'bid accepted.oft',
+    title: 'Bid accepted',
+    trigger: 'Customer approves the estimate.',
+    action: 'Lay out job expectations, next steps, start date planning, and prep details.'
+  },
+  {
+    template: 'Final invoice.oft',
+    title: 'Final walkthrough and invoice',
+    trigger: 'Work is complete or ready for closeout.',
+    action: 'Schedule final walkthrough, send invoice, and include payment options.'
+  },
+  {
+    template: 'feedback.oft',
+    title: 'Feedback, review, and maintenance loop',
+    trigger: 'Job is complete, or estimate did not move forward.',
+    action: 'Request feedback, review, or future maintenance/checkup follow-up.'
+  }
+];
+
 const performanceSummary = {
   visitors: 128,
   clicks: 42,
@@ -220,6 +259,26 @@ function renderActivity() {
   });
 }
 
+function renderWorkflow() {
+  const target = document.querySelector('#workflow-steps');
+  target.innerHTML = '';
+
+  workflowSteps.forEach((step, index) => {
+    const item = document.createElement('article');
+    item.className = 'workflow-step';
+    item.innerHTML = `
+      <span class="workflow-number">${index + 1}</span>
+      <div>
+        <strong>${step.title}</strong>
+        <span>${step.trigger}</span>
+        <span>${step.action}</span>
+      </div>
+      <span class="workflow-template">${step.template}</span>
+    `;
+    target.append(item);
+  });
+}
+
 function renderPerformanceMetrics() {
   document.querySelector('#metric-visitors').textContent = performanceSummary.visitors.toLocaleString();
   document.querySelector('#metric-clicks').textContent = performanceSummary.clicks.toLocaleString();
@@ -345,6 +404,7 @@ function renderAll() {
   renderBoard();
   renderSchedule();
   renderActivity();
+  renderWorkflow();
   renderPerformance();
 }
 
