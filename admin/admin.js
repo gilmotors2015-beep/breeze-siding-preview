@@ -38,82 +38,11 @@ const privateRecord = {
 };
 
 const customerRecords = [
-  {
-    ...privateRecord,
-    id: 'lead-evergreen-lutheran',
-    name: 'Evergreen Lutheran High School',
-    contactPerson: 'Rick',
-    city: 'Tacoma, WA',
-    project: 'Siding replacement proposal',
-    estimateDate: '5/8/2026',
-    dueDate: '5/23/2026',
-    stage: 'estimate-sent',
-    folderStatus: 'Estimate sent',
-    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
-    nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
-    notes: 'Private proposal details are saved locally, not in the public admin view.',
-    createdAt: '2026-05-08T12:00:00'
-  },
-  {
-    ...privateRecord,
-    id: 'lead-mary',
-    name: 'Mary',
-    contactPerson: 'Mary',
-    project: 'Siding replacement + paint proposal',
-    estimateDate: 'Proposal sent',
-    dueDate: 'Stored privately',
-    stage: 'estimate-sent',
-    folderStatus: 'Existing folder, estimate sent',
-    folderTasksDone: ['folder', 'estimate'],
-    nextStep: 'Waiting for response to the proposal.',
-    notes: 'Proposal options are in the local customer folder.',
-    createdAt: '2026-04-26T12:00:00'
-  },
-  {
-    ...privateRecord,
-    id: 'lead-troy-wyatt-rambler',
-    name: 'Troy Wyatt Rambler',
-    contactPerson: 'Troy Wyatt',
-    project: 'Repeat customer - exterior paint estimate',
-    estimateDate: '5/6/2026',
-    dueDate: 'Stored privately',
-    stage: 'estimate-sent',
-    folderStatus: 'Archived folder, new paint estimate sent',
-    folderTasksDone: ['folder', 'estimate'],
-    nextStep: 'Waiting for response to the exterior paint estimate.',
-    notes: 'Repeat customer. Siding was completed previously; current opportunity is exterior paint.',
-    createdAt: '2026-05-06T12:00:00'
-  },
-  {
-    ...privateRecord,
-    id: 'lead-fran-construction',
-    name: 'Fran Construction',
-    contactPerson: 'Fran Construction',
-    project: 'Construction proposal',
-    estimateDate: '4/26/2026',
-    dueDate: 'Stored privately',
-    stage: 'estimate-sent',
-    folderStatus: 'Existing folder, estimate sent',
-    folderTasksDone: ['folder', 'estimate'],
-    nextStep: 'Waiting for reply to the estimate.',
-    notes: 'Existing customer folder confirmed with proposal and estimate files present.',
-    createdAt: '2026-04-26T18:09:00'
-  },
-  {
-    ...privateRecord,
-    id: 'lead-jessica-miller',
-    name: 'Jessica Miller',
-    contactPerson: 'Jessica Miller',
-    project: 'Repeat customer - vinyl repair',
-    estimateDate: '4/10/2026',
-    dueDate: 'Stored privately',
-    stage: 'won',
-    folderStatus: 'Agreement in place',
-    folderTasksDone: ['folder', 'estimate'],
-    nextStep: 'Waiting on materials before scheduling the vinyl repair.',
-    notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.',
-    createdAt: '2026-04-10T12:00:00'
-  }
+  { ...privateRecord, id: 'lead-evergreen-lutheran', name: 'Evergreen Lutheran High School', contactPerson: 'Rick', city: 'Tacoma, WA', project: 'Siding replacement proposal', estimateDate: '5/8/2026', dueDate: '5/23/2026', stage: 'estimate-sent', folderStatus: 'Estimate sent', folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'], nextStep: 'Waiting for response to the proposal sent on 5/8/2026.', notes: 'Private proposal details are saved locally, not in the public admin view.', createdAt: '2026-05-08T12:00:00' },
+  { ...privateRecord, id: 'lead-mary', name: 'Mary', contactPerson: 'Mary', project: 'Siding replacement + paint proposal', estimateDate: 'Proposal sent', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the proposal.', notes: 'Proposal options are in the local customer folder.', createdAt: '2026-04-26T12:00:00' },
+  { ...privateRecord, id: 'lead-troy-wyatt-rambler', name: 'Troy Wyatt Rambler', contactPerson: 'Troy Wyatt', project: 'Repeat customer - exterior paint estimate', estimateDate: '5/6/2026', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Archived folder, new paint estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the exterior paint estimate.', notes: 'Repeat customer. Siding was completed previously; current opportunity is exterior paint.', createdAt: '2026-05-06T12:00:00' },
+  { ...privateRecord, id: 'lead-fran-construction', name: 'Fran Construction', contactPerson: 'Fran Construction', project: 'Construction proposal', estimateDate: '4/26/2026', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for reply to the estimate.', notes: 'Existing customer folder confirmed with proposal and estimate files present.', createdAt: '2026-04-26T18:09:00' },
+  { ...privateRecord, id: 'lead-jessica-miller', name: 'Jessica Miller', contactPerson: 'Jessica Miller', project: 'Repeat customer - vinyl repair', estimateDate: '4/10/2026', dueDate: 'Stored privately', stage: 'won', folderStatus: 'Agreement in place', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting on materials before scheduling the vinyl repair.', notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.', createdAt: '2026-04-10T12:00:00' }
 ];
 
 const slots = [];
@@ -173,6 +102,7 @@ function safeFolderName(name) {
   return name.replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim();
 }
 function folderPathForLead(lead) {
+  if (lead.folderPathOverride) return lead.folderPathOverride;
   const base = lead.id === 'lead-troy-wyatt-rambler' ? `${customerRootPath}\\Archive` : customerRootPath;
   return `${base}\\${safeFolderName(lead.name)}`;
 }
@@ -337,6 +267,28 @@ function renderAll() {
   renderWorkflow();
   renderPerformance();
 }
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Could not load ${src}`));
+    document.head.append(script);
+  });
+}
+async function enablePrivateLayer() {
+  try {
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+    await loadScript('private-admin-config.js');
+    await loadScript('private-auth.js');
+  } catch (error) {
+    console.warn(error.message);
+  }
+}
 
 $('#lead-search').addEventListener('input', renderBoard);
 $('#stage-filter').addEventListener('change', renderBoard);
@@ -344,5 +296,14 @@ copyFolderCommandButton.addEventListener('click', copyFolderCommand);
 $('#mark-qualified-button').addEventListener('click', markActiveLeadQualified);
 $('#mark-spam-button').addEventListener('click', markActiveLeadSpam);
 document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
+window.addEventListener('breeze-private-leads', (event) => {
+  leads = event.detail?.leads?.length ? event.detail.leads : [...customerRecords];
+  renderAll();
+});
+window.addEventListener('breeze-private-logout', () => {
+  leads = [...customerRecords];
+  renderAll();
+});
 
 renderAll();
+enablePrivateLayer();
