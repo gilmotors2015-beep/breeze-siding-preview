@@ -9,6 +9,7 @@
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
   let currentSession = null;
   let panelReady = false;
+  let authWatcherReady = false;
 
   function insertAuthPanel() {
     if (panelReady) return;
@@ -35,6 +36,9 @@
 
     document.querySelector('#private-auth-login')?.addEventListener('click', signIn);
     document.querySelector('#private-auth-logout')?.addEventListener('click', signOut);
+    document.querySelector('#private-auth-password')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') signIn();
+    });
   }
 
   function setMessage(message) {
@@ -151,13 +155,21 @@
     setSignedInUI(Boolean(currentSession));
     if (currentSession) await loadLeads();
 
-    client.auth.onAuthStateChange(async (_event, session) => {
-      currentSession = session;
-      setSignedInUI(Boolean(session));
-      if (session) await loadLeads();
-    });
+    if (!authWatcherReady) {
+      authWatcherReady = true;
+      client.auth.onAuthStateChange(async (_event, session) => {
+        currentSession = session;
+        setSignedInUI(Boolean(session));
+        if (session) await loadLeads();
+      });
+    }
   }
 
   window.BREEZE_PRIVATE_ADMIN_BRIDGE = { client, loadLeads };
-  window.addEventListener('DOMContentLoaded', init);
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 })();
