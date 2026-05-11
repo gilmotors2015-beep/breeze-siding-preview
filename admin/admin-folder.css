@@ -6,6 +6,7 @@
   grid-column: 1 / -1;
 }
 
+.qualification-panel,
 .folder-workspace {
   display: grid;
   gap: 14px;
@@ -14,6 +15,10 @@
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f8fbff;
+}
+
+.qualification-panel {
+  background: #fffdf8;
 }
 
 .folder-heading {
@@ -29,15 +34,42 @@
   line-height: 1.1;
 }
 
-.folder-status {
+.folder-status,
+.quality-status {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
   padding: 0 12px;
   border-radius: 999px;
+  color: var(--wood);
+  background: #fff2df;
+  font-weight: 900;
+}
+
+.folder-status,
+.quality-status.is-qualified {
   color: var(--green);
   background: #e8f4ee;
-  font-weight: 900;
+}
+
+.quality-status.is-spam {
+  color: #a33a2a;
+  background: #ffe8e4;
+}
+
+.folder-lock-note {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.folder-workspace.is-locked {
+  background: #f7f8fa;
+}
+
+.folder-workspace.is-locked .folder-status {
+  color: var(--wood);
+  background: #fff2df;
 }
 
 .folder-path-card {
@@ -64,7 +96,8 @@
   font-size: 0.9rem;
 }
 
-.folder-checklist {
+.folder-checklist,
+.quality-checklist {
   display: grid;
   gap: 8px;
   margin: 0;
@@ -72,7 +105,8 @@
   list-style: none;
 }
 
-.folder-checklist li {
+.folder-checklist li,
+.quality-checklist li {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -83,7 +117,8 @@
   font-weight: 800;
 }
 
-.folder-checklist li span {
+.folder-checklist li span,
+.quality-checklist li span {
   min-width: 54px;
   min-height: 26px;
   display: inline-flex;
@@ -96,9 +131,22 @@
   font-weight: 900;
 }
 
-.folder-checklist li.is-done span {
+.folder-checklist li.is-done span,
+.quality-checklist li.is-done span {
   color: var(--green);
   background: #e8f4ee;
+}
+
+.lead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+button:disabled,
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 @media (max-width: 720px) {
