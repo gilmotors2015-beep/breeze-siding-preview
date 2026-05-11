@@ -22,8 +22,8 @@
 
     <main>
       <section class="notice" id="setup-notice">
-        <strong>Foundation only.</strong>
-        This dashboard is ready for real lead, schedule, Analytics, Search Console, and email-template workflow data. It is currently showing sample records until secure connections are added.
+        <strong>Lead review gate added.</strong>
+        New form leads should be reviewed first. Folder creation stays locked until the lead is marked qualified, which keeps spam from creating customer folders.
       </section>
 
       <nav class="dashboard-tabs" aria-label="Admin dashboard sections">
@@ -34,20 +34,20 @@
       <section class="tab-panel is-active" id="operations-tab" data-tab-panel="operations">
         <section class="metrics" aria-label="Lead summary">
           <article>
-            <span>New leads</span>
+            <span>Needs review</span>
             <strong id="metric-new">0</strong>
           </article>
           <article>
-            <span>Estimates pending</span>
+            <span>Qualified</span>
+            <strong id="metric-qualified">0</strong>
+          </article>
+          <article>
+            <span>Estimates sent</span>
             <strong id="metric-estimates">0</strong>
           </article>
           <article>
-            <span>Scheduled</span>
-            <strong id="metric-scheduled">0</strong>
-          </article>
-          <article>
-            <span>Review follow-up</span>
-            <strong id="metric-review">0</strong>
+            <span>Spam blocked</span>
+            <strong id="metric-spam">0</strong>
           </article>
         </section>
 
@@ -61,12 +61,14 @@
               Pipeline stage
               <select id="stage-filter">
                 <option value="all">All stages</option>
-                <option value="new">New</option>
+                <option value="new">Needs review</option>
+                <option value="qualified">Qualified</option>
                 <option value="contacted">Contacted</option>
                 <option value="estimate-sent">Estimate sent</option>
                 <option value="scheduled">Scheduled</option>
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
+                <option value="spam">Spam</option>
                 <option value="review">Review follow-up</option>
               </select>
             </label>
@@ -128,29 +130,29 @@
             <article class="workflow-step">
               <span class="workflow-number">1</span>
               <div>
-                <strong>Create the customer workspace</strong>
-                <span>Use the customer name from the new lead and create one matching OneDrive folder.</span>
-                <span>Standard path: D:\OneDrive\Breeze Siding documents\CUSTOMERS\Customer Name</span>
+                <strong>Review the lead first</strong>
+                <span>Confirm it is a real customer, inside the service area, and tied to real exterior work.</span>
+                <span>Spam and unqualified requests do not get customer folders.</span>
               </div>
-              <span class="workflow-template">Folder</span>
+              <span class="workflow-template">Gate</span>
             </article>
             <article class="workflow-step">
               <span class="workflow-number">2</span>
               <div>
-                <strong>Create the standard sections</strong>
-                <span>01 Intake, 02 Photos, 03 Measurements, 04 Estimate, 05 Contract, 06 Job Docs, 07 Invoice, 08 Follow Up, and _Archive.</span>
-                <span>This keeps each customer folder predictable from first contact through follow-up.</span>
+                <strong>Mark qualified</strong>
+                <span>Once qualified, unlock the folder helper command and create the matching OneDrive customer folder.</span>
+                <span>Standard path: D:\OneDrive\Breeze Siding documents\CUSTOMERS\Customer Name</span>
               </div>
-              <span class="workflow-template">Structure</span>
+              <span class="workflow-template">Qualify</span>
             </article>
             <article class="workflow-step">
               <span class="workflow-number">3</span>
               <div>
-                <strong>Copy only the starter pack</strong>
-                <span>Estimate workbook, invoice workbook, takeoff workbook, contract, proposal, receipt, and expenses workbook.</span>
+                <strong>Create the standard sections</strong>
+                <span>01 Intake, 02 Photos, 03 Measurements, 04 Estimate, 05 Contract, 06 Job Docs, 07 Invoice, 08 Follow Up, and _Archive.</span>
                 <span>Email templates stay in the master template folder and should be linked, not copied into every customer folder.</span>
               </div>
-              <span class="workflow-template">Starter Pack</span>
+              <span class="workflow-template">Structure</span>
             </article>
             <article class="workflow-step">
               <span class="workflow-number">4</span>
@@ -276,7 +278,22 @@
           <div class="wide"><dt>Notes</dt><dd id="dialog-notes"></dd></div>
         </dl>
 
-        <section class="folder-workspace" aria-labelledby="dialog-folder-title">
+        <section class="qualification-panel" aria-labelledby="dialog-quality-title">
+          <div class="folder-heading">
+            <div>
+              <p class="eyebrow">Lead Review</p>
+              <h3 id="dialog-quality-title">Qualification gate</h3>
+            </div>
+            <span class="quality-status" id="dialog-quality-status"></span>
+          </div>
+          <ul class="quality-checklist" id="dialog-quality-checklist"></ul>
+          <div class="lead-actions">
+            <button class="button primary" id="mark-qualified-button" type="button">Mark qualified</button>
+            <button class="button secondary" id="mark-spam-button" type="button">Mark spam</button>
+          </div>
+        </section>
+
+        <section class="folder-workspace" id="dialog-folder-workspace" aria-labelledby="dialog-folder-title">
           <div class="folder-heading">
             <div>
               <p class="eyebrow">Customer Folder</p>
@@ -284,6 +301,7 @@
             </div>
             <span class="folder-status" id="dialog-folder-status"></span>
           </div>
+          <p class="folder-lock-note" id="dialog-folder-lock-note"></p>
           <div class="folder-path-card">
             <span>OneDrive path</span>
             <code id="dialog-folder-path"></code>
