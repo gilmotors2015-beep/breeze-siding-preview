@@ -21,34 +21,107 @@ const qualityChecks = [
 const allQualityChecks = qualityChecks.map((check) => check.key);
 const folderTasks = [
   ['folder', 'Customer folder exists'],
-  ['sections', 'Numbered sections created'],
+  ['sections', 'Numbered sections reviewed'],
   ['starter', 'Starter pack copied or reviewed'],
   ['template', 'Email templates linked from master folder'],
   ['estimate', 'Estimate/proposal file ready']
 ].map(([key, label]) => ({ key, label }));
 
-const leadBase = { email: 'Stored in local customer record', phone: 'Stored in local customer record', address: 'Stored in local customer record', estimateNo: 'Stored locally', proposalTotal: 'Stored locally', qualityChecksDone: allQualityChecks };
-const sampleLeads = [
-  { ...leadBase, id: 'lead-evergreen-lutheran', name: 'Evergreen Lutheran High School', contactPerson: 'Rick', city: 'Tacoma, WA', project: 'Siding replacement proposal', estimateDate: '5/8/2026', dueDate: '5/23/2026', stage: 'estimate-sent', folderStatus: 'Estimate sent', folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'], nextStep: 'Waiting for response to the proposal sent on 5/8/2026.', notes: 'Private proposal details are saved locally, not in the public admin demo.', createdAt: '2026-05-08T12:00:00' },
-  { ...leadBase, id: 'lead-mary', name: 'Mary', contactPerson: 'Mary', city: 'Stored locally', project: 'Siding replacement + paint proposal', estimateDate: 'Proposal sent', dueDate: 'Stored locally', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the proposal.', notes: 'Private file review shows full and partial siding replacement plus paint proposal PDFs.', createdAt: '2026-04-26T12:00:00' },
-  { ...leadBase, id: 'lead-troy-wyatt-rambler', name: 'Troy Wyatt Rambler', contactPerson: 'Troy Wyatt', city: 'Stored locally', project: 'Repeat customer - exterior paint estimate', estimateDate: '5/6/2026', dueDate: 'Stored locally', stage: 'estimate-sent', folderStatus: 'Archived folder, new paint estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the exterior paint estimate.', notes: 'Repeat customer. Siding was completed previously; current opportunity is exterior paint.', createdAt: '2026-05-06T12:00:00' },
-  { ...leadBase, id: 'lead-jessica-miller', name: 'Jessica Miller', contactPerson: 'Jessica Miller', city: 'Stored locally', project: 'Repeat customer - vinyl repair', estimateDate: '4/10/2026', dueDate: 'Stored locally', stage: 'won', folderStatus: 'Agreement in place', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting on materials before scheduling the vinyl repair.', notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.', createdAt: '2026-04-10T12:00:00' },
-  { id: 'lead-1001', name: 'Sarah M.', contactPerson: 'Sarah M.', email: 'sarah@example.com', phone: '253-555-0188', address: '', city: 'Tacoma', project: 'Siding replacement', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'new', qualityChecksDone: ['real-contact', 'service-area', 'real-project'], folderStatus: 'Locked until qualified', folderTasksDone: [], nextStep: 'Call back and confirm project details before creating a folder.', notes: 'Interested in fiber cement siding and trim around front windows.', createdAt: '2026-05-10T09:20:00' },
-  { id: 'lead-1002', name: 'Daniel R.', contactPerson: 'Daniel R.', email: 'daniel@example.com', phone: '206-555-0144', address: '', city: 'Seattle', project: 'Window and siding estimate', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'qualified', qualityChecksDone: allQualityChecks, folderStatus: 'Qualified, folder not created', folderTasksDone: [], nextStep: 'Create folder, then prepare estimate after walkthrough.', notes: 'Older home. Wants better weather protection and a cleaner front elevation.', createdAt: '2026-05-09T15:40:00' },
-  { id: 'lead-1003', name: 'SEO Pitch Form', contactPerson: 'Unknown', email: 'Hidden spam example', phone: 'Not provided', address: '', city: 'Outside service area', project: 'Marketing solicitation', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'spam', qualityChecksDone: [], folderStatus: 'No folder - spam', folderTasksDone: [], nextStep: 'No action needed.', notes: 'Example of a form submission that should never create a customer folder.', createdAt: '2026-05-09T17:10:00' },
-  { id: 'lead-1004', name: 'Jon P.', contactPerson: 'Jon P.', email: 'jon@example.com', phone: '360-555-0126', address: '', city: 'Puyallup', project: 'Repair visit', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'scheduled', qualityChecksDone: allQualityChecks, folderStatus: 'Starter pack copied', folderTasksDone: ['folder', 'sections', 'starter', 'template'], nextStep: 'Service visit scheduled', notes: 'Small leak-prone trim area near second-story window.', createdAt: '2026-05-07T16:30:00' },
-  { id: 'lead-1005', name: 'Alicia T.', contactPerson: 'Alicia T.', email: 'alicia@example.com', phone: '253-555-0191', address: '', city: 'Spanaway', project: 'Completed siding project', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'review', qualityChecksDone: allQualityChecks, folderStatus: 'Invoice ready', folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'], nextStep: 'Send review request link', notes: 'Project completed. Customer sounded happy at final walkthrough.', createdAt: '2026-05-05T14:10:00' }
+const privateRecord = {
+  email: 'Stored in private customer record',
+  phone: 'Stored in private customer record',
+  address: 'Stored in private customer record',
+  city: 'Stored privately',
+  estimateNo: 'Stored privately',
+  proposalTotal: 'Stored privately',
+  qualityChecksDone: allQualityChecks
+};
+
+const customerRecords = [
+  {
+    ...privateRecord,
+    id: 'lead-evergreen-lutheran',
+    name: 'Evergreen Lutheran High School',
+    contactPerson: 'Rick',
+    city: 'Tacoma, WA',
+    project: 'Siding replacement proposal',
+    estimateDate: '5/8/2026',
+    dueDate: '5/23/2026',
+    stage: 'estimate-sent',
+    folderStatus: 'Estimate sent',
+    folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
+    nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
+    notes: 'Private proposal details are saved locally, not in the public admin view.',
+    createdAt: '2026-05-08T12:00:00'
+  },
+  {
+    ...privateRecord,
+    id: 'lead-mary',
+    name: 'Mary',
+    contactPerson: 'Mary',
+    project: 'Siding replacement + paint proposal',
+    estimateDate: 'Proposal sent',
+    dueDate: 'Stored privately',
+    stage: 'estimate-sent',
+    folderStatus: 'Existing folder, estimate sent',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting for response to the proposal.',
+    notes: 'Proposal options are in the local customer folder.',
+    createdAt: '2026-04-26T12:00:00'
+  },
+  {
+    ...privateRecord,
+    id: 'lead-troy-wyatt-rambler',
+    name: 'Troy Wyatt Rambler',
+    contactPerson: 'Troy Wyatt',
+    project: 'Repeat customer - exterior paint estimate',
+    estimateDate: '5/6/2026',
+    dueDate: 'Stored privately',
+    stage: 'estimate-sent',
+    folderStatus: 'Archived folder, new paint estimate sent',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting for response to the exterior paint estimate.',
+    notes: 'Repeat customer. Siding was completed previously; current opportunity is exterior paint.',
+    createdAt: '2026-05-06T12:00:00'
+  },
+  {
+    ...privateRecord,
+    id: 'lead-fran-construction',
+    name: 'Fran Construction',
+    contactPerson: 'Fran Construction',
+    project: 'Construction proposal',
+    estimateDate: '4/26/2026',
+    dueDate: 'Stored privately',
+    stage: 'estimate-sent',
+    folderStatus: 'Existing folder, estimate sent',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting for reply to the estimate.',
+    notes: 'Existing customer folder confirmed with proposal and estimate files present.',
+    createdAt: '2026-04-26T18:09:00'
+  },
+  {
+    ...privateRecord,
+    id: 'lead-jessica-miller',
+    name: 'Jessica Miller',
+    contactPerson: 'Jessica Miller',
+    project: 'Repeat customer - vinyl repair',
+    estimateDate: '4/10/2026',
+    dueDate: 'Stored privately',
+    stage: 'won',
+    folderStatus: 'Agreement in place',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting on materials before scheduling the vinyl repair.',
+    notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.',
+    createdAt: '2026-04-10T12:00:00'
+  }
 ];
 
-const slots = [
-  { date: 'Tue May 12', time: '9:00 AM - 11:00 AM', label: 'Estimate window', status: 'Open' },
-  { date: 'Wed May 13', time: '1:00 PM - 3:00 PM', label: 'Walkthrough', status: 'Held' },
-  { date: 'Fri May 15', time: '10:00 AM - 12:00 PM', label: 'Repair visit', status: 'Open' }
-];
+const slots = [];
 const activity = [
-  ['Lead review gate added', 'New leads now stay in Needs review until you mark them qualified.'],
+  ['Fran Construction added', 'Estimate has been sent and the current step is waiting for reply.'],
   ['Proposal sent', 'Evergreen Lutheran High School proposal is out and waiting for response.'],
   ['Proposal sent', 'Mary has proposal options out and is waiting for response.'],
+  ['Paint estimate sent', 'Troy Wyatt Rambler is a repeat customer with a new paint estimate pending.'],
   ['Waiting on materials', 'Jessica Miller repair agreement is in place; materials are pending.']
 ];
 const workflowSteps = [
@@ -60,30 +133,30 @@ const workflowSteps = [
   ['Final invoice.oft', 'Final walkthrough and invoice', 'Work is complete or ready for closeout.', 'Schedule final walkthrough, send invoice, and include payment options.'],
   ['feedback.oft', 'Feedback, review, and maintenance loop', 'Job is complete, or estimate did not move forward.', 'Request feedback, review, or future maintenance/checkup follow-up.']
 ].map(([template, title, trigger, action]) => ({ template, title, trigger, action }));
-const performanceSummary = { visitors: 128, clicks: 42, impressions: 1840, averagePosition: 18.6 };
+const performanceSummary = { visitors: 0, clicks: 0, impressions: 0, averagePosition: 0 };
 const trafficMarkers = [
-  ['Organic search visitors', '74', 'Primary traffic source to watch after launch', '+12%', 'good'],
-  ['Estimate form starts', '9', 'Track from homepage and service pages', 'watch', 'watch'],
-  ['Mobile visitors', '68%', 'Keep mobile speed and form usability high', '+5%', 'good']
+  ['Analytics connection', 'Pending', 'Connect Google Analytics after the private admin layer is ready.', 'next', 'watch'],
+  ['Form submissions', 'Email only', 'Leads currently arrive by email, then can be manually entered into this board.', 'active', 'good'],
+  ['Schedule data', 'Manual', 'Calendar availability is ready to connect after the secure backend exists.', 'next', 'watch']
 ].map(([label, value, detail, change, tone]) => ({ label, value, detail, change, tone }));
 const searchMarkers = [
-  ['Indexed pages', '37', 'Watch new static pages as Google recrawls', 'stable', 'good'],
-  ['Not indexed pages', '263', 'Mostly old WordPress tag and missing URLs', 'cleanup', 'watch'],
-  ['Sitemap status', 'Live', 'Submitted under breezesiding.com', 'ok', 'good']
+  ['Search Console connection', 'Pending', 'Use Search Console directly until this dashboard has a secure data connection.', 'next', 'watch'],
+  ['Sitemap', 'Submitted', 'Live site sitemap is available for Google discovery.', 'ok', 'good'],
+  ['Index follow-up', 'Manual', 'Review non-indexed pages in Search Console after Google recrawls the live domain.', 'watch', 'watch']
 ].map(([label, value, detail, change, tone]) => ({ label, value, detail, change, tone }));
 const keywordTargets = [
-  ['siding replacement seattle', '/siding-replacement-seattle.html', 16, 8, 420, 'Strengthen city page content and add internal links from related blog posts.'],
-  ['siding contractor tacoma', '/siding-replacement-tacoma.html', 22, 5, 310, 'Build local proof, completed project references, and Tacoma-specific service copy.'],
-  ['james hardie siding installer', '/siding-replacement.html', 18, 6, 275, 'Add stronger James Hardie sections, FAQs, and supporting comparison content.']
+  ['siding replacement seattle', '/siding-replacement-seattle.html', 'Pending', 0, 0, 'Track once Search Console data is connected.'],
+  ['siding contractor tacoma', '/siding-replacement-tacoma.html', 'Pending', 0, 0, 'Track once Search Console data is connected.'],
+  ['james hardie siding installer', '/siding-replacement.html', 'Pending', 0, 0, 'Track once Search Console data is connected.']
 ].map(([keyword, page, position, clicks, impressions, plan]) => ({ keyword, page, position, clicks, impressions, plan }));
 const performancePlan = [
-  ['Connect real data', 'Link Google Analytics and Search Console data after the admin database is secured.'],
-  ['Track top three keyword pages', 'Watch clicks, impressions, and position weekly before making heavy content changes.'],
-  ['Prioritize pages near page one', 'Improve pages ranking between positions 8 and 20 first because they usually move fastest.'],
-  ['Keep conversion tied to SEO', 'Compare keyword gains with estimate form submissions, calls, and scheduled appointments.']
+  ['Secure the private layer', 'Contact information, lead submission storage, and calendar data need login protection before going fully live.'],
+  ['Connect real form data', 'Route qualified form submissions into the board after spam filtering and review.'],
+  ['Connect Search Console and Analytics', 'Bring real visitors, clicks, impressions, and keyword positions into the performance tab.'],
+  ['Add contact records', 'Store phone, email, address, and notes in a private database instead of public static files.']
 ].map(([title, detail]) => ({ title, detail }));
 
-let leads = [...sampleLeads];
+let leads = [...customerRecords];
 let activeLead = null;
 
 const $ = (selector) => document.querySelector(selector);
@@ -149,7 +222,9 @@ function renderBoard() {
   });
 }
 function renderSchedule() {
-  $('#schedule-list').innerHTML = slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('');
+  $('#schedule-list').innerHTML = slots.length
+    ? slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('')
+    : '<article class="schedule-item"><strong>No customer appointments entered yet</strong><span>Schedule slots will show here once the schedule workflow is connected.</span></article>';
 }
 function renderActivity() {
   $('#activity-list').innerHTML = activity.map(([title, detail]) => `<article class="activity-item"><strong>${title}</strong><span>${detail}</span></article>`).join('');
@@ -161,7 +236,7 @@ function renderPerformance() {
   setText('#metric-visitors', performanceSummary.visitors.toLocaleString());
   setText('#metric-clicks', performanceSummary.clicks.toLocaleString());
   setText('#metric-impressions', performanceSummary.impressions.toLocaleString());
-  setText('#metric-position', performanceSummary.averagePosition.toFixed(1));
+  setText('#metric-position', performanceSummary.averagePosition.toLocaleString());
   renderMarkers(trafficMarkers, '#traffic-markers');
   renderMarkers(searchMarkers, '#search-markers');
   $('#keyword-body').innerHTML = keywordTargets.map((target) => `<tr><td>${target.keyword}</td><td>${target.page}</td><td><span class="position">${target.position}</span></td><td>${target.clicks}</td><td>${target.impressions}</td><td>${target.plan}</td></tr>`).join('');
@@ -246,15 +321,6 @@ function markActiveLeadSpam() {
   renderAll();
   refreshLeadDetails(activeLead);
 }
-function addSampleLead() {
-  const nextNumber = leads.length + 1001;
-  leads = [{ id: `lead-${nextNumber}`, name: `Sample Lead ${leads.length + 1}`, contactPerson: `Sample Lead ${leads.length + 1}`, email: 'sample@example.com', phone: '253-555-0100', address: '', city: 'Federal Way', project: 'Siding estimate', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'new', qualityChecksDone: ['real-contact'], folderStatus: 'Locked until qualified', folderTasksDone: [], nextStep: 'Review and qualify before creating a folder.', notes: 'Sample record added in demo mode.', createdAt: new Date().toISOString() }, ...leads];
-  renderAll();
-}
-function addSampleSlot() {
-  slots.push({ date: 'Next available', time: '3:00 PM - 5:00 PM', label: 'Estimate window', status: 'Open' });
-  renderSchedule();
-}
 function activateTab(tabName) {
   document.querySelectorAll('.tab-button').forEach((button) => {
     const active = button.dataset.tab === tabName;
@@ -274,8 +340,6 @@ function renderAll() {
 
 $('#lead-search').addEventListener('input', renderBoard);
 $('#stage-filter').addEventListener('change', renderBoard);
-$('#add-lead-button').addEventListener('click', addSampleLead);
-$('#add-slot-button').addEventListener('click', addSampleSlot);
 copyFolderCommandButton.addEventListener('click', copyFolderCommand);
 $('#mark-qualified-button').addEventListener('click', markActiveLeadQualified);
 $('#mark-spam-button').addEventListener('click', markActiveLeadSpam);
