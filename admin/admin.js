@@ -12,11 +12,11 @@ const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
 const localHelperPath = '.\\new-customer-folder-builder.ps1';
 
 const folderTasks = [
-  { key: 'folder', label: 'Customer folder created' },
+  { key: 'folder', label: 'Customer folder exists' },
   { key: 'sections', label: 'Numbered sections created' },
-  { key: 'starter', label: 'Starter pack copied' },
+  { key: 'starter', label: 'Starter pack copied or reviewed' },
   { key: 'template', label: 'Email templates linked from master folder' },
-  { key: 'estimate', label: 'Estimate workbook ready' }
+  { key: 'estimate', label: 'Estimate/proposal file ready' }
 ];
 
 const sampleLeads = [
@@ -37,8 +37,68 @@ const sampleLeads = [
     folderStatus: 'Estimate sent',
     folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
-    notes: 'Real proposal details are saved in the local private customer record, not on the public admin demo.',
+    notes: 'Private proposal details are saved locally, not in the public admin demo.',
     createdAt: '2026-05-08T12:00:00'
+  },
+  {
+    id: 'lead-mary',
+    name: 'Mary',
+    contactPerson: 'Mary',
+    email: 'Stored in local customer record',
+    phone: 'Stored in local customer record',
+    address: 'Stored in local customer record',
+    city: 'Stored locally',
+    project: 'Siding replacement + paint proposal',
+    estimateNo: 'Stored locally',
+    estimateDate: 'Proposal sent',
+    dueDate: 'Stored locally',
+    proposalTotal: 'Stored locally',
+    stage: 'estimate-sent',
+    folderStatus: 'Existing folder, estimate sent',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting for response to the proposal.',
+    notes: 'Private file review shows full and partial siding replacement plus paint proposal PDFs.',
+    createdAt: '2026-04-26T12:00:00'
+  },
+  {
+    id: 'lead-troy-wyatt-rambler',
+    name: 'Troy Wyatt Rambler',
+    contactPerson: 'Troy Wyatt',
+    email: 'Stored in local customer record',
+    phone: 'Stored in local customer record',
+    address: 'Stored in local customer record',
+    city: 'Stored locally',
+    project: 'Repeat customer - exterior paint estimate',
+    estimateNo: 'Stored locally',
+    estimateDate: '5/6/2026',
+    dueDate: 'Stored locally',
+    proposalTotal: 'Stored locally',
+    stage: 'estimate-sent',
+    folderStatus: 'Archived folder, new paint estimate sent',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting for response to the exterior paint estimate.',
+    notes: 'Repeat customer. Siding was completed previously; current opportunity is exterior paint.',
+    createdAt: '2026-05-06T12:00:00'
+  },
+  {
+    id: 'lead-jessica-miller',
+    name: 'Jessica Miller',
+    contactPerson: 'Jessica Miller',
+    email: 'Stored in local customer record',
+    phone: 'Stored in local customer record',
+    address: 'Stored in local customer record',
+    city: 'Stored locally',
+    project: 'Repeat customer - vinyl repair',
+    estimateNo: 'Stored locally',
+    estimateDate: '4/10/2026',
+    dueDate: 'Stored locally',
+    proposalTotal: 'Stored locally',
+    stage: 'won',
+    folderStatus: 'Agreement in place',
+    folderTasksDone: ['folder', 'estimate'],
+    nextStep: 'Waiting on materials before scheduling the vinyl repair.',
+    notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.',
+    createdAt: '2026-04-10T12:00:00'
   },
   {
     id: 'lead-1001',
@@ -130,55 +190,21 @@ const sampleSlots = [
 
 const sampleActivity = [
   { title: 'Proposal sent', detail: 'Evergreen Lutheran High School proposal is out and waiting for response.' },
-  { title: 'New lead received', detail: 'Homepage estimate form added Sarah M. to New.' },
-  { title: 'Review request ready', detail: 'Alicia T. is ready for rate-us follow-up.' }
+  { title: 'Proposal sent', detail: 'Mary has proposal options out and is waiting for response.' },
+  { title: 'Paint estimate sent', detail: 'Troy Wyatt Rambler is a repeat customer with a new paint estimate pending.' },
+  { title: 'Waiting on materials', detail: 'Jessica Miller repair agreement is in place; materials are pending.' }
 ];
 
 const workflowSteps = [
-  {
-    template: 'Welcome.oft',
-    title: 'First contact received',
-    trigger: 'Customer fills out a form, calls, or is manually entered.',
-    action: 'Confirm the request, set expectations, and move the lead toward scheduling.'
-  },
-  {
-    template: 'schedule.oft',
-    title: 'Appointment scheduling',
-    trigger: 'Lead is qualified and ready for an estimate visit or walkthrough.',
-    action: 'Send scheduling instructions or appointment confirmation.'
-  },
-  {
-    template: 'Estimate.oft',
-    title: 'Bid sent',
-    trigger: 'Estimate PDF is ready after site visit or project review.',
-    action: 'Send estimate email with the PDF attachment and track follow-up.'
-  },
-  {
-    template: 'bid accepted.oft',
-    title: 'Bid accepted',
-    trigger: 'Customer approves the estimate.',
-    action: 'Lay out job expectations, next steps, start date planning, and prep details.'
-  },
-  {
-    template: 'Final invoice.oft',
-    title: 'Final walkthrough and invoice',
-    trigger: 'Work is complete or ready for closeout.',
-    action: 'Schedule final walkthrough, send invoice, and include payment options.'
-  },
-  {
-    template: 'feedback.oft',
-    title: 'Feedback, review, and maintenance loop',
-    trigger: 'Job is complete, or estimate did not move forward.',
-    action: 'Request feedback, review, or future maintenance/checkup follow-up.'
-  }
+  { template: 'Welcome.oft', title: 'First contact received', trigger: 'Customer fills out a form, calls, or is manually entered.', action: 'Confirm the request, set expectations, and move the lead toward scheduling.' },
+  { template: 'schedule.oft', title: 'Appointment scheduling', trigger: 'Lead is qualified and ready for an estimate visit or walkthrough.', action: 'Send scheduling instructions or appointment confirmation.' },
+  { template: 'Estimate.oft', title: 'Bid sent', trigger: 'Estimate PDF is ready after site visit or project review.', action: 'Send estimate email with the PDF attachment and track follow-up.' },
+  { template: 'bid accepted.oft', title: 'Bid accepted', trigger: 'Customer approves the estimate.', action: 'Lay out job expectations, next steps, start date planning, and prep details.' },
+  { template: 'Final invoice.oft', title: 'Final walkthrough and invoice', trigger: 'Work is complete or ready for closeout.', action: 'Schedule final walkthrough, send invoice, and include payment options.' },
+  { template: 'feedback.oft', title: 'Feedback, review, and maintenance loop', trigger: 'Job is complete, or estimate did not move forward.', action: 'Request feedback, review, or future maintenance/checkup follow-up.' }
 ];
 
-const performanceSummary = {
-  visitors: 128,
-  clicks: 42,
-  impressions: 1840,
-  averagePosition: 18.6
-};
+const performanceSummary = { visitors: 128, clicks: 42, impressions: 1840, averagePosition: 18.6 };
 
 const trafficMarkers = [
   { label: 'Organic search visitors', value: '74', detail: 'Primary traffic source to watch after launch', change: '+12%', tone: 'good' },
@@ -193,30 +219,9 @@ const searchMarkers = [
 ];
 
 const keywordTargets = [
-  {
-    keyword: 'siding replacement seattle',
-    page: '/siding-replacement-seattle.html',
-    position: 16,
-    clicks: 8,
-    impressions: 420,
-    plan: 'Strengthen city page content and add internal links from related blog posts.'
-  },
-  {
-    keyword: 'siding contractor tacoma',
-    page: '/siding-replacement-tacoma.html',
-    position: 22,
-    clicks: 5,
-    impressions: 310,
-    plan: 'Build local proof, completed project references, and Tacoma-specific service copy.'
-  },
-  {
-    keyword: 'james hardie siding installer',
-    page: '/siding-replacement.html',
-    position: 18,
-    clicks: 6,
-    impressions: 275,
-    plan: 'Add stronger James Hardie sections, FAQs, and supporting comparison content.'
-  }
+  { keyword: 'siding replacement seattle', page: '/siding-replacement-seattle.html', position: 16, clicks: 8, impressions: 420, plan: 'Strengthen city page content and add internal links from related blog posts.' },
+  { keyword: 'siding contractor tacoma', page: '/siding-replacement-tacoma.html', position: 22, clicks: 5, impressions: 310, plan: 'Build local proof, completed project references, and Tacoma-specific service copy.' },
+  { keyword: 'james hardie siding installer', page: '/siding-replacement.html', position: 18, clicks: 6, impressions: 275, plan: 'Add stronger James Hardie sections, FAQs, and supporting comparison content.' }
 ];
 
 const performancePlan = [
@@ -251,7 +256,8 @@ function safeFolderName(name) {
 }
 
 function folderPathForLead(lead) {
-  return `${customerRootPath}\\${safeFolderName(lead.name)}`;
+  const base = lead.id === 'lead-troy-wyatt-rambler' ? `${customerRootPath}\\Archive` : customerRootPath;
+  return `${base}\\${safeFolderName(lead.name)}`;
 }
 
 function commandForLead(lead) {
@@ -332,19 +338,10 @@ function renderActivity() {
 function renderWorkflow() {
   const target = document.querySelector('#workflow-steps');
   target.innerHTML = '';
-
   workflowSteps.forEach((step, index) => {
     const item = document.createElement('article');
     item.className = 'workflow-step';
-    item.innerHTML = `
-      <span class="workflow-number">${index + 1}</span>
-      <div>
-        <strong>${step.title}</strong>
-        <span>${step.trigger}</span>
-        <span>${step.action}</span>
-      </div>
-      <span class="workflow-template">${step.template}</span>
-    `;
+    item.innerHTML = `<span class="workflow-number">${index + 1}</span><div><strong>${step.title}</strong><span>${step.trigger}</span><span>${step.action}</span></div><span class="workflow-template">${step.template}</span>`;
     target.append(item);
   });
 }
@@ -359,17 +356,10 @@ function renderPerformanceMetrics() {
 function renderMarkers(items, targetSelector) {
   const target = document.querySelector(targetSelector);
   target.innerHTML = '';
-
   items.forEach((item) => {
     const marker = document.createElement('article');
     marker.className = 'marker-item';
-    marker.innerHTML = `
-      <div>
-        <strong>${item.label}: ${item.value}</strong>
-        <span>${item.detail}</span>
-      </div>
-      <span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span>
-    `;
+    marker.innerHTML = `<div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span>`;
     target.append(marker);
   });
 }
@@ -377,17 +367,9 @@ function renderMarkers(items, targetSelector) {
 function renderKeywords() {
   const body = document.querySelector('#keyword-body');
   body.innerHTML = '';
-
   keywordTargets.forEach((target) => {
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${target.keyword}</td>
-      <td>${target.page}</td>
-      <td><span class="position">${target.position}</span></td>
-      <td>${target.clicks}</td>
-      <td>${target.impressions}</td>
-      <td>${target.plan}</td>
-    `;
+    row.innerHTML = `<td>${target.keyword}</td><td>${target.page}</td><td><span class="position">${target.position}</span></td><td>${target.clicks}</td><td>${target.impressions}</td><td>${target.plan}</td>`;
     body.append(row);
   });
 }
@@ -395,7 +377,6 @@ function renderKeywords() {
 function renderPerformancePlan() {
   const target = document.querySelector('#performance-plan');
   target.innerHTML = '';
-
   performancePlan.forEach((item) => {
     const plan = document.createElement('article');
     plan.className = 'plan-item';
@@ -415,7 +396,6 @@ function renderPerformance() {
 function renderFolderChecklist(lead) {
   const list = document.querySelector('#dialog-folder-checklist');
   list.innerHTML = '';
-
   folderTasks.forEach((task) => {
     const done = lead.folderTasksDone.includes(task.key);
     const item = document.createElement('li');
@@ -450,7 +430,6 @@ function showLead(lead) {
 async function copyFolderCommand() {
   if (!activeLead || !copyFolderCommandButton) return;
   const command = commandForLead(activeLead);
-
   try {
     await navigator.clipboard.writeText(command);
     copyFolderCommandButton.textContent = 'Copied';
@@ -461,43 +440,12 @@ async function copyFolderCommand() {
 
 function addSampleLead() {
   const nextNumber = leads.length + 1001;
-  leads = [
-    {
-      id: `lead-${nextNumber}`,
-      name: `Sample Lead ${leads.length + 1}`,
-      contactPerson: `Sample Lead ${leads.length + 1}`,
-      email: 'sample@example.com',
-      phone: '253-555-0100',
-      address: '',
-      city: 'Federal Way',
-      project: 'Siding estimate',
-      estimateNo: '',
-      estimateDate: '',
-      dueDate: '',
-      proposalTotal: '',
-      stage: 'new',
-      folderStatus: 'Not started',
-      folderTasksDone: [],
-      nextStep: 'Call to qualify project',
-      notes: 'Sample record added in demo mode.',
-      createdAt: new Date().toISOString()
-    },
-    ...leads
-  ];
+  leads = [{ id: `lead-${nextNumber}`, name: `Sample Lead ${leads.length + 1}`, contactPerson: `Sample Lead ${leads.length + 1}`, email: 'sample@example.com', phone: '253-555-0100', address: '', city: 'Federal Way', project: 'Siding estimate', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'new', folderStatus: 'Not started', folderTasksDone: [], nextStep: 'Call to qualify project', notes: 'Sample record added in demo mode.', createdAt: new Date().toISOString() }, ...leads];
   renderAll();
 }
 
 function addSampleSlot() {
-  slots = [
-    ...slots,
-    {
-      id: `slot-${slots.length + 1}`,
-      date: 'Next available',
-      time: '3:00 PM - 5:00 PM',
-      label: 'Estimate window',
-      status: 'Open'
-    }
-  ];
+  slots = [...slots, { id: `slot-${slots.length + 1}`, date: 'Next available', time: '3:00 PM - 5:00 PM', label: 'Estimate window', status: 'Open' }];
   renderSchedule();
 }
 
@@ -507,10 +455,7 @@ function activateTab(tabName) {
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-selected', String(isActive));
   });
-
-  tabPanels.forEach((panel) => {
-    panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName);
-  });
+  tabPanels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName));
 }
 
 function renderAll() {
@@ -527,8 +472,6 @@ stageFilter.addEventListener('change', renderBoard);
 addLeadButton.addEventListener('click', addSampleLead);
 addSlotButton.addEventListener('click', addSampleSlot);
 if (copyFolderCommandButton) copyFolderCommandButton.addEventListener('click', copyFolderCommand);
-tabButtons.forEach((button) => {
-  button.addEventListener('click', () => activateTab(button.dataset.tab));
-});
+tabButtons.forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 
 renderAll();
