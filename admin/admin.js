@@ -1,11 +1,13 @@
 const stages = [
-  { id: 'new', label: 'New' },
+  { id: 'new', label: 'Needs review' },
+  { id: 'qualified', label: 'Qualified' },
   { id: 'contacted', label: 'Contacted' },
   { id: 'estimate-sent', label: 'Estimate sent' },
   { id: 'scheduled', label: 'Scheduled' },
-  { id: 'review', label: 'Review follow-up' },
   { id: 'won', label: 'Won' },
-  { id: 'lost', label: 'Lost' }
+  { id: 'review', label: 'Review follow-up' },
+  { id: 'lost', label: 'Lost' },
+  { id: 'spam', label: 'Spam' }
 ];
 
 const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
@@ -18,6 +20,15 @@ const folderTasks = [
   { key: 'template', label: 'Email templates linked from master folder' },
   { key: 'estimate', label: 'Estimate/proposal file ready' }
 ];
+
+const qualityChecks = [
+  { key: 'real-contact', label: 'Real name and reachable phone or email' },
+  { key: 'service-area', label: 'Inside the Breeze Siding service area' },
+  { key: 'real-project', label: 'Real siding, window, paint, deck, or exterior repair need' },
+  { key: 'not-spam', label: 'Not an SEO pitch, bot form, or unrelated solicitation' }
+];
+
+const allQualityChecks = qualityChecks.map((check) => check.key);
 
 const sampleLeads = [
   {
@@ -34,6 +45,7 @@ const sampleLeads = [
     dueDate: '5/23/2026',
     proposalTotal: 'Stored locally',
     stage: 'estimate-sent',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Estimate sent',
     folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Waiting for response to the proposal sent on 5/8/2026.',
@@ -54,6 +66,7 @@ const sampleLeads = [
     dueDate: 'Stored locally',
     proposalTotal: 'Stored locally',
     stage: 'estimate-sent',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Existing folder, estimate sent',
     folderTasksDone: ['folder', 'estimate'],
     nextStep: 'Waiting for response to the proposal.',
@@ -74,6 +87,7 @@ const sampleLeads = [
     dueDate: 'Stored locally',
     proposalTotal: 'Stored locally',
     stage: 'estimate-sent',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Archived folder, new paint estimate sent',
     folderTasksDone: ['folder', 'estimate'],
     nextStep: 'Waiting for response to the exterior paint estimate.',
@@ -94,6 +108,7 @@ const sampleLeads = [
     dueDate: 'Stored locally',
     proposalTotal: 'Stored locally',
     stage: 'won',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Agreement in place',
     folderTasksDone: ['folder', 'estimate'],
     nextStep: 'Waiting on materials before scheduling the vinyl repair.',
@@ -114,9 +129,10 @@ const sampleLeads = [
     dueDate: '',
     proposalTotal: '',
     stage: 'new',
-    folderStatus: 'Not started',
+    qualityChecksDone: ['real-contact', 'service-area', 'real-project'],
+    folderStatus: 'Locked until qualified',
     folderTasksDone: [],
-    nextStep: 'Call back and request photos',
+    nextStep: 'Call back and confirm project details before creating a folder.',
     notes: 'Interested in fiber cement siding and trim around front windows.',
     createdAt: '2026-05-10T09:20:00'
   },
@@ -133,12 +149,34 @@ const sampleLeads = [
     estimateDate: '',
     dueDate: '',
     proposalTotal: '',
-    stage: 'contacted',
-    folderStatus: 'Created',
-    folderTasksDone: ['folder', 'sections'],
-    nextStep: 'Prepare estimate after walkthrough',
+    stage: 'qualified',
+    qualityChecksDone: allQualityChecks,
+    folderStatus: 'Qualified, folder not created',
+    folderTasksDone: [],
+    nextStep: 'Create folder, then prepare estimate after walkthrough.',
     notes: 'Older home. Wants better weather protection and a cleaner front elevation.',
     createdAt: '2026-05-09T15:40:00'
+  },
+  {
+    id: 'lead-1003',
+    name: 'SEO Pitch Form',
+    contactPerson: 'Unknown',
+    email: 'Hidden spam example',
+    phone: 'Not provided',
+    address: '',
+    city: 'Outside service area',
+    project: 'Marketing solicitation',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
+    stage: 'spam',
+    qualityChecksDone: [],
+    folderStatus: 'No folder - spam',
+    folderTasksDone: [],
+    nextStep: 'No action needed.',
+    notes: 'Example of a form submission that should never create a customer folder.',
+    createdAt: '2026-05-09T17:10:00'
   },
   {
     id: 'lead-1004',
@@ -154,6 +192,7 @@ const sampleLeads = [
     dueDate: '',
     proposalTotal: '',
     stage: 'scheduled',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Starter pack copied',
     folderTasksDone: ['folder', 'sections', 'starter', 'template'],
     nextStep: 'Service visit scheduled',
@@ -174,6 +213,7 @@ const sampleLeads = [
     dueDate: '',
     proposalTotal: '',
     stage: 'review',
+    qualityChecksDone: allQualityChecks,
     folderStatus: 'Invoice ready',
     folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'],
     nextStep: 'Send review request link',
@@ -189,14 +229,15 @@ const sampleSlots = [
 ];
 
 const sampleActivity = [
+  { title: 'Lead review gate added', detail: 'New leads now stay in Needs review until you mark them qualified.' },
   { title: 'Proposal sent', detail: 'Evergreen Lutheran High School proposal is out and waiting for response.' },
   { title: 'Proposal sent', detail: 'Mary has proposal options out and is waiting for response.' },
-  { title: 'Paint estimate sent', detail: 'Troy Wyatt Rambler is a repeat customer with a new paint estimate pending.' },
   { title: 'Waiting on materials', detail: 'Jessica Miller repair agreement is in place; materials are pending.' }
 ];
 
 const workflowSteps = [
-  { template: 'Welcome.oft', title: 'First contact received', trigger: 'Customer fills out a form, calls, or is manually entered.', action: 'Confirm the request, set expectations, and move the lead toward scheduling.' },
+  { template: 'Review gate', title: 'Lead received', trigger: 'Customer fills out a form, calls, or is manually entered.', action: 'Leave the lead in Needs review until it is confirmed as real and useful.' },
+  { template: 'Qualified', title: 'Lead approved', trigger: 'The request is real, in-service, and worth pursuing.', action: 'Mark qualified to unlock the customer folder command and scheduling flow.' },
   { template: 'schedule.oft', title: 'Appointment scheduling', trigger: 'Lead is qualified and ready for an estimate visit or walkthrough.', action: 'Send scheduling instructions or appointment confirmation.' },
   { template: 'Estimate.oft', title: 'Bid sent', trigger: 'Estimate PDF is ready after site visit or project review.', action: 'Send estimate email with the PDF attachment and track follow-up.' },
   { template: 'bid accepted.oft', title: 'Bid accepted', trigger: 'Customer approves the estimate.', action: 'Lay out job expectations, next steps, start date planning, and prep details.' },
@@ -246,6 +287,10 @@ const dialog = document.querySelector('#lead-dialog');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('[data-tab-panel]');
 const copyFolderCommandButton = document.querySelector('#copy-folder-command');
+const folderWorkspace = document.querySelector('#dialog-folder-workspace');
+const folderLockNote = document.querySelector('#dialog-folder-lock-note');
+const markQualifiedButton = document.querySelector('#mark-qualified-button');
+const markSpamButton = document.querySelector('#mark-spam-button');
 
 function stageLabel(stageId) {
   return stages.find((stage) => stage.id === stageId)?.label || 'Unknown';
@@ -264,6 +309,10 @@ function commandForLead(lead) {
   return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`;
 }
 
+function canUseFolderActions(lead) {
+  return !['new', 'spam', 'lost'].includes(lead.stage) || lead.folderTasksDone.includes('folder');
+}
+
 function setText(selector, value) {
   const element = document.querySelector(selector);
   if (element) element.textContent = value || 'Not set';
@@ -280,11 +329,15 @@ function filteredLeads() {
   });
 }
 
+function count(stageId) {
+  return leads.filter((lead) => lead.stage === stageId).length;
+}
+
 function renderMetrics() {
-  document.querySelector('#metric-new').textContent = leads.filter((lead) => lead.stage === 'new').length;
-  document.querySelector('#metric-estimates').textContent = leads.filter((lead) => lead.stage === 'estimate-sent').length;
-  document.querySelector('#metric-scheduled').textContent = leads.filter((lead) => lead.stage === 'scheduled').length;
-  document.querySelector('#metric-review').textContent = leads.filter((lead) => lead.stage === 'review').length;
+  document.querySelector('#metric-new').textContent = count('new');
+  document.querySelector('#metric-qualified').textContent = count('qualified');
+  document.querySelector('#metric-estimates').textContent = count('estimate-sent');
+  document.querySelector('#metric-spam').textContent = count('spam');
 }
 
 function renderBoard() {
@@ -393,16 +446,51 @@ function renderPerformance() {
   renderPerformancePlan();
 }
 
-function renderFolderChecklist(lead) {
+function renderQualityChecklist(lead) {
+  const list = document.querySelector('#dialog-quality-checklist');
+  const status = document.querySelector('#dialog-quality-status');
+  const completed = lead.qualityChecksDone || [];
+  const isQualified = completed.length === qualityChecks.length && !['new', 'spam'].includes(lead.stage);
+
+  status.textContent = lead.stage === 'spam' ? 'Spam' : isQualified ? 'Qualified' : 'Needs review';
+  status.classList.toggle('is-qualified', isQualified);
+  status.classList.toggle('is-spam', lead.stage === 'spam');
+  list.innerHTML = '';
+
+  qualityChecks.forEach((check) => {
+    const done = completed.includes(check.key);
+    const item = document.createElement('li');
+    item.className = done ? 'is-done' : '';
+    item.innerHTML = `<span>${done ? 'Yes' : 'Check'}</span>${check.label}`;
+    list.append(item);
+  });
+}
+
+function renderFolderChecklist(lead, locked) {
   const list = document.querySelector('#dialog-folder-checklist');
   list.innerHTML = '';
   folderTasks.forEach((task) => {
-    const done = lead.folderTasksDone.includes(task.key);
+    const done = !locked && lead.folderTasksDone.includes(task.key);
     const item = document.createElement('li');
     item.className = done ? 'is-done' : '';
-    item.innerHTML = `<span>${done ? 'Done' : 'Next'}</span>${task.label}`;
+    item.innerHTML = `<span>${done ? 'Done' : locked ? 'Locked' : 'Next'}</span>${task.label}`;
     list.append(item);
   });
+}
+
+function renderFolderPanel(lead) {
+  const unlocked = canUseFolderActions(lead);
+  folderWorkspace.classList.toggle('is-locked', !unlocked);
+  folderLockNote.textContent = unlocked
+    ? 'Folder tools are available for this qualified or active customer.'
+    : 'Review this lead first. If it is real and worth pursuing, mark it qualified to unlock folder creation.';
+
+  setText('#dialog-folder-status', unlocked ? lead.folderStatus : 'Locked until qualified');
+  setText('#dialog-folder-path', unlocked ? folderPathForLead(lead) : 'Qualify the lead before creating a OneDrive folder.');
+  setText('#dialog-folder-command', unlocked ? commandForLead(lead) : 'Folder command unlocks after qualification.');
+  copyFolderCommandButton.disabled = !unlocked;
+  copyFolderCommandButton.textContent = unlocked ? 'Copy folder command' : 'Locked until qualified';
+  renderFolderChecklist(lead, !unlocked);
 }
 
 function showLead(lead) {
@@ -419,16 +507,13 @@ function showLead(lead) {
   setText('#dialog-due', lead.dueDate);
   setText('#dialog-next', lead.nextStep);
   setText('#dialog-notes', lead.notes);
-  setText('#dialog-folder-status', lead.folderStatus);
-  setText('#dialog-folder-path', folderPathForLead(lead));
-  setText('#dialog-folder-command', commandForLead(lead));
-  if (copyFolderCommandButton) copyFolderCommandButton.textContent = 'Copy folder command';
-  renderFolderChecklist(lead);
+  renderQualityChecklist(lead);
+  renderFolderPanel(lead);
   dialog.showModal();
 }
 
 async function copyFolderCommand() {
-  if (!activeLead || !copyFolderCommandButton) return;
+  if (!activeLead || !copyFolderCommandButton || !canUseFolderActions(activeLead)) return;
   const command = commandForLead(activeLead);
   try {
     await navigator.clipboard.writeText(command);
@@ -438,9 +523,50 @@ async function copyFolderCommand() {
   }
 }
 
+function markActiveLeadQualified() {
+  if (!activeLead) return;
+  activeLead.stage = 'qualified';
+  activeLead.qualityChecksDone = allQualityChecks;
+  activeLead.folderStatus = activeLead.folderTasksDone.includes('folder') ? activeLead.folderStatus : 'Qualified, folder not created';
+  activeLead.nextStep = activeLead.folderTasksDone.includes('folder') ? activeLead.nextStep : 'Create the customer folder, then schedule or prepare the estimate.';
+  renderAll();
+  showLead(activeLead);
+}
+
+function markActiveLeadSpam() {
+  if (!activeLead) return;
+  activeLead.stage = 'spam';
+  activeLead.qualityChecksDone = [];
+  activeLead.folderStatus = 'No folder - spam';
+  activeLead.folderTasksDone = [];
+  activeLead.nextStep = 'No action needed.';
+  renderAll();
+  showLead(activeLead);
+}
+
 function addSampleLead() {
   const nextNumber = leads.length + 1001;
-  leads = [{ id: `lead-${nextNumber}`, name: `Sample Lead ${leads.length + 1}`, contactPerson: `Sample Lead ${leads.length + 1}`, email: 'sample@example.com', phone: '253-555-0100', address: '', city: 'Federal Way', project: 'Siding estimate', estimateNo: '', estimateDate: '', dueDate: '', proposalTotal: '', stage: 'new', folderStatus: 'Not started', folderTasksDone: [], nextStep: 'Call to qualify project', notes: 'Sample record added in demo mode.', createdAt: new Date().toISOString() }, ...leads];
+  leads = [{
+    id: `lead-${nextNumber}`,
+    name: `Sample Lead ${leads.length + 1}`,
+    contactPerson: `Sample Lead ${leads.length + 1}`,
+    email: 'sample@example.com',
+    phone: '253-555-0100',
+    address: '',
+    city: 'Federal Way',
+    project: 'Siding estimate',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
+    stage: 'new',
+    qualityChecksDone: ['real-contact'],
+    folderStatus: 'Locked until qualified',
+    folderTasksDone: [],
+    nextStep: 'Review and qualify before creating a folder.',
+    notes: 'Sample record added in demo mode.',
+    createdAt: new Date().toISOString()
+  }, ...leads];
   renderAll();
 }
 
@@ -472,6 +598,8 @@ stageFilter.addEventListener('change', renderBoard);
 addLeadButton.addEventListener('click', addSampleLead);
 addSlotButton.addEventListener('click', addSampleSlot);
 if (copyFolderCommandButton) copyFolderCommandButton.addEventListener('click', copyFolderCommand);
+if (markQualifiedButton) markQualifiedButton.addEventListener('click', markActiveLeadQualified);
+if (markSpamButton) markSpamButton.addEventListener('click', markActiveLeadSpam);
 tabButtons.forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 
 renderAll();
