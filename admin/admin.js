@@ -282,7 +282,7 @@ function loadScript(src) {
 }
 async function enablePrivateLayer() {
   try {
-    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
     await loadScript('private-admin-config.js');
     await loadScript('private-auth.js');
   } catch (error) {
