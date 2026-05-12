@@ -2,23 +2,27 @@
   const config = window.BREEZE_PRIVATE_ADMIN;
   const supabaseFactory = window.supabase;
 
+  function loginUrl() {
+    const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    return `/admin-login/?next=${encodeURIComponent(next || '/admin/')}`;
+  }
+
+  function showLoginNeeded(message = 'Secure login is needed before this dashboard can open.') {
+    const screen = document.querySelector('#auth-check-screen');
+    const text = screen?.querySelector('span');
+    const link = screen?.querySelector('a');
+    if (text) text.textContent = message;
+    if (link) link.setAttribute('href', loginUrl());
+  }
+
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
-    window.location.replace('/admin-login/?reason=config');
+    showLoginNeeded('Secure login could not load. Use the login button below.');
     return;
   }
 
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
   let currentSession = null;
   let authWatcherReady = false;
-
-  function loginUrl() {
-    const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    return `/admin-login/?next=${encodeURIComponent(next)}`;
-  }
-
-  function redirectToLogin() {
-    window.location.replace(loginUrl());
-  }
 
   function setMessage(message) {
     const target = document.querySelector('#private-status-message');
@@ -100,7 +104,7 @@
   async function signOut() {
     await client.auth.signOut();
     window.dispatchEvent(new CustomEvent('breeze-private-logout'));
-    redirectToLogin();
+    window.location.replace('/admin-login/');
   }
 
   async function init() {
@@ -110,7 +114,7 @@
     currentSession = data.session;
 
     if (!currentSession) {
-      redirectToLogin();
+      showLoginNeeded('You are not signed in. Use the secure login button below.');
       return;
     }
 
@@ -122,7 +126,7 @@
       client.auth.onAuthStateChange(async (_event, session) => {
         currentSession = session;
         if (!session) {
-          redirectToLogin();
+          showLoginNeeded('You are not signed in. Use the secure login button below.');
           return;
         }
         unlockDashboard();
