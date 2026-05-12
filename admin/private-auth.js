@@ -1,6 +1,8 @@
 (() => {
   const config = window.BREEZE_PRIVATE_ADMIN;
   const supabaseFactory = window.supabase;
+  const bootText = document.querySelector('#auth-check-screen span');
+  if (bootText) bootText.textContent = 'Checking your saved login session...';
 
   function loginUrl() {
     const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
