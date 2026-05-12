@@ -1,14 +1,47 @@
 const stages = [
-  ['new', 'Needs review'],
+  ['new', 'Lead'],
   ['qualified', 'Qualified'],
   ['contacted', 'Contacted'],
-  ['estimate-sent', 'Estimate sent'],
   ['scheduled', 'Scheduled'],
+  ['estimate-sent', 'Estimate sent'],
   ['won', 'Won'],
   ['review', 'Review follow-up'],
   ['lost', 'Lost'],
   ['spam', 'Spam']
 ].map(([id, label]) => ({ id, label }));
+
+const stageFlow = {
+  new: 'qualified',
+  qualified: 'contacted',
+  contacted: 'scheduled',
+  scheduled: 'estimate-sent',
+  'estimate-sent': 'won',
+  won: 'review'
+};
+
+const stageNextSteps = {
+  new: 'Review the lead, confirm it is real, then qualify or mark spam.',
+  qualified: 'Set the appointment, send the schedule email, or call/text the customer.',
+  contacted: 'Confirm the appointment or site visit details.',
+  scheduled: 'Complete the site visit, measurements, photos, and estimate notes.',
+  'estimate-sent': 'Follow up on the proposal and track the reply.',
+  won: 'Prepare job expectations, start date planning, and contract details.',
+  review: 'Request feedback, review, maintenance follow-up, or closeout notes.',
+  lost: 'Record why the bid did not move forward.',
+  spam: 'No action needed.'
+};
+
+const privateStageMap = {
+  new: 'needs_review',
+  qualified: 'qualified',
+  contacted: 'contacted',
+  scheduled: 'scheduled',
+  'estimate-sent': 'estimate_sent',
+  won: 'won',
+  lost: 'lost',
+  spam: 'spam',
+  review: 'review_follow_up'
+};
 
 const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
 const localHelperPath = '.\\new-customer-folder-builder.ps1';
@@ -36,15 +69,12 @@ const customerRecords = [
 ];
 const slots = [];
 const activity = [
-  ['Fran Construction added', 'Estimate has been sent and the current step is waiting for reply.'],
-  ['Proposal sent', 'Evergreen Lutheran High School proposal is out and waiting for response.'],
-  ['Proposal sent', 'Mary has proposal options out and is waiting for response.'],
-  ['Paint estimate sent', 'Troy Wyatt Rambler is a repeat customer with a new paint estimate pending.'],
-  ['Waiting on materials', 'Jessica Miller repair agreement is in place; materials are pending.']
+  ['Manual lead entry ready', 'Use Add lead for calls, referrals, and customers who do not come through the website form.'],
+  ['Pipeline steps updated', 'Each lead can now move forward from Lead to Qualified to Contacted to Scheduled and beyond.']
 ];
 const workflowSteps = [
-  ['Review gate', 'Lead received', 'Customer fills out a form, calls, or is manually entered.', 'Leave the lead in Needs review until it is confirmed as real and useful.'],
-  ['Qualified', 'Lead approved', 'The request is real, in-service, and worth pursuing.', 'Mark qualified to unlock the customer folder command and scheduling flow.'],
+  ['Review gate', 'Lead received', 'Customer fills out a form, calls, or is manually entered.', 'Leave the lead in Lead until it is confirmed as real and useful.'],
+  ['Qualified', 'Lead approved', 'The request is real, in-service, and worth pursuing.', 'Set appointment, call, text, or send the scheduling email.'],
   ['schedule.oft', 'Appointment scheduling', 'Lead is qualified and ready for an estimate visit or walkthrough.', 'Send scheduling instructions or appointment confirmation.'],
   ['Estimate.oft', 'Bid sent', 'Estimate PDF is ready after site visit or project review.', 'Send estimate email with the PDF attachment and track follow-up.'],
   ['bid accepted.oft', 'Bid accepted', 'Customer approves the estimate.', 'Lay out job expectations, next steps, start date planning, and prep details.'],
@@ -79,9 +109,16 @@ let activeLead = null;
 const $ = (selector) => document.querySelector(selector);
 const board = $('#pipeline-board');
 const dialog = $('#lead-dialog');
+const manualLeadDialog = $('#manual-lead-dialog');
+const manualLeadForm = $('#manual-lead-form');
 const copyFolderCommandButton = $('#copy-folder-command');
 const folderWorkspace = $('#dialog-folder-workspace');
 const folderLockNote = $('#dialog-folder-lock-note');
+const moveNextButton = $('#move-next-button');
+const markQualifiedButton = $('#mark-qualified-button');
+const markSpamButton = $('#mark-spam-button');
+const addLeadButton = $('#add-lead-button');
+const saveManualLeadButton = $('#save-manual-lead-button');
 
 function stageLabel(stageId) { return stages.find((stage) => stage.id === stageId)?.label || 'Unknown'; }
 function safeFolderName(name) { return name.replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim(); }
@@ -89,6 +126,14 @@ function folderPathForLead(lead) { return lead.folderPathOverride || `${lead.id 
 function commandForLead(lead) { return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`; }
 function canUseFolderActions(lead) { return !['new', 'spam', 'lost'].includes(lead.stage) || lead.folderTasksDone.includes('folder'); }
 function setText(selector, value) { const element = $(selector); if (element) element.textContent = value || 'Not set'; }
+function bridgeClient() { return window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client || null; }
+function refreshPrivateLeads() { return window.BREEZE_PRIVATE_ADMIN_BRIDGE?.loadLeads?.(); }
+function nextStage(lead) { return stageFlow[lead.stage] || null; }
+function nextStageLabel(lead) { const target = nextStage(lead); return target ? stageLabel(target) : ''; }
+function makeLocalId() { return `manual-${Date.now()}`; }
+function todayStamp() { return new Date().toISOString(); }
+function valueFromForm(name) { return manualLeadForm?.elements[name]?.value?.trim() || ''; }
+
 function filteredLeads() {
   const search = $('#lead-search').value.trim().toLowerCase();
   const stage = $('#stage-filter').value;
@@ -113,18 +158,26 @@ function renderBoard() {
     column.className = 'pipeline-column';
     const stageLeads = visibleLeads.filter((lead) => lead.stage === stage.id);
     column.innerHTML = `<h3>${stage.label}<span>${stageLeads.length}</span></h3>`;
+    if (!stageLeads.length) {
+      const empty = document.createElement('p');
+      empty.className = 'pipeline-empty';
+      empty.textContent = stage.id === 'new' ? 'New calls, referrals, and form leads start here.' : `No ${stage.label.toLowerCase()} customers yet.`;
+      column.append(empty);
+    }
     stageLeads.forEach((lead) => {
       const card = template.content.firstElementChild.cloneNode(true);
       card.querySelector('.lead-name').textContent = lead.name;
       card.querySelector('.lead-meta').textContent = `${lead.city} - ${lead.phone}`;
       card.querySelector('.lead-project').textContent = lead.project;
+      const next = card.querySelector('.lead-next');
+      if (next) next.textContent = lead.nextStep || stageNextSteps[lead.stage] || '';
       card.querySelector('button').addEventListener('click', () => showLead(lead));
       column.append(card);
     });
     board.append(column);
   });
 }
-function renderSchedule() { $('#schedule-list').innerHTML = slots.length ? slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('') : '<article class="schedule-item"><strong>No customer appointments entered yet</strong><span>Schedule slots will show here once the schedule workflow is connected.</span></article>'; }
+function renderSchedule() { $('#schedule-list').innerHTML = slots.length ? slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('') : '<article class="schedule-item"><strong>No customer appointments entered yet</strong><span>Qualified leads should move toward a call, text, email, or site visit here.</span></article>'; }
 function renderActivity() { $('#activity-list').innerHTML = activity.map(([title, detail]) => `<article class="activity-item"><strong>${title}</strong><span>${detail}</span></article>`).join(''); }
 function renderWorkflow() { $('#workflow-steps').innerHTML = workflowSteps.map((step, index) => `<article class="workflow-step"><span class="workflow-number">${index + 1}</span><div><strong>${step.title}</strong><span>${step.trigger}</span><span>${step.action}</span></div><span class="workflow-template">${step.template}</span></article>`).join(''); }
 function renderMarkers(items, selector) { $(selector).innerHTML = items.map((item) => `<article class="marker-item"><div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span></article>`).join(''); }
@@ -143,7 +196,7 @@ function renderQualityChecklist(lead) {
   const completed = lead.qualityChecksDone || [];
   const isQualified = completed.length === qualityChecks.length && !['new', 'spam'].includes(lead.stage);
   const status = $('#dialog-quality-status');
-  status.textContent = lead.stage === 'spam' ? 'Spam' : isQualified ? 'Qualified' : 'Needs review';
+  status.textContent = lead.stage === 'spam' ? 'Spam' : isQualified ? 'Qualified' : 'Lead';
   status.classList.toggle('is-qualified', isQualified);
   status.classList.toggle('is-spam', lead.stage === 'spam');
   renderChecklist('#dialog-quality-checklist', qualityChecks, completed, 'Yes', 'Check');
@@ -159,6 +212,15 @@ function renderFolderPanel(lead) {
   copyFolderCommandButton.textContent = unlocked ? 'Copy folder command' : 'Locked until qualified';
   renderChecklist('#dialog-folder-checklist', folderTasks, unlocked ? lead.folderTasksDone : [], 'Done', unlocked ? 'Next' : 'Locked');
 }
+function renderStageActions(lead) {
+  const target = nextStage(lead);
+  const isLead = lead.stage === 'new';
+  markQualifiedButton.hidden = !isLead;
+  markSpamButton.hidden = lead.stage === 'spam' || lead.stage === 'won' || lead.stage === 'review';
+  moveNextButton.hidden = isLead || !target;
+  moveNextButton.textContent = target ? `Move to ${stageLabel(target)}` : 'No next stage';
+  setText('#dialog-stage-guidance', stageNextSteps[lead.stage]);
+}
 function refreshLeadDetails(lead) {
   activeLead = lead;
   setText('#dialog-name', lead.name);
@@ -171,38 +233,142 @@ function refreshLeadDetails(lead) {
   setText('#dialog-estimate', lead.estimateNo ? `${lead.estimateNo} - ${lead.estimateDate}` : 'Not sent');
   setText('#dialog-total', lead.proposalTotal);
   setText('#dialog-due', lead.dueDate);
-  setText('#dialog-next', lead.nextStep);
+  setText('#dialog-next', lead.nextStep || stageNextSteps[lead.stage]);
   setText('#dialog-notes', lead.notes);
+  renderStageActions(lead);
   renderQualityChecklist(lead);
   renderFolderPanel(lead);
 }
 function showLead(lead) { refreshLeadDetails(lead); if (!dialog.open) dialog.showModal(); }
 async function copyFolderCommand() { if (!activeLead || !canUseFolderActions(activeLead)) return; try { await navigator.clipboard.writeText(commandForLead(activeLead)); copyFolderCommandButton.textContent = 'Copied'; } catch { copyFolderCommandButton.textContent = 'Copy failed'; } }
-function markActiveLeadQualified() { if (!activeLead) return; activeLead.stage = 'qualified'; activeLead.qualityChecksDone = allQualityChecks; activeLead.folderStatus = activeLead.folderTasksDone.includes('folder') ? activeLead.folderStatus : 'Qualified, folder not created'; activeLead.nextStep = activeLead.folderTasksDone.includes('folder') ? activeLead.nextStep : 'Create the customer folder, then schedule or prepare the estimate.'; renderAll(); refreshLeadDetails(activeLead); }
-function markActiveLeadSpam() { if (!activeLead) return; activeLead.stage = 'spam'; activeLead.qualityChecksDone = []; activeLead.folderStatus = 'No folder - spam'; activeLead.folderTasksDone = []; activeLead.nextStep = 'No action needed.'; renderAll(); refreshLeadDetails(activeLead); }
+async function persistStage(lead, stage) {
+  const nextStep = stageNextSteps[stage] || lead.nextStep;
+  lead.stage = stage;
+  lead.nextStep = nextStep;
+  if (stage === 'qualified') lead.qualityChecksDone = allQualityChecks;
+  if (stage === 'spam') {
+    lead.qualityChecksDone = [];
+    lead.folderStatus = 'No folder - spam';
+    lead.folderTasksDone = [];
+  }
+  renderAll();
+  refreshLeadDetails(lead);
+
+  const client = bridgeClient();
+  if (!client || `${lead.id}`.startsWith('manual-')) return;
+  const { error } = await client.from('leads').update({ stage: privateStageMap[stage], next_step: nextStep, is_spam: stage === 'spam' }).eq('id', lead.id);
+  if (error) {
+    setText('#private-status-message', `Could not save stage update: ${error.message}`);
+    return;
+  }
+  await refreshPrivateLeads();
+}
+function markActiveLeadQualified() { if (activeLead) persistStage(activeLead, 'qualified'); }
+function markActiveLeadSpam() { if (activeLead) persistStage(activeLead, 'spam'); }
+function moveActiveLeadForward() { if (activeLead && nextStage(activeLead)) persistStage(activeLead, nextStage(activeLead)); }
 function activateTab(tabName) { document.querySelectorAll('.tab-button').forEach((button) => { const active = button.dataset.tab === tabName; button.classList.toggle('is-active', active); button.setAttribute('aria-selected', String(active)); }); document.querySelectorAll('[data-tab-panel]').forEach((panel) => panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName)); }
 function renderAll() { renderMetrics(); renderBoard(); renderSchedule(); renderActivity(); renderWorkflow(); renderPerformance(); }
-function loadScript(src) { return new Promise((resolve, reject) => { if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; } const script = document.createElement('script'); script.src = src; script.onload = resolve; script.onerror = () => reject(new Error(`Could not load ${src}`)); document.head.append(script); }); }
-async function enablePrivateLayer() {
-  try {
-    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
-    await loadScript('/admin/private-admin-config.js?v=admin-auth-2');
-    await loadScript('/admin/private-auth.js?v=admin-auth-2');
-  } catch (error) {
-    const screen = document.querySelector('#auth-check-screen span');
-    if (screen) screen.textContent = 'Secure login could not load. Use the login button below.';
-    console.warn(error.message);
+function localLeadFromManualForm() {
+  const name = valueFromForm('customer_name');
+  const city = valueFromForm('city');
+  const state = valueFromForm('state') || 'WA';
+  const zip = valueFromForm('zip');
+  const cityLine = [city, state, zip].filter(Boolean).join(', ');
+  return {
+    id: makeLocalId(),
+    name,
+    contactPerson: valueFromForm('contact_person') || name,
+    email: valueFromForm('email') || 'Not set',
+    phone: valueFromForm('phone') || 'Not set',
+    address: [valueFromForm('address_line'), cityLine].filter(Boolean).join(' - ') || 'Not set',
+    city: cityLine || 'Not set',
+    project: valueFromForm('project_summary') || valueFromForm('project_type') || 'Not set',
+    estimateNo: '',
+    estimateDate: '',
+    dueDate: '',
+    proposalTotal: '',
+    stage: 'new',
+    qualityChecksDone: [],
+    folderStatus: 'not_started',
+    folderTasksDone: [],
+    nextStep: stageNextSteps.new,
+    notes: valueFromForm('notes'),
+    createdAt: todayStamp(),
+    folderPathOverride: valueFromForm('folder_path')
+  };
+}
+function privateLeadFromManualForm() {
+  const row = {
+    source: 'manual',
+    stage: 'needs_review',
+    customer_name: valueFromForm('customer_name'),
+    contact_person: valueFromForm('contact_person'),
+    phone: valueFromForm('phone'),
+    email: valueFromForm('email'),
+    address_line: valueFromForm('address_line'),
+    city: valueFromForm('city'),
+    state: valueFromForm('state') || 'WA',
+    zip: valueFromForm('zip'),
+    project_type: valueFromForm('project_type'),
+    project_summary: valueFromForm('project_summary'),
+    folder_path: valueFromForm('folder_path'),
+    folder_status: 'not_started',
+    next_step: stageNextSteps.new,
+    notes: valueFromForm('notes'),
+    is_spam: false
+  };
+  Object.keys(row).forEach((key) => { if (row[key] === '') delete row[key]; });
+  return row;
+}
+async function saveManualLead(event) {
+  event.preventDefault();
+  const localLead = localLeadFromManualForm();
+  if (!localLead.name) {
+    setText('#manual-lead-message', 'Customer name is required.');
+    return;
   }
+
+  saveManualLeadButton.disabled = true;
+  setText('#manual-lead-message', 'Saving lead...');
+  const client = bridgeClient();
+
+  if (client) {
+    const { error } = await client.from('leads').insert(privateLeadFromManualForm());
+    if (error) {
+      saveManualLeadButton.disabled = false;
+      setText('#manual-lead-message', `Could not save lead: ${error.message}`);
+      return;
+    }
+    await refreshPrivateLeads();
+  } else {
+    leads = [localLead, ...leads];
+    renderAll();
+  }
+
+  saveManualLeadButton.disabled = false;
+  setText('#manual-lead-message', 'Lead saved.');
+  manualLeadDialog?.close();
+  manualLeadForm.reset();
+}
+function openManualLeadDialog() {
+  manualLeadForm?.reset();
+  setText('#manual-lead-message', '');
+  const state = manualLeadForm?.elements.state;
+  if (state) state.value = 'WA';
+  manualLeadDialog?.showModal();
 }
 
 $('#lead-search').addEventListener('input', renderBoard);
 $('#stage-filter').addEventListener('change', renderBoard);
 copyFolderCommandButton.addEventListener('click', copyFolderCommand);
-$('#mark-qualified-button').addEventListener('click', markActiveLeadQualified);
-$('#mark-spam-button').addEventListener('click', markActiveLeadSpam);
+markQualifiedButton.addEventListener('click', markActiveLeadQualified);
+markSpamButton.addEventListener('click', markActiveLeadSpam);
+moveNextButton.addEventListener('click', moveActiveLeadForward);
+addLeadButton?.addEventListener('click', openManualLeadDialog);
+manualLeadForm?.addEventListener('submit', saveManualLead);
+document.querySelectorAll('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => button.closest('dialog')?.close()));
 document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 window.addEventListener('breeze-private-leads', (event) => { leads = Array.isArray(event.detail?.leads) ? event.detail.leads : [...customerRecords]; renderAll(); });
 window.addEventListener('breeze-private-logout', () => { leads = [...customerRecords]; renderAll(); });
 
 renderAll();
-enablePrivateLayer();
