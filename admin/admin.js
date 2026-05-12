@@ -26,15 +26,7 @@ const folderTasks = [
   ['template', 'Email templates linked from master folder'],
   ['estimate', 'Estimate/proposal file ready']
 ].map(([key, label]) => ({ key, label }));
-const privateRecord = {
-  email: 'Stored in private customer record',
-  phone: 'Stored in private customer record',
-  address: 'Stored in private customer record',
-  city: 'Stored privately',
-  estimateNo: 'Stored privately',
-  proposalTotal: 'Stored privately',
-  qualityChecksDone: allQualityChecks
-};
+const privateRecord = { email: 'Stored in private customer record', phone: 'Stored in private customer record', address: 'Stored in private customer record', city: 'Stored privately', estimateNo: 'Stored privately', proposalTotal: 'Stored privately', qualityChecksDone: allQualityChecks };
 const customerRecords = [
   { ...privateRecord, id: 'lead-evergreen-lutheran', name: 'Evergreen Lutheran High School', contactPerson: 'Rick', city: 'Tacoma, WA', project: 'Siding replacement proposal', estimateDate: '5/8/2026', dueDate: '5/23/2026', stage: 'estimate-sent', folderStatus: 'Estimate sent', folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'], nextStep: 'Waiting for response to the proposal sent on 5/8/2026.', notes: 'Private proposal details are saved locally, not in the public admin view.', createdAt: '2026-05-08T12:00:00' },
   { ...privateRecord, id: 'lead-mary', name: 'Mary', contactPerson: 'Mary', project: 'Siding replacement + paint proposal', estimateDate: 'Proposal sent', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the proposal.', notes: 'Proposal options are in the local customer folder.', createdAt: '2026-04-26T12:00:00' },
@@ -91,27 +83,12 @@ const copyFolderCommandButton = $('#copy-folder-command');
 const folderWorkspace = $('#dialog-folder-workspace');
 const folderLockNote = $('#dialog-folder-lock-note');
 
-function stageLabel(stageId) {
-  return stages.find((stage) => stage.id === stageId)?.label || 'Unknown';
-}
-function safeFolderName(name) {
-  return name.replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim();
-}
-function folderPathForLead(lead) {
-  if (lead.folderPathOverride) return lead.folderPathOverride;
-  const base = lead.id === 'lead-troy-wyatt-rambler' ? `${customerRootPath}\\Archive` : customerRootPath;
-  return `${base}\\${safeFolderName(lead.name)}`;
-}
-function commandForLead(lead) {
-  return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`;
-}
-function canUseFolderActions(lead) {
-  return !['new', 'spam', 'lost'].includes(lead.stage) || lead.folderTasksDone.includes('folder');
-}
-function setText(selector, value) {
-  const element = $(selector);
-  if (element) element.textContent = value || 'Not set';
-}
+function stageLabel(stageId) { return stages.find((stage) => stage.id === stageId)?.label || 'Unknown'; }
+function safeFolderName(name) { return name.replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim(); }
+function folderPathForLead(lead) { return lead.folderPathOverride || `${lead.id === 'lead-troy-wyatt-rambler' ? `${customerRootPath}\\Archive` : customerRootPath}\\${safeFolderName(lead.name)}`; }
+function commandForLead(lead) { return `powershell -NoProfile -ExecutionPolicy Bypass -File "${localHelperPath}" -CustomerName "${safeFolderName(lead.name)}"`; }
+function canUseFolderActions(lead) { return !['new', 'spam', 'lost'].includes(lead.stage) || lead.folderTasksDone.includes('folder'); }
+function setText(selector, value) { const element = $(selector); if (element) element.textContent = value || 'Not set'; }
 function filteredLeads() {
   const search = $('#lead-search').value.trim().toLowerCase();
   const stage = $('#stage-filter').value;
@@ -147,20 +124,10 @@ function renderBoard() {
     board.append(column);
   });
 }
-function renderSchedule() {
-  $('#schedule-list').innerHTML = slots.length
-    ? slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('')
-    : '<article class="schedule-item"><strong>No customer appointments entered yet</strong><span>Schedule slots will show here once the schedule workflow is connected.</span></article>';
-}
-function renderActivity() {
-  $('#activity-list').innerHTML = activity.map(([title, detail]) => `<article class="activity-item"><strong>${title}</strong><span>${detail}</span></article>`).join('');
-}
-function renderWorkflow() {
-  $('#workflow-steps').innerHTML = workflowSteps.map((step, index) => `<article class="workflow-step"><span class="workflow-number">${index + 1}</span><div><strong>${step.title}</strong><span>${step.trigger}</span><span>${step.action}</span></div><span class="workflow-template">${step.template}</span></article>`).join('');
-}
-function renderMarkers(items, selector) {
-  $(selector).innerHTML = items.map((item) => `<article class="marker-item"><div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span></article>`).join('');
-}
+function renderSchedule() { $('#schedule-list').innerHTML = slots.length ? slots.map((slot) => `<article class="schedule-item"><strong>${slot.date} - ${slot.time}</strong><span>${slot.label} - ${slot.status}</span></article>`).join('') : '<article class="schedule-item"><strong>No customer appointments entered yet</strong><span>Schedule slots will show here once the schedule workflow is connected.</span></article>'; }
+function renderActivity() { $('#activity-list').innerHTML = activity.map(([title, detail]) => `<article class="activity-item"><strong>${title}</strong><span>${detail}</span></article>`).join(''); }
+function renderWorkflow() { $('#workflow-steps').innerHTML = workflowSteps.map((step, index) => `<article class="workflow-step"><span class="workflow-number">${index + 1}</span><div><strong>${step.title}</strong><span>${step.trigger}</span><span>${step.action}</span></div><span class="workflow-template">${step.template}</span></article>`).join(''); }
+function renderMarkers(items, selector) { $(selector).innerHTML = items.map((item) => `<article class="marker-item"><div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span></article>`).join(''); }
 function renderPerformance() {
   setText('#metric-visitors', performanceSummary.visitors.toLocaleString());
   setText('#metric-clicks', performanceSummary.clicks.toLocaleString());
@@ -171,12 +138,7 @@ function renderPerformance() {
   $('#keyword-body').innerHTML = keywordTargets.map((target) => `<tr><td>${target.keyword}</td><td>${target.page}</td><td><span class="position">${target.position}</span></td><td>${target.clicks}</td><td>${target.impressions}</td><td>${target.plan}</td></tr>`).join('');
   $('#performance-plan').innerHTML = performancePlan.map((item) => `<article class="plan-item"><strong>${item.title}</strong><span>${item.detail}</span></article>`).join('');
 }
-function renderChecklist(selector, checks, doneKeys, doneText, pendingText) {
-  $(selector).innerHTML = checks.map((check) => {
-    const done = doneKeys.includes(check.key);
-    return `<li class="${done ? 'is-done' : ''}"><span>${done ? doneText : pendingText}</span>${check.label}</li>`;
-  }).join('');
-}
+function renderChecklist(selector, checks, doneKeys, doneText, pendingText) { $(selector).innerHTML = checks.map((check) => `<li class="${doneKeys.includes(check.key) ? 'is-done' : ''}"><span>${doneKeys.includes(check.key) ? doneText : pendingText}</span>${check.label}</li>`).join(''); }
 function renderQualityChecklist(lead) {
   const completed = lead.qualityChecksDone || [];
   const isQualified = completed.length === qualityChecks.length && !['new', 'spam'].includes(lead.stage);
@@ -214,73 +176,21 @@ function refreshLeadDetails(lead) {
   renderQualityChecklist(lead);
   renderFolderPanel(lead);
 }
-function showLead(lead) {
-  refreshLeadDetails(lead);
-  if (!dialog.open) dialog.showModal();
-}
-async function copyFolderCommand() {
-  if (!activeLead || !canUseFolderActions(activeLead)) return;
-  try {
-    await navigator.clipboard.writeText(commandForLead(activeLead));
-    copyFolderCommandButton.textContent = 'Copied';
-  } catch {
-    copyFolderCommandButton.textContent = 'Copy failed';
-  }
-}
-function markActiveLeadQualified() {
-  if (!activeLead) return;
-  activeLead.stage = 'qualified';
-  activeLead.qualityChecksDone = allQualityChecks;
-  activeLead.folderStatus = activeLead.folderTasksDone.includes('folder') ? activeLead.folderStatus : 'Qualified, folder not created';
-  activeLead.nextStep = activeLead.folderTasksDone.includes('folder') ? activeLead.nextStep : 'Create the customer folder, then schedule or prepare the estimate.';
-  renderAll();
-  refreshLeadDetails(activeLead);
-}
-function markActiveLeadSpam() {
-  if (!activeLead) return;
-  activeLead.stage = 'spam';
-  activeLead.qualityChecksDone = [];
-  activeLead.folderStatus = 'No folder - spam';
-  activeLead.folderTasksDone = [];
-  activeLead.nextStep = 'No action needed.';
-  renderAll();
-  refreshLeadDetails(activeLead);
-}
-function activateTab(tabName) {
-  document.querySelectorAll('.tab-button').forEach((button) => {
-    const active = button.dataset.tab === tabName;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-selected', String(active));
-  });
-  document.querySelectorAll('[data-tab-panel]').forEach((panel) => panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName));
-}
-function renderAll() {
-  renderMetrics();
-  renderBoard();
-  renderSchedule();
-  renderActivity();
-  renderWorkflow();
-  renderPerformance();
-}
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = () => reject(new Error(`Could not load ${src}`));
-    document.head.append(script);
-  });
-}
+function showLead(lead) { refreshLeadDetails(lead); if (!dialog.open) dialog.showModal(); }
+async function copyFolderCommand() { if (!activeLead || !canUseFolderActions(activeLead)) return; try { await navigator.clipboard.writeText(commandForLead(activeLead)); copyFolderCommandButton.textContent = 'Copied'; } catch { copyFolderCommandButton.textContent = 'Copy failed'; } }
+function markActiveLeadQualified() { if (!activeLead) return; activeLead.stage = 'qualified'; activeLead.qualityChecksDone = allQualityChecks; activeLead.folderStatus = activeLead.folderTasksDone.includes('folder') ? activeLead.folderStatus : 'Qualified, folder not created'; activeLead.nextStep = activeLead.folderTasksDone.includes('folder') ? activeLead.nextStep : 'Create the customer folder, then schedule or prepare the estimate.'; renderAll(); refreshLeadDetails(activeLead); }
+function markActiveLeadSpam() { if (!activeLead) return; activeLead.stage = 'spam'; activeLead.qualityChecksDone = []; activeLead.folderStatus = 'No folder - spam'; activeLead.folderTasksDone = []; activeLead.nextStep = 'No action needed.'; renderAll(); refreshLeadDetails(activeLead); }
+function activateTab(tabName) { document.querySelectorAll('.tab-button').forEach((button) => { const active = button.dataset.tab === tabName; button.classList.toggle('is-active', active); button.setAttribute('aria-selected', String(active)); }); document.querySelectorAll('[data-tab-panel]').forEach((panel) => panel.classList.toggle('is-active', panel.dataset.tabPanel === tabName)); }
+function renderAll() { renderMetrics(); renderBoard(); renderSchedule(); renderActivity(); renderWorkflow(); renderPerformance(); }
+function loadScript(src) { return new Promise((resolve, reject) => { if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; } const script = document.createElement('script'); script.src = src; script.onload = resolve; script.onerror = () => reject(new Error(`Could not load ${src}`)); document.head.append(script); }); }
 async function enablePrivateLayer() {
   try {
     await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
-    await loadScript('private-admin-config.js');
-    await loadScript('private-auth.js');
+    await loadScript('/admin/private-admin-config.js?v=admin-auth-2');
+    await loadScript('/admin/private-auth.js?v=admin-auth-2');
   } catch (error) {
+    const screen = document.querySelector('#auth-check-screen span');
+    if (screen) screen.textContent = 'Secure login could not load. Use the login button below.';
     console.warn(error.message);
   }
 }
@@ -291,14 +201,8 @@ copyFolderCommandButton.addEventListener('click', copyFolderCommand);
 $('#mark-qualified-button').addEventListener('click', markActiveLeadQualified);
 $('#mark-spam-button').addEventListener('click', markActiveLeadSpam);
 document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
-window.addEventListener('breeze-private-leads', (event) => {
-  leads = Array.isArray(event.detail?.leads) ? event.detail.leads : [...customerRecords];
-  renderAll();
-});
-window.addEventListener('breeze-private-logout', () => {
-  leads = [...customerRecords];
-  renderAll();
-});
+window.addEventListener('breeze-private-leads', (event) => { leads = Array.isArray(event.detail?.leads) ? event.detail.leads : [...customerRecords]; renderAll(); });
+window.addEventListener('breeze-private-logout', () => { leads = [...customerRecords]; renderAll(); });
 
 renderAll();
 enablePrivateLayer();
