@@ -113,6 +113,43 @@
   let dialogObserver = null;
   let loadingLeads = false;
 
+  function injectMoveStyles() {
+    if (document.querySelector('#lead-stage-move-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'lead-stage-move-styles';
+    style.textContent = `
+      .lead-card.is-movable { display: grid; gap: 8px; }
+      .lead-drag-handle {
+        width: max-content;
+        max-width: 100%;
+        min-height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        border: 1px solid #b8c6d8;
+        border-radius: 999px;
+        color: var(--blue-dark);
+        background: #e8f1ff;
+        font-size: 0.78rem;
+        font-weight: 900;
+        cursor: grab;
+        user-select: none;
+      }
+      .lead-drag-handle:active { cursor: grabbing; }
+      .lead-card.is-dragging { opacity: 0.52; }
+      .lead-card-controls { display: grid; gap: 6px; }
+      .lead-stage-select {
+        min-height: 36px;
+        padding: 6px 9px;
+        border-radius: 6px;
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+    `;
+    document.head.append(style);
+  }
+
   function selectedStage() {
     return document.querySelector('#manual-lead-stage')?.value || 'new';
   }
@@ -237,7 +274,7 @@
     const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
     const loadLeads = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.loadLeads;
     if (!client || !loadLeads) {
-      setStatusMessage('Drag move needs the private database connection.');
+      setStatusMessage('Moving leads needs the private database connection.');
       return;
     }
 
@@ -261,41 +298,83 @@
     enhanceBoard();
   }
 
+  function ensureStageControls(card, lead) {
+    let controls = card.querySelector('.lead-card-controls');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.className = 'lead-card-controls';
+      const select = document.createElement('select');
+      select.className = 'lead-stage-select';
+      statusOptions.forEach(([value, text]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = `Move to ${text}`;
+        select.append(option);
+      });
+      controls.append(select);
+      card.append(controls);
+    }
+
+    const select = controls.querySelector('.lead-stage-select');
+    if (!select) return;
+    select.value = lead.stage;
+    select.setAttribute('aria-label', `Move ${lead.name} to another stage`);
+    select.onpointerdown = (event) => event.stopPropagation();
+    select.onclick = (event) => event.stopPropagation();
+    select.onchange = async (event) => {
+      event.stopPropagation();
+      await moveLeadToStage(lead.id, select.value);
+    };
+  }
+
+  function ensureDragHandle(card, lead) {
+    let handle = card.querySelector('.lead-drag-handle');
+    if (!handle) {
+      handle = document.createElement('span');
+      handle.className = 'lead-drag-handle';
+      handle.textContent = 'Move';
+      handle.draggable = true;
+      card.prepend(handle);
+    }
+
+    handle.dataset.leadId = lead.id;
+    handle.setAttribute('aria-label', `Drag ${lead.name} to another stage`);
+
+    if (handle.dataset.dragListeners === 'true') return;
+    handle.dataset.dragListeners = 'true';
+
+    handle.addEventListener('click', (event) => event.stopPropagation());
+    handle.addEventListener('dragstart', (event) => {
+      draggedLeadId = handle.dataset.leadId;
+      card.classList.add('is-dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', draggedLeadId);
+    });
+
+    handle.addEventListener('dragend', () => {
+      card.classList.remove('is-dragging');
+      document.querySelectorAll('.pipeline-column.is-drag-over').forEach((column) => column.classList.remove('is-drag-over'));
+      draggedLeadId = '';
+    });
+  }
+
   function enhanceCard(card) {
     const lead = findLeadForCard(card);
     if (!lead) return;
 
-    card.dataset.dragEnhanced = 'true';
     card.dataset.leadId = lead.id;
-    card.setAttribute('draggable', 'true');
-    card.title = 'Drag this lead to another stage, or click to open details.';
+    card.classList.add('is-movable');
+    card.removeAttribute('draggable');
+    card.title = 'Use Move to drag this lead, or use the stage dropdown.';
 
     const button = card.querySelector('.lead-card-button');
     if (button) {
-      button.setAttribute('draggable', 'true');
+      button.removeAttribute('draggable');
       button.dataset.leadId = lead.id;
     }
 
-    if (card.dataset.dragListeners === 'true') return;
-    card.dataset.dragListeners = 'true';
-
-    const startDrag = (event) => {
-      draggedLeadId = card.dataset.leadId;
-      card.classList.add('is-dragging');
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', draggedLeadId);
-    };
-
-    const endDrag = () => {
-      card.classList.remove('is-dragging');
-      document.querySelectorAll('.pipeline-column.is-drag-over').forEach((column) => column.classList.remove('is-drag-over'));
-      draggedLeadId = '';
-    };
-
-    card.addEventListener('dragstart', startDrag);
-    card.addEventListener('dragend', endDrag);
-    button?.addEventListener('dragstart', startDrag);
-    button?.addEventListener('dragend', endDrag);
+    ensureDragHandle(card, lead);
+    ensureStageControls(card, lead);
   }
 
   function enhanceColumn(column) {
@@ -391,6 +470,7 @@
   }
 
   function init() {
+    injectMoveStyles();
     insertStatusField();
     enhanceLocalLeadBuilder();
     enhancePrivateLeadBuilder();
