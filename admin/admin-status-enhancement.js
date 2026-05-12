@@ -50,67 +50,19 @@
   };
 
   const stageProtocols = {
-    new: {
-      title: 'Lead intake protocol',
-      template: 'No OFT yet',
-      contact: 'Review first, then call or text only if the request looks real.',
-      actions: ['Confirm name, phone/email, location, and project type.', 'Decide whether this is a real opportunity or spam.', 'If real, move to Qualified.']
-    },
-    qualified: {
-      title: 'Qualified lead protocol',
-      template: 'schedule.oft',
-      contact: 'Call, text, or send the scheduling email.',
-      actions: ['Offer appointment windows or a quick phone call.', 'Create or confirm the customer folder.', 'Collect photos, address, and project notes if needed.']
-    },
-    contacted: {
-      title: 'Contacted protocol',
-      template: 'schedule.oft',
-      contact: 'Follow up until the visit or call is confirmed.',
-      actions: ['Confirm date, time, and address.', 'Ask for photos if they help the estimate.', 'Move to Scheduled once the appointment is set.']
-    },
-    scheduled: {
-      title: 'Scheduled protocol',
-      template: 'Estimate prep',
-      contact: 'Site visit, phone walkthrough, or photo review.',
-      actions: ['Take measurements and photos.', 'Capture scope, materials, access notes, and customer priorities.', 'Prepare estimate notes and move to Estimate sent after the proposal goes out.']
-    },
-    'estimate-sent': {
-      title: 'Estimate sent protocol',
-      template: 'Estimate.oft',
-      contact: 'Email follow-up, phone call, or text check-in.',
-      actions: ['Track proposal date, total, and due date.', 'Follow up before the quote gets cold.', 'Move to Won, Lost, or Review follow-up based on response.']
-    },
-    won: {
-      title: 'Won job protocol',
-      template: 'bid accepted.oft',
-      contact: 'Email job expectations and next steps.',
-      actions: ['Confirm agreement, deposit, start timing, and material plan.', 'Move customer folder into active job structure.', 'Schedule job prep and customer expectations email.']
-    },
-    review: {
-      title: 'Review and maintenance protocol',
-      template: 'feedback.oft',
-      contact: 'Feedback form, review request, or maintenance check-in.',
-      actions: ['Ask for review or private feedback.', 'Record lessons learned.', 'Set future maintenance or checkup reminder if useful.']
-    },
-    lost: {
-      title: 'Lost bid protocol',
-      template: 'feedback.oft',
-      contact: 'Short feedback request if appropriate.',
-      actions: ['Record why it did not move forward.', 'Ask for feedback if the relationship is warm.', 'Leave the door open for future exterior work.']
-    },
-    spam: {
-      title: 'Spam protocol',
-      template: 'No template',
-      contact: 'Do not contact.',
-      actions: ['No folder needed.', 'No follow-up needed.', 'Keep it out of the working queue.']
-    }
+    new: ['Lead intake protocol', 'No OFT yet', 'Review first, then call or text only if the request looks real.', ['Confirm name, phone/email, location, and project type.', 'Decide whether this is a real opportunity or spam.', 'If real, move to Qualified.']],
+    qualified: ['Qualified lead protocol', 'schedule.oft', 'Call, text, or send the scheduling email.', ['Offer appointment windows or a quick phone call.', 'Create or confirm the customer folder.', 'Collect photos, address, and project notes if needed.']],
+    contacted: ['Contacted protocol', 'schedule.oft', 'Follow up until the visit or call is confirmed.', ['Confirm date, time, and address.', 'Ask for photos if they help the estimate.', 'Move to Scheduled once the appointment is set.']],
+    scheduled: ['Scheduled protocol', 'Estimate prep', 'Site visit, phone walkthrough, or photo review.', ['Take measurements and photos.', 'Capture scope, materials, access notes, and customer priorities.', 'Prepare estimate notes and move to Estimate sent after the proposal goes out.']],
+    'estimate-sent': ['Estimate sent protocol', 'Estimate.oft', 'Email follow-up, phone call, or text check-in.', ['Track proposal date, total, and due date.', 'Follow up before the quote gets cold.', 'Move to Won, Lost, or Review follow-up based on response.']],
+    won: ['Won job protocol', 'bid accepted.oft', 'Email job expectations and next steps.', ['Confirm agreement, deposit, start timing, and material plan.', 'Move customer folder into active job structure.', 'Schedule job prep and customer expectations email.']],
+    review: ['Review and maintenance protocol', 'feedback.oft', 'Feedback form, review request, or maintenance check-in.', ['Ask for review or private feedback.', 'Record lessons learned.', 'Set future maintenance or checkup reminder if useful.']],
+    lost: ['Lost bid protocol', 'feedback.oft', 'Short feedback request if appropriate.', ['Record why it did not move forward.', 'Ask for feedback if the relationship is warm.', 'Leave the door open for future exterior work.']],
+    spam: ['Spam protocol', 'No template', 'Do not contact.', ['No folder needed.', 'No follow-up needed.', 'Keep it out of the working queue.']]
   };
 
   const qualifiedChecks = ['real-contact', 'service-area', 'real-project', 'not-spam'];
   let privateLeads = window.BREEZE_PRIVATE_ADMIN_LEADS || [];
-  let dialogObserver = null;
-  let boardObserver = null;
-  let loadingLeads = false;
 
   function injectStatusStyles() {
     if (document.querySelector('#lead-status-editor-styles')) return;
@@ -131,9 +83,7 @@
         gap: 7px;
         font-weight: 900;
       }
-      .lead-status-editor select {
-        min-height: 42px;
-      }
+      .lead-status-editor select { min-height: 42px; }
       .lead-status-editor span {
         color: var(--muted);
         font-size: 0.9rem;
@@ -163,14 +113,12 @@
 
   async function loadEnhancementLeads() {
     const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
-    if (!client || loadingLeads) return privateLeads;
+    if (!client) return privateLeads;
 
-    loadingLeads = true;
     const { data, error } = await client
       .from('leads')
       .select('id, customer_name, project_summary, project_type, stage')
       .order('updated_at', { ascending: false });
-    loadingLeads = false;
 
     if (!error) {
       privateLeads = (data || []).map(rowToLead);
@@ -255,6 +203,19 @@
     return privateLeads.find((lead) => lead.name === name && lead.project === project) || privateLeads.find((lead) => lead.name === name);
   }
 
+  function setDialogStageText(stage) {
+    const stageLabel = statusOptions.find(([value]) => value === stage)?.[1] || 'Lead';
+    const dialogStage = document.querySelector('#dialog-stage');
+    const dialogNext = document.querySelector('#dialog-next');
+    const guidance = document.querySelector('#dialog-stage-guidance');
+    const select = document.querySelector('#dialog-status-select');
+
+    if (dialogStage) dialogStage.textContent = stageLabel;
+    if (dialogNext) dialogNext.textContent = nextStep[stage] || '';
+    if (guidance) guidance.textContent = nextStep[stage] || '';
+    if (select) select.value = stage;
+  }
+
   async function moveLeadToStage(lead, stage) {
     if (!lead || !stage || lead.stage === stage) return;
 
@@ -282,23 +243,10 @@
     }
 
     lead.stage = stage;
+    setDialogStageText(stage);
+    renderDialogProtocol();
     await loadLeads();
     await loadEnhancementLeads();
-    updateDialogStageView(stage);
-  }
-
-  function updateDialogStageView(stage) {
-    const stageLabel = statusOptions.find(([value]) => value === stage)?.[1] || 'Lead';
-    const dialogStage = document.querySelector('#dialog-stage');
-    const dialogNext = document.querySelector('#dialog-next');
-    const guidance = document.querySelector('#dialog-stage-guidance');
-    const select = document.querySelector('#dialog-status-select');
-
-    if (dialogStage) dialogStage.textContent = stageLabel;
-    if (dialogNext) dialogNext.textContent = nextStep[stage] || '';
-    if (guidance) guidance.textContent = nextStep[stage] || '';
-    if (select) select.value = stage;
-    renderDialogProtocol();
   }
 
   function ensureStatusEditor() {
@@ -346,7 +294,7 @@
       if (!protocol) return;
       const note = document.createElement('p');
       note.className = 'stage-protocol-mini';
-      note.textContent = `${protocol.template}: ${protocol.contact}`;
+      note.textContent = `${protocol[1]}: ${protocol[2]}`;
       const heading = column.querySelector('h3');
       if (heading) heading.insertAdjacentElement('afterend', note);
     });
@@ -373,31 +321,34 @@
 
     const stage = currentDialogStage();
     const protocol = stageProtocols[stage] || stageProtocols.new;
+    const [title, template, contact, actions] = protocol;
 
     panel.innerHTML = `
       <div class="stage-protocol-heading">
-        <div><p class="eyebrow">Stage Protocol</p><h3>${protocol.title}</h3></div>
-        <span>${protocol.template}</span>
+        <div><p class="eyebrow">Stage Protocol</p><h3>${title}</h3></div>
+        <span>${template}</span>
       </div>
-      <p>${protocol.contact}</p>
-      <ul>${protocol.actions.map((action) => `<li>${action}</li>`).join('')}</ul>
+      <p>${contact}</p>
+      <ul>${actions.map((action) => `<li>${action}</li>`).join('')}</ul>
     `;
   }
 
-  function observeBoard() {
-    const board = document.querySelector('#pipeline-board');
-    if (!board || boardObserver) return;
-    boardObserver = new MutationObserver(() => renderColumnProtocols());
-    boardObserver.observe(board, { childList: true, subtree: true });
-    renderColumnProtocols();
+  function hookLeadCards() {
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.lead-card-button')) return;
+      window.setTimeout(renderDialogProtocol, 0);
+    });
   }
 
-  function observeDialog() {
-    const dialog = document.querySelector('#lead-dialog');
-    if (!dialog || dialogObserver) return;
-    dialogObserver = new MutationObserver(() => renderDialogProtocol());
-    dialogObserver.observe(dialog, { childList: true, subtree: true, characterData: true });
-    renderDialogProtocol();
+  function hookShowLead() {
+    if (typeof showLead !== 'function' || showLead.isStatusEnhanced) return;
+    const original = showLead;
+    const enhanced = function enhancedShowLead(lead) {
+      original(lead);
+      window.setTimeout(renderDialogProtocol, 0);
+    };
+    enhanced.isStatusEnhanced = true;
+    showLead = enhanced;
   }
 
   function init() {
@@ -405,8 +356,9 @@
     insertStatusField();
     enhanceLocalLeadBuilder();
     enhancePrivateLeadBuilder();
-    observeBoard();
-    observeDialog();
+    hookShowLead();
+    hookLeadCards();
+    renderColumnProtocols();
     window.setTimeout(renderColumnProtocols, 600);
   }
 
