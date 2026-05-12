@@ -26,7 +26,6 @@ const folderTasks = [
   ['template', 'Email templates linked from master folder'],
   ['estimate', 'Estimate/proposal file ready']
 ].map(([key, label]) => ({ key, label }));
-
 const privateRecord = {
   email: 'Stored in private customer record',
   phone: 'Stored in private customer record',
@@ -36,7 +35,6 @@ const privateRecord = {
   proposalTotal: 'Stored privately',
   qualityChecksDone: allQualityChecks
 };
-
 const customerRecords = [
   { ...privateRecord, id: 'lead-evergreen-lutheran', name: 'Evergreen Lutheran High School', contactPerson: 'Rick', city: 'Tacoma, WA', project: 'Siding replacement proposal', estimateDate: '5/8/2026', dueDate: '5/23/2026', stage: 'estimate-sent', folderStatus: 'Estimate sent', folderTasksDone: ['folder', 'sections', 'starter', 'template', 'estimate'], nextStep: 'Waiting for response to the proposal sent on 5/8/2026.', notes: 'Private proposal details are saved locally, not in the public admin view.', createdAt: '2026-05-08T12:00:00' },
   { ...privateRecord, id: 'lead-mary', name: 'Mary', contactPerson: 'Mary', project: 'Siding replacement + paint proposal', estimateDate: 'Proposal sent', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for response to the proposal.', notes: 'Proposal options are in the local customer folder.', createdAt: '2026-04-26T12:00:00' },
@@ -44,7 +42,6 @@ const customerRecords = [
   { ...privateRecord, id: 'lead-fran-construction', name: 'Fran Construction', contactPerson: 'Fran Construction', project: 'Construction proposal', estimateDate: '4/26/2026', dueDate: 'Stored privately', stage: 'estimate-sent', folderStatus: 'Existing folder, estimate sent', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting for reply to the estimate.', notes: 'Existing customer folder confirmed with proposal and estimate files present.', createdAt: '2026-04-26T18:09:00' },
   { ...privateRecord, id: 'lead-jessica-miller', name: 'Jessica Miller', contactPerson: 'Jessica Miller', project: 'Repeat customer - vinyl repair', estimateDate: '4/10/2026', dueDate: 'Stored privately', stage: 'won', folderStatus: 'Agreement in place', folderTasksDone: ['folder', 'estimate'], nextStep: 'Waiting on materials before scheduling the vinyl repair.', notes: 'Repeat customer. Current vinyl repair agreement is in place; materials are pending.', createdAt: '2026-04-10T12:00:00' }
 ];
-
 const slots = [];
 const activity = [
   ['Fran Construction added', 'Estimate has been sent and the current step is waiting for reply.'],
@@ -84,7 +81,6 @@ const performancePlan = [
   ['Connect Search Console and Analytics', 'Bring real visitors, clicks, impressions, and keyword positions into the performance tab.'],
   ['Add contact records', 'Store phone, email, address, and notes in a private database instead of public static files.']
 ].map(([title, detail]) => ({ title, detail }));
-
 let leads = [...customerRecords];
 let activeLead = null;
 
@@ -162,6 +158,9 @@ function renderActivity() {
 function renderWorkflow() {
   $('#workflow-steps').innerHTML = workflowSteps.map((step, index) => `<article class="workflow-step"><span class="workflow-number">${index + 1}</span><div><strong>${step.title}</strong><span>${step.trigger}</span><span>${step.action}</span></div><span class="workflow-template">${step.template}</span></article>`).join('');
 }
+function renderMarkers(items, selector) {
+  $(selector).innerHTML = items.map((item) => `<article class="marker-item"><div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span></article>`).join('');
+}
 function renderPerformance() {
   setText('#metric-visitors', performanceSummary.visitors.toLocaleString());
   setText('#metric-clicks', performanceSummary.clicks.toLocaleString());
@@ -171,9 +170,6 @@ function renderPerformance() {
   renderMarkers(searchMarkers, '#search-markers');
   $('#keyword-body').innerHTML = keywordTargets.map((target) => `<tr><td>${target.keyword}</td><td>${target.page}</td><td><span class="position">${target.position}</span></td><td>${target.clicks}</td><td>${target.impressions}</td><td>${target.plan}</td></tr>`).join('');
   $('#performance-plan').innerHTML = performancePlan.map((item) => `<article class="plan-item"><strong>${item.title}</strong><span>${item.detail}</span></article>`).join('');
-}
-function renderMarkers(items, selector) {
-  $(selector).innerHTML = items.map((item) => `<article class="marker-item"><div><strong>${item.label}: ${item.value}</strong><span>${item.detail}</span></div><span class="change ${item.tone === 'watch' ? 'watch' : ''}">${item.change}</span></article>`).join('');
 }
 function renderChecklist(selector, checks, doneKeys, doneText, pendingText) {
   $(selector).innerHTML = checks.map((check) => {
@@ -199,8 +195,7 @@ function renderFolderPanel(lead) {
   setText('#dialog-folder-command', unlocked ? commandForLead(lead) : 'Folder command unlocks after qualification.');
   copyFolderCommandButton.disabled = !unlocked;
   copyFolderCommandButton.textContent = unlocked ? 'Copy folder command' : 'Locked until qualified';
-  const doneKeys = unlocked ? lead.folderTasksDone : [];
-  renderChecklist('#dialog-folder-checklist', folderTasks, doneKeys, 'Done', unlocked ? 'Next' : 'Locked');
+  renderChecklist('#dialog-folder-checklist', folderTasks, unlocked ? lead.folderTasksDone : [], 'Done', unlocked ? 'Next' : 'Locked');
 }
 function refreshLeadDetails(lead) {
   activeLead = lead;
@@ -297,7 +292,7 @@ $('#mark-qualified-button').addEventListener('click', markActiveLeadQualified);
 $('#mark-spam-button').addEventListener('click', markActiveLeadSpam);
 document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 window.addEventListener('breeze-private-leads', (event) => {
-  leads = event.detail?.leads?.length ? event.detail.leads : [...customerRecords];
+  leads = Array.isArray(event.detail?.leads) ? event.detail.leads : [...customerRecords];
   renderAll();
 });
 window.addEventListener('breeze-private-logout', () => {
