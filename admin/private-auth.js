@@ -34,7 +34,7 @@
   function loadDashboardEnhancements() {
     if (document.querySelector('script[data-admin-status-enhancement]')) return;
     const script = document.createElement('script');
-    script.src = '/admin/admin-status-enhancement.js?v=status-2';
+    script.src = '/admin/admin-status-enhancement.js?v=status-3';
     script.defer = true;
     script.dataset.adminStatusEnhancement = 'true';
     document.body.append(script);
@@ -109,6 +109,7 @@
     }
 
     const leads = (data || []).map(mapLead);
+    window.BREEZE_PRIVATE_ADMIN_LEADS = leads;
     window.dispatchEvent(new CustomEvent('breeze-private-leads', { detail: { leads } }));
     setMessage(leads.length ? `Private mode loaded ${leads.length} customer record${leads.length === 1 ? '' : 's'}.` : 'Private mode is connected. No database leads have been entered yet.');
   }
