@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Breeze Siding Admin Login</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="login.css">
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-card" aria-labelledby="login-title">
+        <p class="eyebrow">Breeze Siding Admin</p>
+        <h1 id="login-title">Sign in to dashboard</h1>
+        <p class="login-copy">Use your private admin account to open the customer workflow dashboard.</p>
+
+        <form id="admin-login-form" class="login-form">
+          <label>
+            Email
+            <input id="admin-login-email" type="email" autocomplete="username" required>
+          </label>
+          <label>
+            Password
+            <input id="admin-login-password" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="button primary" type="submit">Sign in</button>
+          <p class="login-message" id="admin-login-message" aria-live="polite">Secure login is ready.</p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="../admin/private-admin-config.js" defer></script>
+    <script src="login.js" defer></script>
+  </body>
+</html>
