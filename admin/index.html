@@ -8,22 +8,28 @@
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="admin-folder.css">
   </head>
-  <body>
+  <body class="is-auth-checking">
+    <div class="auth-check-screen" id="auth-check-screen" aria-live="polite">
+      <strong>Checking secure access</strong>
+      <span>Opening the private Breeze Siding dashboard...</span>
+    </div>
+
     <header class="admin-header">
       <div>
         <p class="eyebrow">Breeze Siding Admin</p>
         <h1>Business command center</h1>
       </div>
       <div class="admin-actions">
-        <span class="mode-pill" id="mode-pill">Workflow mode</span>
+        <span class="mode-pill" id="mode-pill">Private mode</span>
         <a class="button secondary" href="/">View site</a>
+        <button class="button secondary" id="private-auth-logout" type="button" hidden>Sign out</button>
       </div>
     </header>
 
     <main>
       <section class="notice" id="setup-notice">
-        <strong>Active customer board.</strong>
-        This view now shows real workflow records with private contact details redacted. Add full contact details only after the secure private admin layer is in place.
+        <strong>Private customer board.</strong>
+        <span id="private-status-message">Loading secure workflow records from the private database.</span>
       </section>
 
       <nav class="dashboard-tabs" aria-label="Admin dashboard sections">
