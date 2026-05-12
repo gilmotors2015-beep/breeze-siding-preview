@@ -108,42 +108,35 @@
 
   const qualifiedChecks = ['real-contact', 'service-area', 'real-project', 'not-spam'];
   let privateLeads = window.BREEZE_PRIVATE_ADMIN_LEADS || [];
-  let draggedLeadId = '';
-  let boardObserver = null;
   let dialogObserver = null;
+  let boardObserver = null;
   let loadingLeads = false;
 
-  function injectMoveStyles() {
-    if (document.querySelector('#lead-stage-move-styles')) return;
+  function injectStatusStyles() {
+    if (document.querySelector('#lead-status-editor-styles')) return;
     const style = document.createElement('style');
-    style.id = 'lead-stage-move-styles';
+    style.id = 'lead-status-editor-styles';
     style.textContent = `
-      .lead-card.is-movable { display: grid; gap: 8px; }
-      .lead-drag-handle {
-        width: max-content;
-        max-width: 100%;
-        min-height: 30px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 10px;
-        border: 1px solid #b8c6d8;
-        border-radius: 999px;
-        color: var(--blue-dark);
-        background: #e8f1ff;
-        font-size: 0.78rem;
-        font-weight: 900;
-        cursor: grab;
-        user-select: none;
+      .lead-status-editor {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #f8fbff;
       }
-      .lead-drag-handle:active { cursor: grabbing; }
-      .lead-card.is-dragging { opacity: 0.52; }
-      .lead-card-controls { display: grid; gap: 6px; }
-      .lead-stage-select {
-        min-height: 36px;
-        padding: 6px 9px;
-        border-radius: 6px;
-        font-size: 0.86rem;
+      .lead-status-editor label {
+        display: grid;
+        gap: 7px;
+        font-weight: 900;
+      }
+      .lead-status-editor select {
+        min-height: 42px;
+      }
+      .lead-status-editor span {
+        color: var(--muted);
+        font-size: 0.9rem;
         font-weight: 800;
       }
     `;
@@ -251,34 +244,29 @@
     privateLeadFromManualForm = enhanced;
   }
 
-  function cardText(card, selector) {
-    return card.querySelector(selector)?.textContent?.trim() || '';
+  function currentDialogStage() {
+    const label = document.querySelector('#dialog-stage')?.textContent?.trim().toLowerCase() || '';
+    return stageByLabel[label] || 'new';
   }
 
-  function findLeadForCard(card) {
-    const name = cardText(card, '.lead-name');
-    const project = cardText(card, '.lead-project');
+  function currentDialogLead() {
+    const name = document.querySelector('#dialog-name')?.textContent?.trim() || '';
+    const project = document.querySelector('#dialog-project')?.textContent?.trim() || '';
     return privateLeads.find((lead) => lead.name === name && lead.project === project) || privateLeads.find((lead) => lead.name === name);
   }
 
-  function stageFromColumn(column) {
-    const raw = column.querySelector('h3')?.childNodes?.[0]?.textContent?.trim().toLowerCase() || '';
-    return stageByLabel[raw] || '';
-  }
-
-  async function moveLeadToStage(leadId, stage) {
-    if (!leadId || !stage) return;
-    const lead = privateLeads.find((item) => `${item.id}` === `${leadId}`);
-    if (!lead || lead.stage === stage) return;
+  async function moveLeadToStage(lead, stage) {
+    if (!lead || !stage || lead.stage === stage) return;
 
     const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
     const loadLeads = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.loadLeads;
     if (!client || !loadLeads) {
-      setStatusMessage('Moving leads needs the private database connection.');
+      setStatusMessage('Status changes need the private database connection.');
       return;
     }
 
-    setStatusMessage(`Moving ${lead.name} to ${statusOptions.find(([value]) => value === stage)?.[1] || 'new stage'}...`);
+    const label = statusOptions.find(([value]) => value === stage)?.[1] || 'new stage';
+    setStatusMessage(`Updating ${lead.name} to ${label}...`);
     const { error } = await client
       .from('leads')
       .update({
@@ -289,128 +277,71 @@
       .eq('id', lead.id);
 
     if (error) {
-      setStatusMessage(`Could not move lead: ${error.message}`);
+      setStatusMessage(`Could not update status: ${error.message}`);
       return;
     }
 
+    lead.stage = stage;
     await loadLeads();
     await loadEnhancementLeads();
-    enhanceBoard();
+    updateDialogStageView(stage);
   }
 
-  function ensureStageControls(card, lead) {
-    let controls = card.querySelector('.lead-card-controls');
-    if (!controls) {
-      controls = document.createElement('div');
-      controls.className = 'lead-card-controls';
-      const select = document.createElement('select');
-      select.className = 'lead-stage-select';
+  function updateDialogStageView(stage) {
+    const stageLabel = statusOptions.find(([value]) => value === stage)?.[1] || 'Lead';
+    const dialogStage = document.querySelector('#dialog-stage');
+    const dialogNext = document.querySelector('#dialog-next');
+    const guidance = document.querySelector('#dialog-stage-guidance');
+    const select = document.querySelector('#dialog-status-select');
+
+    if (dialogStage) dialogStage.textContent = stageLabel;
+    if (dialogNext) dialogNext.textContent = nextStep[stage] || '';
+    if (guidance) guidance.textContent = nextStep[stage] || '';
+    if (select) select.value = stage;
+    renderDialogProtocol();
+  }
+
+  function ensureStatusEditor() {
+    const guidance = document.querySelector('#dialog-stage-guidance');
+    if (!guidance) return null;
+
+    let editor = document.querySelector('#dialog-status-editor');
+    if (!editor) {
+      editor = document.createElement('section');
+      editor.id = 'dialog-status-editor';
+      editor.className = 'lead-status-editor';
+      editor.innerHTML = '<label>Status<select id="dialog-status-select"></select></label><span id="dialog-status-save-message">Change the status here when this customer moves to a new step.</span>';
+      guidance.insertAdjacentElement('afterend', editor);
+
+      const select = editor.querySelector('#dialog-status-select');
       statusOptions.forEach(([value, text]) => {
         const option = document.createElement('option');
         option.value = value;
-        option.textContent = `Move to ${text}`;
+        option.textContent = text;
         select.append(option);
       });
-      controls.append(select);
-      card.append(controls);
+
+      select.addEventListener('change', async () => {
+        const lead = currentDialogLead();
+        const message = document.querySelector('#dialog-status-save-message');
+        select.disabled = true;
+        if (message) message.textContent = 'Saving status...';
+        await moveLeadToStage(lead, select.value);
+        select.disabled = false;
+        if (message) message.textContent = 'Status saved. The board will show this lead in the updated column.';
+      });
     }
 
-    const select = controls.querySelector('.lead-stage-select');
-    if (!select) return;
-    select.value = lead.stage;
-    select.setAttribute('aria-label', `Move ${lead.name} to another stage`);
-    select.onpointerdown = (event) => event.stopPropagation();
-    select.onclick = (event) => event.stopPropagation();
-    select.onchange = async (event) => {
-      event.stopPropagation();
-      await moveLeadToStage(lead.id, select.value);
-    };
-  }
-
-  function ensureDragHandle(card, lead) {
-    let handle = card.querySelector('.lead-drag-handle');
-    if (!handle) {
-      handle = document.createElement('span');
-      handle.className = 'lead-drag-handle';
-      handle.textContent = 'Move';
-      handle.draggable = true;
-      card.prepend(handle);
-    }
-
-    handle.dataset.leadId = lead.id;
-    handle.setAttribute('aria-label', `Drag ${lead.name} to another stage`);
-
-    if (handle.dataset.dragListeners === 'true') return;
-    handle.dataset.dragListeners = 'true';
-
-    handle.addEventListener('click', (event) => event.stopPropagation());
-    handle.addEventListener('dragstart', (event) => {
-      draggedLeadId = handle.dataset.leadId;
-      card.classList.add('is-dragging');
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', draggedLeadId);
-    });
-
-    handle.addEventListener('dragend', () => {
-      card.classList.remove('is-dragging');
-      document.querySelectorAll('.pipeline-column.is-drag-over').forEach((column) => column.classList.remove('is-drag-over'));
-      draggedLeadId = '';
-    });
-  }
-
-  function enhanceCard(card) {
-    const lead = findLeadForCard(card);
-    if (!lead) return;
-
-    card.dataset.leadId = lead.id;
-    card.classList.add('is-movable');
-    card.removeAttribute('draggable');
-    card.title = 'Use Move to drag this lead, or use the stage dropdown.';
-
-    const button = card.querySelector('.lead-card-button');
-    if (button) {
-      button.removeAttribute('draggable');
-      button.dataset.leadId = lead.id;
-    }
-
-    ensureDragHandle(card, lead);
-    ensureStageControls(card, lead);
-  }
-
-  function enhanceColumn(column) {
-    if (column.dataset.dropEnhanced === 'true') return;
-    column.dataset.dropEnhanced = 'true';
-
-    column.addEventListener('dragover', (event) => {
-      if (!draggedLeadId) return;
-      event.preventDefault();
-      column.classList.add('is-drag-over');
-      event.dataTransfer.dropEffect = 'move';
-    });
-
-    column.addEventListener('dragleave', (event) => {
-      if (!column.contains(event.relatedTarget)) column.classList.remove('is-drag-over');
-    });
-
-    column.addEventListener('drop', async (event) => {
-      event.preventDefault();
-      column.classList.remove('is-drag-over');
-      const leadId = event.dataTransfer.getData('text/plain') || draggedLeadId;
-      await moveLeadToStage(leadId, stageFromColumn(column));
-    });
-  }
-
-  async function enhanceBoard() {
-    if (!privateLeads.length) await loadEnhancementLeads();
-    document.querySelectorAll('.pipeline-column').forEach(enhanceColumn);
-    document.querySelectorAll('.lead-card').forEach(enhanceCard);
-    renderColumnProtocols();
+    const select = editor.querySelector('#dialog-status-select');
+    if (select) select.value = currentDialogStage();
+    return editor;
   }
 
   function renderColumnProtocols() {
     document.querySelectorAll('.pipeline-column').forEach((column) => {
       if (column.querySelector('.stage-protocol-mini')) return;
-      const stage = stageFromColumn(column);
+      const raw = column.querySelector('h3')?.childNodes?.[0]?.textContent?.trim().toLowerCase() || '';
+      const stage = stageByLabel[raw] || '';
       const protocol = stageProtocols[stage];
       if (!protocol) return;
       const note = document.createElement('p');
@@ -425,22 +356,22 @@
     let panel = document.querySelector('#dialog-stage-protocol');
     if (panel) return panel;
 
-    const guidance = document.querySelector('#dialog-stage-guidance');
-    if (!guidance) return null;
+    const editor = ensureStatusEditor();
+    if (!editor) return null;
 
     panel = document.createElement('section');
     panel.id = 'dialog-stage-protocol';
     panel.className = 'stage-protocol-panel';
-    guidance.insertAdjacentElement('afterend', panel);
+    editor.insertAdjacentElement('afterend', panel);
     return panel;
   }
 
   function renderDialogProtocol() {
+    ensureStatusEditor();
     const panel = ensureProtocolPanel();
     if (!panel) return;
 
-    const stageLabel = document.querySelector('#dialog-stage')?.textContent?.trim().toLowerCase() || '';
-    const stage = stageByLabel[stageLabel] || 'new';
+    const stage = currentDialogStage();
     const protocol = stageProtocols[stage] || stageProtocols.new;
 
     panel.innerHTML = `
@@ -456,9 +387,9 @@
   function observeBoard() {
     const board = document.querySelector('#pipeline-board');
     if (!board || boardObserver) return;
-    boardObserver = new MutationObserver(() => enhanceBoard());
+    boardObserver = new MutationObserver(() => renderColumnProtocols());
     boardObserver.observe(board, { childList: true, subtree: true });
-    enhanceBoard();
+    renderColumnProtocols();
   }
 
   function observeDialog() {
@@ -470,20 +401,19 @@
   }
 
   function init() {
-    injectMoveStyles();
+    injectStatusStyles();
     insertStatusField();
     enhanceLocalLeadBuilder();
     enhancePrivateLeadBuilder();
     observeBoard();
     observeDialog();
-    window.setTimeout(enhanceBoard, 600);
-    window.setTimeout(enhanceBoard, 1600);
+    window.setTimeout(renderColumnProtocols, 600);
   }
 
   window.addEventListener('breeze-private-leads', (event) => {
     privateLeads = Array.isArray(event.detail?.leads) ? event.detail.leads : [];
     window.BREEZE_PRIVATE_ADMIN_LEADS = privateLeads;
-    window.setTimeout(enhanceBoard, 0);
+    window.setTimeout(renderColumnProtocols, 0);
   });
 
   if (document.readyState === 'loading') {
