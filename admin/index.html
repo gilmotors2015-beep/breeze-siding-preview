@@ -16,143 +16,28 @@
     </div>
 
     <header class="admin-header">
-      <div>
-        <p class="eyebrow">Breeze Siding Admin</p>
-        <h1>Business command center</h1>
-      </div>
-      <div class="admin-actions">
-        <span class="mode-pill" id="mode-pill">Private mode</span>
-        <a class="button secondary" href="/">View site</a>
-        <button class="button secondary" id="private-auth-logout" type="button" hidden>Sign out</button>
-      </div>
+      <div><p class="eyebrow">Breeze Siding Admin</p><h1>Business command center</h1></div>
+      <div class="admin-actions"><span class="mode-pill" id="mode-pill">Private mode</span><a class="button secondary" href="/">View site</a><button class="button secondary" id="private-auth-logout" type="button" hidden>Sign out</button></div>
     </header>
 
     <main>
-      <section class="notice" id="setup-notice">
-        <strong>Private customer board.</strong>
-        <span id="private-status-message">Loading secure workflow records from the private database.</span>
-      </section>
-
-      <nav class="dashboard-tabs" aria-label="Admin dashboard sections">
-        <button class="tab-button is-active" type="button" data-tab="operations" aria-controls="operations-tab" aria-selected="true">Leads and Schedule</button>
-        <button class="tab-button" type="button" data-tab="performance" aria-controls="performance-tab" aria-selected="false">Website Performance</button>
-      </nav>
-
+      <section class="notice" id="setup-notice"><strong>Private customer board.</strong> <span id="private-status-message">Loading secure workflow records from the private database.</span></section>
+      <nav class="dashboard-tabs" aria-label="Admin dashboard sections"><button class="tab-button is-active" type="button" data-tab="operations" aria-controls="operations-tab" aria-selected="true">Leads and Schedule</button><button class="tab-button" type="button" data-tab="performance" aria-controls="performance-tab" aria-selected="false">Website Performance</button></nav>
       <section class="tab-panel is-active" id="operations-tab" data-tab-panel="operations">
-        <section class="metrics" aria-label="Lead summary">
-          <article><span>Needs review</span><strong id="metric-new">0</strong></article>
-          <article><span>Qualified</span><strong id="metric-qualified">0</strong></article>
-          <article><span>Estimates sent</span><strong id="metric-estimates">0</strong></article>
-          <article><span>Spam blocked</span><strong id="metric-spam">0</strong></article>
-        </section>
-
+        <section class="metrics" aria-label="Lead summary"><article><span>Needs review</span><strong id="metric-new">0</strong></article><article><span>Qualified</span><strong id="metric-qualified">0</strong></article><article><span>Estimates sent</span><strong id="metric-estimates">0</strong></article><article><span>Spam blocked</span><strong id="metric-spam">0</strong></article></section>
         <section class="workspace">
-          <aside class="sidebar" aria-label="Dashboard filters">
-            <label>Search leads<input id="lead-search" type="search" placeholder="Name, city, project..."></label>
-            <label>
-              Pipeline stage
-              <select id="stage-filter">
-                <option value="all">All stages</option>
-                <option value="new">Needs review</option>
-                <option value="qualified">Qualified</option>
-                <option value="contacted">Contacted</option>
-                <option value="estimate-sent">Estimate sent</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-                <option value="spam">Spam</option>
-                <option value="review">Review follow-up</option>
-              </select>
-            </label>
-          </aside>
-
-          <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
-            <div class="panel-heading"><div><p class="eyebrow">Pipeline</p><h2 id="pipeline-title">Customer journey</h2></div></div>
-            <div class="pipeline" id="pipeline-board"></div>
-          </section>
+          <aside class="sidebar" aria-label="Dashboard filters"><label>Search leads<input id="lead-search" type="search" placeholder="Name, city, project..."></label><label>Pipeline stage<select id="stage-filter"><option value="all">All stages</option><option value="new">Needs review</option><option value="qualified">Qualified</option><option value="contacted">Contacted</option><option value="estimate-sent">Estimate sent</option><option value="scheduled">Scheduled</option><option value="won">Won</option><option value="lost">Lost</option><option value="spam">Spam</option><option value="review">Review follow-up</option></select></label></aside>
+          <section class="panel pipeline-panel" aria-labelledby="pipeline-title"><div class="panel-heading"><div><p class="eyebrow">Pipeline</p><h2 id="pipeline-title">Customer journey</h2></div></div><div class="pipeline" id="pipeline-board"></div></section>
         </section>
-
-        <section class="lower-grid">
-          <section class="panel" aria-labelledby="schedule-title">
-            <div class="panel-heading"><div><p class="eyebrow">Schedule</p><h2 id="schedule-title">Upcoming slots</h2></div></div>
-            <div class="schedule-list" id="schedule-list"></div>
-          </section>
-          <section class="panel" aria-labelledby="activity-title">
-            <div class="panel-heading"><div><p class="eyebrow">Follow-up</p><h2 id="activity-title">Recent activity</h2></div></div>
-            <div class="activity-list" id="activity-list"></div>
-          </section>
-        </section>
-
-        <section class="panel" aria-labelledby="workflow-title">
-          <div class="panel-heading"><div><p class="eyebrow">Customer Machine</p><h2 id="workflow-title">Email template workflow</h2></div></div>
-          <div class="workflow-steps" id="workflow-steps"></div>
-        </section>
-
-        <section class="panel" aria-labelledby="folder-title">
-          <div class="panel-heading"><div><p class="eyebrow">Customer Folders</p><h2 id="folder-title">New customer folder standard</h2></div></div>
-          <div class="workflow-steps">
-            <article class="workflow-step"><span class="workflow-number">1</span><div><strong>Review the lead first</strong><span>Confirm it is a real customer, inside the service area, and tied to real exterior work.</span><span>Spam and unqualified requests do not get customer folders.</span></div><span class="workflow-template">Gate</span></article>
-            <article class="workflow-step"><span class="workflow-number">2</span><div><strong>Mark qualified</strong><span>Once qualified, unlock the folder helper command and create the matching OneDrive customer folder.</span><span>Standard path: D:\OneDrive\Breeze Siding documents\CUSTOMERS\Customer Name</span></div><span class="workflow-template">Qualify</span></article>
-            <article class="workflow-step"><span class="workflow-number">3</span><div><strong>Create the standard sections</strong><span>01 Intake, 02 Photos, 03 Measurements, 04 Estimate, 05 Contract, 06 Job Docs, 07 Invoice, 08 Follow Up, and _Archive.</span><span>Email templates stay in the master template folder and should be linked, not copied into every customer folder.</span></div><span class="workflow-template">Structure</span></article>
-            <article class="workflow-step"><span class="workflow-number">4</span><div><strong>Track folder status in the lead record</strong><span>Each lead should show whether the folder is not started, created, starter pack copied, estimate ready, or archived.</span><span>The next automation step is connecting this dashboard to a secure folder-creation action.</span></div><span class="workflow-template">Dashboard</span></article>
-          </div>
-        </section>
+        <section class="lower-grid"><section class="panel" aria-labelledby="schedule-title"><div class="panel-heading"><div><p class="eyebrow">Schedule</p><h2 id="schedule-title">Upcoming slots</h2></div></div><div class="schedule-list" id="schedule-list"></div></section><section class="panel" aria-labelledby="activity-title"><div class="panel-heading"><div><p class="eyebrow">Follow-up</p><h2 id="activity-title">Recent activity</h2></div></div><div class="activity-list" id="activity-list"></div></section></section>
+        <section class="panel" aria-labelledby="workflow-title"><div class="panel-heading"><div><p class="eyebrow">Customer Machine</p><h2 id="workflow-title">Email template workflow</h2></div></div><div class="workflow-steps" id="workflow-steps"></div></section>
+        <section class="panel" aria-labelledby="folder-title"><div class="panel-heading"><div><p class="eyebrow">Customer Folders</p><h2 id="folder-title">New customer folder standard</h2></div></div><div class="workflow-steps"><article class="workflow-step"><span class="workflow-number">1</span><div><strong>Review the lead first</strong><span>Confirm it is a real customer, inside the service area, and tied to real exterior work.</span><span>Spam and unqualified requests do not get customer folders.</span></div><span class="workflow-template">Gate</span></article><article class="workflow-step"><span class="workflow-number">2</span><div><strong>Mark qualified</strong><span>Once qualified, unlock the folder helper command and create the matching OneDrive customer folder.</span><span>Standard path: D:\OneDrive\Breeze Siding documents\CUSTOMERS\Customer Name</span></div><span class="workflow-template">Qualify</span></article><article class="workflow-step"><span class="workflow-number">3</span><div><strong>Create the standard sections</strong><span>01 Intake, 02 Photos, 03 Measurements, 04 Estimate, 05 Contract, 06 Job Docs, 07 Invoice, 08 Follow Up, and _Archive.</span><span>Email templates stay in the master template folder and should be linked, not copied into every customer folder.</span></div><span class="workflow-template">Structure</span></article><article class="workflow-step"><span class="workflow-number">4</span><div><strong>Track folder status in the lead record</strong><span>Each lead should show whether the folder is not started, created, starter pack copied, estimate ready, or archived.</span><span>The next automation step is connecting this dashboard to a secure folder-creation action.</span></div><span class="workflow-template">Dashboard</span></article></div></section>
       </section>
-
-      <section class="tab-panel" id="performance-tab" data-tab-panel="performance">
-        <section class="metrics performance-metrics" aria-label="Website performance summary">
-          <article><span>Visitors</span><strong id="metric-visitors">0</strong><small>Analytics pending</small></article>
-          <article><span>Search clicks</span><strong id="metric-clicks">0</strong><small>Search Console pending</small></article>
-          <article><span>Search impressions</span><strong id="metric-impressions">0</strong><small>Search Console pending</small></article>
-          <article><span>Average position</span><strong id="metric-position">0</strong><small>Keyword tracking pending</small></article>
-        </section>
-
-        <section class="performance-grid">
-          <section class="panel" aria-labelledby="traffic-title"><div class="panel-heading"><div><p class="eyebrow">Analytics</p><h2 id="traffic-title">Visitor markers</h2></div></div><div class="marker-list" id="traffic-markers"></div></section>
-          <section class="panel" aria-labelledby="search-title"><div class="panel-heading"><div><p class="eyebrow">Search Console</p><h2 id="search-title">Index and search markers</h2></div></div><div class="marker-list" id="search-markers"></div></section>
-        </section>
-
-        <section class="panel" aria-labelledby="keyword-title">
-          <div class="panel-heading"><div><p class="eyebrow">Keyword Tracking</p><h2 id="keyword-title">Top three targets</h2></div></div>
-          <div class="table-wrap">
-            <table class="keyword-table">
-              <thead><tr><th>Keyword</th><th>Best page</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>Plan</th></tr></thead>
-              <tbody id="keyword-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="panel" aria-labelledby="plan-title">
-          <div class="panel-heading"><div><p class="eyebrow">Next Moves</p><h2 id="plan-title">Performance action plan</h2></div></div>
-          <div class="action-plan" id="performance-plan"></div>
-        </section>
-      </section>
+      <section class="tab-panel" id="performance-tab" data-tab-panel="performance"><section class="metrics performance-metrics" aria-label="Website performance summary"><article><span>Visitors</span><strong id="metric-visitors">0</strong><small>Analytics pending</small></article><article><span>Search clicks</span><strong id="metric-clicks">0</strong><small>Search Console pending</small></article><article><span>Search impressions</span><strong id="metric-impressions">0</strong><small>Search Console pending</small></article><article><span>Average position</span><strong id="metric-position">0</strong><small>Keyword tracking pending</small></article></section><section class="performance-grid"><section class="panel" aria-labelledby="traffic-title"><div class="panel-heading"><div><p class="eyebrow">Analytics</p><h2 id="traffic-title">Visitor markers</h2></div></div><div class="marker-list" id="traffic-markers"></div></section><section class="panel" aria-labelledby="search-title"><div class="panel-heading"><div><p class="eyebrow">Search Console</p><h2 id="search-title">Index and search markers</h2></div></div><div class="marker-list" id="search-markers"></div></section></section><section class="panel" aria-labelledby="keyword-title"><div class="panel-heading"><div><p class="eyebrow">Keyword Tracking</p><h2 id="keyword-title">Top three targets</h2></div></div><div class="table-wrap"><table class="keyword-table"><thead><tr><th>Keyword</th><th>Best page</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>Plan</th></tr></thead><tbody id="keyword-body"></tbody></table></div></section><section class="panel" aria-labelledby="plan-title"><div class="panel-heading"><div><p class="eyebrow">Next Moves</p><h2 id="plan-title">Performance action plan</h2></div></div><div class="action-plan" id="performance-plan"></div></section></section>
     </main>
 
-    <template id="lead-card-template">
-      <article class="lead-card"><button type="button" class="lead-card-button"><span class="lead-name"></span><span class="lead-meta"></span><span class="lead-project"></span></button></article>
-    </template>
-
-    <dialog id="lead-dialog">
-      <form method="dialog">
-        <button class="dialog-close" value="close" aria-label="Close lead details">x</button>
-        <p class="eyebrow">Lead details</p>
-        <h2 id="dialog-name"></h2>
-        <dl class="lead-details">
-          <div><dt>Stage</dt><dd id="dialog-stage"></dd></div><div><dt>Project</dt><dd id="dialog-project"></dd></div><div><dt>Contact person</dt><dd id="dialog-contact-person"></dd></div><div><dt>Contact</dt><dd id="dialog-contact"></dd></div><div><dt>Address</dt><dd id="dialog-address"></dd></div><div><dt>City</dt><dd id="dialog-city"></dd></div><div><dt>Estimate</dt><dd id="dialog-estimate"></dd></div><div><dt>Total</dt><dd id="dialog-total"></dd></div><div><dt>Due date</dt><dd id="dialog-due"></dd></div><div><dt>Next step</dt><dd id="dialog-next"></dd></div><div class="wide"><dt>Notes</dt><dd id="dialog-notes"></dd></div>
-        </dl>
-        <section class="qualification-panel" aria-labelledby="dialog-quality-title"><div class="folder-heading"><div><p class="eyebrow">Lead Review</p><h3 id="dialog-quality-title">Qualification gate</h3></div><span class="quality-status" id="dialog-quality-status"></span></div><ul class="quality-checklist" id="dialog-quality-checklist"></ul><div class="lead-actions"><button class="button primary" id="mark-qualified-button" type="button">Mark qualified</button><button class="button secondary" id="mark-spam-button" type="button">Mark spam</button></div></section>
-        <section class="folder-workspace" id="dialog-folder-workspace" aria-labelledby="dialog-folder-title"><div class="folder-heading"><div><p class="eyebrow">Customer Folder</p><h3 id="dialog-folder-title">Folder action</h3></div><span class="folder-status" id="dialog-folder-status"></span></div><p class="folder-lock-note" id="dialog-folder-lock-note"></p><div class="folder-path-card"><span>OneDrive path</span><code id="dialog-folder-path"></code></div><div class="folder-path-card"><span>Local helper command</span><code id="dialog-folder-command"></code></div><button class="button primary" id="copy-folder-command" type="button">Copy folder command</button><ul class="folder-checklist" id="dialog-folder-checklist"></ul></section>
-      </form>
-    </dialog>
-
-    <script>
-      window.setTimeout(() => {
-        if (document.body.classList.contains('is-auth-checking')) {
-          window.location.replace('/admin-login/?next=' + encodeURIComponent('/admin/'));
-        }
-      }, 5000);
-    </script>
-    <script src="admin.js" defer></script>
+    <template id="lead-card-template"><article class="lead-card"><button type="button" class="lead-card-button"><span class="lead-name"></span><span class="lead-meta"></span><span class="lead-project"></span></button></article></template>
+    <dialog id="lead-dialog"><form method="dialog"><button class="dialog-close" value="close" aria-label="Close lead details">x</button><p class="eyebrow">Lead details</p><h2 id="dialog-name"></h2><dl class="lead-details"><div><dt>Stage</dt><dd id="dialog-stage"></dd></div><div><dt>Project</dt><dd id="dialog-project"></dd></div><div><dt>Contact person</dt><dd id="dialog-contact-person"></dd></div><div><dt>Contact</dt><dd id="dialog-contact"></dd></div><div><dt>Address</dt><dd id="dialog-address"></dd></div><div><dt>City</dt><dd id="dialog-city"></dd></div><div><dt>Estimate</dt><dd id="dialog-estimate"></dd></div><div><dt>Total</dt><dd id="dialog-total"></dd></div><div><dt>Due date</dt><dd id="dialog-due"></dd></div><div><dt>Next step</dt><dd id="dialog-next"></dd></div><div class="wide"><dt>Notes</dt><dd id="dialog-notes"></dd></div></dl><section class="qualification-panel" aria-labelledby="dialog-quality-title"><div class="folder-heading"><div><p class="eyebrow">Lead Review</p><h3 id="dialog-quality-title">Qualification gate</h3></div><span class="quality-status" id="dialog-quality-status"></span></div><ul class="quality-checklist" id="dialog-quality-checklist"></ul><div class="lead-actions"><button class="button primary" id="mark-qualified-button" type="button">Mark qualified</button><button class="button secondary" id="mark-spam-button" type="button">Mark spam</button></div></section><section class="folder-workspace" id="dialog-folder-workspace" aria-labelledby="dialog-folder-title"><div class="folder-heading"><div><p class="eyebrow">Customer Folder</p><h3 id="dialog-folder-title">Folder action</h3></div><span class="folder-status" id="dialog-folder-status"></span></div><p class="folder-lock-note" id="dialog-folder-lock-note"></p><div class="folder-path-card"><span>OneDrive path</span><code id="dialog-folder-path"></code></div><div class="folder-path-card"><span>Local helper command</span><code id="dialog-folder-command"></code></div><button class="button primary" id="copy-folder-command" type="button">Copy folder command</button><ul class="folder-checklist" id="dialog-folder-checklist"></ul></section></form></dialog>
+    <script src="admin.js?v=admin-auth-2" defer></script>
   </body>
 </html>
