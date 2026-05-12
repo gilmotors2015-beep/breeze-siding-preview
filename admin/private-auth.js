@@ -31,12 +31,22 @@
     if (target) target.textContent = message;
   }
 
+  function loadDashboardEnhancements() {
+    if (document.querySelector('script[data-admin-status-enhancement]')) return;
+    const script = document.createElement('script');
+    script.src = '/admin/admin-status-enhancement.js?v=status-1';
+    script.defer = true;
+    script.dataset.adminStatusEnhancement = 'true';
+    document.body.append(script);
+  }
+
   function unlockDashboard() {
     document.body.classList.remove('is-auth-checking');
     document.body.classList.add('is-auth-ready');
     const pill = document.querySelector('#mode-pill');
     if (pill) pill.textContent = 'Private mode';
     document.querySelector('#private-auth-logout')?.removeAttribute('hidden');
+    loadDashboardEnhancements();
   }
 
   function toDashboardStage(stage) {
