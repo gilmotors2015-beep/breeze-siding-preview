@@ -17,8 +17,15 @@
     if (link) link.setAttribute('href', loginUrl());
   }
 
+  function withTimeout(promise, ms, fallback) {
+    return Promise.race([
+      promise,
+      new Promise((resolve) => window.setTimeout(() => resolve(fallback), ms))
+    ]);
+  }
+
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
-    showLoginNeeded('Secure login could not load. Use the login button below.');
+    showLoginNeeded('Secure login could not load. Refresh once, or use the login button below.');
     return;
   }
 
@@ -123,8 +130,13 @@
   async function init() {
     document.querySelector('#private-auth-logout')?.addEventListener('click', signOut);
 
-    const { data } = await client.auth.getSession();
-    currentSession = data.session;
+    const sessionResult = await withTimeout(client.auth.getSession(), 5000, { timedOut: true });
+    if (sessionResult?.timedOut) {
+      showLoginNeeded('Saved login could not be confirmed. Please sign in again.');
+      return;
+    }
+
+    currentSession = sessionResult?.data?.session || null;
 
     if (!currentSession) {
       showLoginNeeded('You are not signed in. Use the secure login button below.');
