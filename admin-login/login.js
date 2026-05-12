@@ -17,12 +17,23 @@
   function nextUrl() {
     const params = new URLSearchParams(window.location.search);
     const next = params.get('next');
-    if (next && next.startsWith('/admin/')) return next;
-    return '/admin/';
+    const destination = next && next.startsWith('/admin/') ? next : '/admin/';
+    const separator = destination.includes('?') ? '&' : '?';
+    return `${destination}${separator}v=auth-${Date.now()}`;
   }
 
   function setBusy(isBusy) {
     if (submitButton) submitButton.disabled = isBusy;
+  }
+
+  async function waitForSession(client, initialSession) {
+    if (initialSession) return initialSession;
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const { data } = await client.auth.getSession();
+      if (data.session) return data.session;
+      await new Promise((resolve) => window.setTimeout(resolve, 120));
+    }
+    return null;
   }
 
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
@@ -49,15 +60,23 @@
 
     setBusy(true);
     setMessage('Signing in...');
-    const { error } = await client.auth.signInWithPassword({ email, password });
-    setBusy(false);
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
 
     if (error) {
+      setBusy(false);
       setMessage(`Sign-in failed: ${error.message}`, 'error');
       return;
     }
 
-    setMessage('Login successful. Opening dashboard...', 'success');
+    setMessage('Login accepted. Opening dashboard...', 'success');
+    const session = await waitForSession(client, data.session);
+    setBusy(false);
+
+    if (!session) {
+      setMessage('Login was accepted, but the browser did not save the session. Please try again in a fresh incognito window.', 'error');
+      return;
+    }
+
     window.location.replace(nextUrl());
   });
 })();
