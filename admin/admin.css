@@ -39,7 +39,8 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid #8ab9ff;
   outline-offset: 3px;
 }
@@ -56,7 +57,8 @@ select:focus-visible {
 
 .admin-header h1,
 .panel h2,
-#lead-dialog h2 {
+#lead-dialog h2,
+#manual-lead-dialog h2 {
   margin: 0;
   line-height: 1.05;
   letter-spacing: 0;
@@ -227,7 +229,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 44px;
   padding: 9px 11px;
@@ -235,6 +238,10 @@ select {
   border-radius: 6px;
   color: var(--ink);
   background: var(--white);
+}
+
+textarea {
+  resize: vertical;
 }
 
 .panel {
@@ -292,6 +299,16 @@ select {
   font-size: 0.84rem;
 }
 
+.pipeline-empty {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed #b8c6d8;
+  border-radius: 7px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.62);
+  font-weight: 700;
+}
+
 .lead-card {
   margin: 0;
 }
@@ -309,14 +326,27 @@ select {
   cursor: pointer;
 }
 
+.lead-card-button:hover {
+  border-color: #96b8e8;
+  box-shadow: 0 10px 22px rgba(20, 32, 51, 0.08);
+}
+
 .lead-name {
   font-weight: 900;
 }
 
 .lead-meta,
-.lead-project {
+.lead-project,
+.lead-next {
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.lead-next {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-weight: 800;
 }
 
 .lower-grid,
@@ -455,7 +485,8 @@ select {
   font-weight: 900;
 }
 
-#lead-dialog {
+#lead-dialog,
+#manual-lead-dialog {
   width: min(720px, calc(100vw - 28px));
   border: 0;
   border-radius: 8px;
@@ -463,11 +494,17 @@ select {
   box-shadow: 0 28px 80px rgba(20, 32, 51, 0.38);
 }
 
-#lead-dialog::backdrop {
+#manual-lead-dialog {
+  width: min(860px, calc(100vw - 28px));
+}
+
+#lead-dialog::backdrop,
+#manual-lead-dialog::backdrop {
   background: rgba(20, 32, 51, 0.54);
 }
 
-#lead-dialog form {
+#lead-dialog form,
+#manual-lead-dialog form {
   position: relative;
   margin: 0;
   padding: clamp(24px, 4vw, 36px);
@@ -483,6 +520,21 @@ select {
   border-radius: 999px;
   background: var(--white);
   cursor: pointer;
+}
+
+.stage-guidance,
+.manual-lead-intro,
+.manual-lead-message {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.stage-guidance {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f8fbff;
 }
 
 .lead-details {
@@ -508,6 +560,17 @@ select {
 
 .lead-details dd {
   margin: 4px 0 0;
+}
+
+.manual-lead-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.manual-lead-grid .wide {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 1020px) {
@@ -541,7 +604,8 @@ select {
   }
 
   .lead-details,
-  .workflow-step {
+  .workflow-step,
+  .manual-lead-grid {
     grid-template-columns: 1fr;
   }
 
