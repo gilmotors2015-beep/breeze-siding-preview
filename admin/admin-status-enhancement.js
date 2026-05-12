@@ -23,6 +23,18 @@
     spam: 'spam'
   };
 
+  const dashboardStage = {
+    needs_review: 'new',
+    qualified: 'qualified',
+    contacted: 'contacted',
+    scheduled: 'scheduled',
+    estimate_sent: 'estimate-sent',
+    won: 'won',
+    review_follow_up: 'review',
+    lost: 'lost',
+    spam: 'spam'
+  };
+
   const stageByLabel = Object.fromEntries(statusOptions.map(([value, label]) => [label.toLowerCase(), value]));
 
   const nextStep = {
@@ -95,10 +107,11 @@
   };
 
   const qualifiedChecks = ['real-contact', 'service-area', 'real-project', 'not-spam'];
-  let privateLeads = [];
+  let privateLeads = window.BREEZE_PRIVATE_ADMIN_LEADS || [];
   let draggedLeadId = '';
   let boardObserver = null;
   let dialogObserver = null;
+  let loadingLeads = false;
 
   function selectedStage() {
     return document.querySelector('#manual-lead-stage')?.value || 'new';
@@ -107,6 +120,33 @@
   function setStatusMessage(message) {
     const target = document.querySelector('#private-status-message');
     if (target) target.textContent = message;
+  }
+
+  function rowToLead(row) {
+    return {
+      id: row.id,
+      name: row.customer_name || 'Unnamed lead',
+      project: row.project_summary || row.project_type || 'Not set',
+      stage: dashboardStage[row.stage] || 'new'
+    };
+  }
+
+  async function loadEnhancementLeads() {
+    const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
+    if (!client || loadingLeads) return privateLeads;
+
+    loadingLeads = true;
+    const { data, error } = await client
+      .from('leads')
+      .select('id, customer_name, project_summary, project_type, stage')
+      .order('updated_at', { ascending: false });
+    loadingLeads = false;
+
+    if (!error) {
+      privateLeads = (data || []).map(rowToLead);
+      window.BREEZE_PRIVATE_ADMIN_LEADS = privateLeads;
+    }
+    return privateLeads;
   }
 
   function insertStatusField() {
@@ -217,10 +257,11 @@
     }
 
     await loadLeads();
+    await loadEnhancementLeads();
+    enhanceBoard();
   }
 
   function enhanceCard(card) {
-    if (card.dataset.dragEnhanced === 'true') return;
     const lead = findLeadForCard(card);
     if (!lead) return;
 
@@ -229,18 +270,32 @@
     card.setAttribute('draggable', 'true');
     card.title = 'Drag this lead to another stage, or click to open details.';
 
-    card.addEventListener('dragstart', (event) => {
+    const button = card.querySelector('.lead-card-button');
+    if (button) {
+      button.setAttribute('draggable', 'true');
+      button.dataset.leadId = lead.id;
+    }
+
+    if (card.dataset.dragListeners === 'true') return;
+    card.dataset.dragListeners = 'true';
+
+    const startDrag = (event) => {
       draggedLeadId = card.dataset.leadId;
       card.classList.add('is-dragging');
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', draggedLeadId);
-    });
+    };
 
-    card.addEventListener('dragend', () => {
+    const endDrag = () => {
       card.classList.remove('is-dragging');
       document.querySelectorAll('.pipeline-column.is-drag-over').forEach((column) => column.classList.remove('is-drag-over'));
       draggedLeadId = '';
-    });
+    };
+
+    card.addEventListener('dragstart', startDrag);
+    card.addEventListener('dragend', endDrag);
+    button?.addEventListener('dragstart', startDrag);
+    button?.addEventListener('dragend', endDrag);
   }
 
   function enhanceColumn(column) {
@@ -266,7 +321,8 @@
     });
   }
 
-  function enhanceBoard() {
+  async function enhanceBoard() {
+    if (!privateLeads.length) await loadEnhancementLeads();
     document.querySelectorAll('.pipeline-column').forEach(enhanceColumn);
     document.querySelectorAll('.lead-card').forEach(enhanceCard);
     renderColumnProtocols();
@@ -340,10 +396,13 @@
     enhancePrivateLeadBuilder();
     observeBoard();
     observeDialog();
+    window.setTimeout(enhanceBoard, 600);
+    window.setTimeout(enhanceBoard, 1600);
   }
 
   window.addEventListener('breeze-private-leads', (event) => {
     privateLeads = Array.isArray(event.detail?.leads) ? event.detail.leads : [];
+    window.BREEZE_PRIVATE_ADMIN_LEADS = privateLeads;
     window.setTimeout(enhanceBoard, 0);
   });
 
