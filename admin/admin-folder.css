@@ -1,3 +1,43 @@
+.auth-check-screen {
+  display: none;
+}
+
+body.is-auth-checking {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #edf3f8;
+}
+
+body.is-auth-checking .auth-check-screen {
+  width: min(460px, calc(100vw - 32px));
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+body.is-auth-checking .auth-check-screen strong {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+body.is-auth-checking .auth-check-screen span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+body.is-auth-checking > header,
+body.is-auth-checking > main,
+body.is-auth-checking > dialog,
+body.is-auth-checking > template {
+  display: none;
+}
+
 #lead-dialog {
   width: min(940px, calc(100vw - 28px));
 }
