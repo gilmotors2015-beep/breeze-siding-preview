@@ -36,6 +36,7 @@
       .next-step-action-panel .lead-actions {
         justify-content: flex-start;
       }
+      .qualification-panel[hidden] { display: none; }
       .lead-age-flag {
         width: max-content;
         max-width: 100%;
@@ -205,11 +206,13 @@
     buttons.replaceChildren();
     panel.classList.remove('is-urgent');
 
-    if (stage === 'contacted') {
+    if (stage === 'qualified' || stage === 'contacted') {
       panel.hidden = false;
-      title.textContent = 'Scheduling email';
-      text.textContent = 'Use this when the customer is ready to book an estimate appointment.';
-      buttons.append(copyButton('Copy schedule email command', 'Copied schedule command', scheduleCommand));
+      title.textContent = 'Send schedule email';
+      text.textContent = stage === 'qualified'
+        ? 'This lead is qualified. Send the schedule prompt email or call/text to book the estimate appointment.'
+        : 'This customer has been contacted. Use the schedule prompt if the appointment is not set yet.';
+      buttons.append(copyButton('Copy schedule .oft command', 'Copied schedule command', scheduleCommand));
       return;
     }
 
@@ -229,6 +232,13 @@
     }
 
     panel.hidden = true;
+  }
+
+  function simplifyLeadReviewPanel() {
+    const panel = document.querySelector('.qualification-panel');
+    if (!panel) return;
+    const stage = currentStage();
+    panel.hidden = stage !== 'new';
   }
 
   function ensureFolderPathActions(workspace) {
@@ -368,6 +378,7 @@
 
   function refreshWorkflowActions() {
     renderNextStepActions();
+    simplifyLeadReviewPanel();
     simplifyFolderPanel();
     addEstimateFlags();
     addFolderPathButtons();
