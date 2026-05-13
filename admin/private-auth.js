@@ -51,7 +51,15 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadStatusController = () => appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-1', 'admin-status-controller');
+    const loadStatusController = () => {
+      const controllerScript = appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-1', 'admin-status-controller');
+      const loadScheduledStagePolish = () => appendEnhancementScript('/admin/admin-scheduled-stage-polish.js?v=scheduled-1', 'admin-scheduled-stage-polish');
+      if (controllerScript) {
+        controllerScript.addEventListener('load', loadScheduledStagePolish, { once: true });
+      } else {
+        loadScheduledStagePolish();
+      }
+    };
     const loadSchedulePolish = () => {
       const scheduleScript = appendEnhancementScript('/admin/admin-schedule-action-polish.js?v=schedule-2', 'admin-schedule-action-polish');
       if (scheduleScript) {
