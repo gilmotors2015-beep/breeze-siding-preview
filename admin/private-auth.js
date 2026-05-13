@@ -93,7 +93,7 @@
       }
     };
     const loadEstimateActions = () => {
-      const estimateScript = appendEnhancementScript('/admin/admin-estimate-sent-actions.js?v=estimate-2', 'admin-estimate-sent-actions');
+      const estimateScript = appendEnhancementScript('/admin/admin-estimate-sent-actions.js?v=estimate-3', 'admin-estimate-sent-actions');
       if (estimateScript) {
         estimateScript.addEventListener('load', loadDeleteActions, { once: true });
       } else {
