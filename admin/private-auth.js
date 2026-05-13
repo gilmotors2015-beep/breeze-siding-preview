@@ -51,7 +51,15 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadEstimateActions = () => appendEnhancementScript('/admin/admin-estimate-sent-actions.js?v=estimate-2', 'admin-estimate-sent-actions');
+    const loadDeleteActions = () => appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-1', 'admin-delete-lead-actions');
+    const loadEstimateActions = () => {
+      const estimateScript = appendEnhancementScript('/admin/admin-estimate-sent-actions.js?v=estimate-2', 'admin-estimate-sent-actions');
+      if (estimateScript) {
+        estimateScript.addEventListener('load', loadDeleteActions, { once: true });
+      } else {
+        loadDeleteActions();
+      }
+    };
     const loadWorkflowActions = () => {
       const workflowScript = appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-5', 'admin-workflow-actions');
       if (workflowScript) {
