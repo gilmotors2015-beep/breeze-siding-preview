@@ -69,7 +69,7 @@
       }
     };
     const loadWorkflowActions = () => {
-      const workflowScript = appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-5', 'admin-workflow-actions');
+      const workflowScript = appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-6', 'admin-workflow-actions');
       if (workflowScript) {
         workflowScript.addEventListener('load', loadEstimateActions, { once: true });
       } else {
