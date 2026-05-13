@@ -80,6 +80,32 @@
     return map[label] || 'new';
   }
 
+  function getLeads() {
+    try {
+      if (Array.isArray(leads)) return leads;
+    } catch (_error) {}
+    return window.BREEZE_PRIVATE_ADMIN_LEADS || [];
+  }
+
+  function cleanValue(value) {
+    if (!value || value === 'Not set' || value === 'Stored privately' || value === 'Stored in private customer record') return '';
+    return String(value).trim();
+  }
+
+  function renderCardAddresses() {
+    const sourceLeads = getLeads();
+    if (!sourceLeads.length) return;
+    document.querySelectorAll('.lead-card').forEach((card) => {
+      const name = card.querySelector('.lead-name')?.textContent?.trim();
+      const lead = sourceLeads.find((item) => item.name === name);
+      const meta = card.querySelector('.lead-meta');
+      if (!lead || !meta) return;
+      const address = cleanValue(lead.address) || cleanValue(lead.city);
+      const phone = cleanValue(lead.phone);
+      meta.textContent = [address, phone].filter(Boolean).join(' - ') || 'Contact details pending';
+    });
+  }
+
   function ensurePanel() {
     let panel = document.getElementById(panelId);
     if (panel) return panel;
@@ -122,6 +148,7 @@
 
   function renderPanel() {
     injectStyles();
+    renderCardAddresses();
     const panel = ensurePanel();
     if (!panel) return;
     const stage = getStageSlug();
@@ -158,8 +185,23 @@
     return ready;
   }
 
+  function hookRenderAll() {
+    try {
+      if (typeof renderAll === 'function' && !renderAll.__cardAddressPolished) {
+        const originalRenderAll = renderAll;
+        renderAll = function cardAddressPolishedRenderAll(...args) {
+          const result = originalRenderAll.apply(this, args);
+          window.setTimeout(renderCardAddresses, 0);
+          return result;
+        };
+        renderAll.__cardAddressPolished = true;
+      }
+    } catch (_error) {}
+  }
+
   function boot() {
     const ready = hookShowLead();
+    hookRenderAll();
     renderPanel();
     if (!ready && attempts < 30) {
       attempts += 1;
@@ -168,11 +210,15 @@
   }
 
   document.addEventListener('click', (event) => {
-    if (event.target.closest('.lead-card-button, #mark-qualified-button, #move-next-button, #mark-spam-button')) {
+    if (event.target.closest('.lead-card-button, #mark-qualified-button, #move-next-button, #mark-spam-button, #save-lead-location-button')) {
       window.setTimeout(renderPanel, 180);
+      window.setTimeout(renderCardAddresses, 250);
     }
   });
-  window.addEventListener('breeze-private-leads', () => window.setTimeout(renderPanel, 100));
+  window.addEventListener('breeze-private-leads', () => {
+    window.setTimeout(renderPanel, 100);
+    window.setTimeout(renderCardAddresses, 120);
+  });
   window.addEventListener('load', () => window.setTimeout(boot, 0));
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', boot, { once: true });
   else window.setTimeout(boot, 0);
