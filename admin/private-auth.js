@@ -51,7 +51,7 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadWorkflowActions = () => appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-3', 'admin-workflow-actions');
+    const loadWorkflowActions = () => appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-4', 'admin-workflow-actions');
 
     if (statusScript) {
       statusScript.addEventListener('load', loadWorkflowActions, { once: true });
