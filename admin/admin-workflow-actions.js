@@ -1,6 +1,8 @@
 (() => {
   const scheduleTemplatePath = 'D:\\OneDrive\\Breeze Siding documents\\Marketing\\emails\\Templates\\Website Style OFT\\schedule - website style.oft';
+  const estimateTemplatePath = 'D:\\OneDrive\\Breeze Siding documents\\Marketing\\emails\\Templates\\Website Style OFT\\Estimate - website style.oft';
   const scheduleCommand = `Start-Process -FilePath '${scheduleTemplatePath.replace(/'/g, "''")}'`;
+  const estimateCommand = `Start-Process -FilePath '${estimateTemplatePath.replace(/'/g, "''")}'`;
   const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
   const activeFolderStages = new Set(['qualified', 'contacted', 'scheduled', 'estimate-sent', 'won', 'review']);
   const followUpMessage = 'Hi, this is Ygil with Breeze Siding. I wanted to follow up on the estimate I sent over and see if you had any questions or wanted to review next steps. I am happy to clarify the scope, timeline, or materials.';
@@ -213,6 +215,14 @@
         ? 'This lead is qualified. Send the schedule prompt email or call/text to book the estimate appointment.'
         : 'This customer has been contacted. Use the schedule prompt if the appointment is not set yet.';
       buttons.append(copyButton('Copy schedule .oft command', 'Copied schedule command', scheduleCommand));
+      return;
+    }
+
+    if (stage === 'scheduled') {
+      panel.hidden = false;
+      title.textContent = 'Prepare estimate email';
+      text.textContent = 'The appointment is scheduled. After the visit and proposal are ready, open the generic estimate email, attach the estimate PDF, then adjust the customer name, address, and project details before sending.';
+      buttons.append(copyButton('Copy estimate .oft command', 'Copied estimate command', estimateCommand));
       return;
     }
 
