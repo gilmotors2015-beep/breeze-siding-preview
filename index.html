@@ -17,6 +17,7 @@
       .top-project-copy{max-width:620px}
       .top-project-copy p:not(.eyebrow){color:var(--muted);font-size:1.08rem}
       .top-project img{width:100%;height:clamp(320px,38vw,520px);object-fit:cover;border-radius:8px;filter:contrast(1.04) saturate(1.03)}
+      .form-status{min-height:24px;margin:0;color:var(--muted);font-weight:800}.form-status[data-tone="success"]{color:var(--green)}.form-status[data-tone="error"]{color:#b42318}
       @media(max-width:980px){.top-project{grid-template-columns:1fr}.top-project img{height:380px}}
       @media(max-width:640px){.top-project img{height:300px}}
     </style>
@@ -85,11 +86,7 @@
             <a class="button secondary" href="mailto:service@breezesiding.com">Email service@breezesiding.com</a>
           </div>
         </div>
-        <form class="estimate-form" action="https://formsubmit.co/service@breezesiding.com" method="POST">
-          <input type="hidden" name="_subject" value="New Breeze Siding estimate request">
-          <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_next" value="https://breezesiding.com/thank-you.html">
+        <form class="estimate-form" id="estimate-lead-form" method="POST">
           <input class="form-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
           <label>
             Name
@@ -133,6 +130,7 @@
             Project notes (optional)
             <textarea name="message" rows="5" placeholder="Tell us about the home, siding condition, photos you can provide, or what you want changed."></textarea>
           </label>
+          <p class="form-status wide" id="estimate-form-status" aria-live="polite"></p>
           <button class="button primary wide" type="submit">Request Free Estimate</button>
         </form>
       </section>
@@ -360,5 +358,7 @@
     </footer>
 
     <a class="mobile-call" href="tel:12532280531">Call Breeze Siding</a>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="lead-submit.js?v=lead-1" defer></script>
   </body>
 </html>
