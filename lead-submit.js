@@ -4,7 +4,8 @@
   const form = document.querySelector('#estimate-lead-form');
   const status = document.querySelector('#estimate-form-status');
   const thankYouUrl = '/thank-you.html';
-  const submitTimeoutMs = 5500;
+  const softNoticeMs = 1400;
+  const redirectTimeoutMs = 3200;
 
   if (!form || !status) return;
 
@@ -46,8 +47,8 @@
     });
   }
 
-  function timeout(ms) {
-    return new Promise((resolve) => window.setTimeout(() => resolve({ timedOut: true }), ms));
+  function delay(ms, value) {
+    return new Promise((resolve) => window.setTimeout(() => resolve(value), ms));
   }
 
   async function insertLead(record) {
@@ -98,8 +99,22 @@
     }
     setStatus('Sending your request securely...', 'info');
 
+    const noticeTimer = window.setTimeout(() => {
+      setStatus('Request received. Opening the confirmation page...', 'success');
+      if (button) button.textContent = 'Opening confirmation...';
+    }, softNoticeMs);
+
+    const sendPromise = insertLead(leadFromForm(data));
+    sendPromise.catch(() => {});
+
     try {
-      const result = await Promise.race([insertLead(leadFromForm(data)), timeout(submitTimeoutMs)]);
+      const result = await Promise.race([
+        sendPromise,
+        delay(redirectTimeoutMs, { timedOut: true })
+      ]);
+
+      window.clearTimeout(noticeTimer);
+
       if (result?.timedOut) {
         setStatus('Request received. Opening the confirmation page...', 'success');
         openConfirmation();
@@ -109,6 +124,7 @@
       setStatus('Request received. Opening the confirmation page...', 'success');
       openConfirmation();
     } catch (_error) {
+      window.clearTimeout(noticeTimer);
       setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       if (button) {
         button.disabled = false;
