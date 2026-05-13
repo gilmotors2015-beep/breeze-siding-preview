@@ -51,7 +51,7 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadSchedulePolish = () => appendEnhancementScript('/admin/admin-schedule-action-polish.js?v=schedule-1', 'admin-schedule-action-polish');
+    const loadSchedulePolish = () => appendEnhancementScript('/admin/admin-schedule-action-polish.js?v=schedule-2', 'admin-schedule-action-polish');
     const loadDialogPolish = () => {
       const dialogScript = appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-3', 'admin-lead-dialog-polish');
       if (dialogScript) {
