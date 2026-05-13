@@ -50,6 +50,7 @@
   }
 
   function loadDashboardEnhancements() {
+    appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-1', 'admin-static-lead-restore');
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
     const loadStatusController = () => {
       const controllerScript = appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-1', 'admin-status-controller');
