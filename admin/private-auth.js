@@ -50,7 +50,7 @@
   }
 
   function loadDashboardEnhancements() {
-    appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-1', 'admin-static-lead-restore');
+    appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-2', 'admin-static-lead-restore');
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
     const loadStatusController = () => {
       const controllerScript = appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-1', 'admin-status-controller');
@@ -86,7 +86,7 @@
       }
     };
     const loadDeleteActions = () => {
-      const deleteScript = appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-2', 'admin-delete-lead-actions');
+      const deleteScript = appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-4', 'admin-delete-lead-actions');
       if (deleteScript) {
         deleteScript.addEventListener('load', loadFlowPolish, { once: true });
       } else {
