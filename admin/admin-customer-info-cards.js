@@ -70,14 +70,23 @@
     return text;
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function row(label, value) {
     const clean = displayValue(value);
     const muted = clean === 'Not entered' || /^stored privately/i.test(clean) || /^stored in private/i.test(clean);
     return `
-      <div class="lead-info-row${muted ? ' is-muted' : ''}">
-        <strong>${label}</strong>
-        <span>${clean}</span>
-      </div>
+      <span class="lead-info-row${muted ? ' is-muted' : ''}">
+        <strong>${escapeHtml(label)}</strong>
+        <span>${escapeHtml(clean)}</span>
+      </span>
     `;
   }
 
@@ -97,7 +106,7 @@
 
       let info = button.querySelector('.lead-card-full-info');
       if (!info) {
-        info = document.createElement('div');
+        info = document.createElement('span');
         info.className = 'lead-card-full-info';
         button.append(info);
       }
@@ -150,7 +159,7 @@
     if (event.target.matches('#stage-filter, #dialog-status-select')) window.setTimeout(enrichCards, 0);
   });
   document.addEventListener('click', (event) => {
-    if (event.target.closest('#mark-qualified-button, #move-next-button, #mark-spam-button')) {
+    if (event.target.closest('#mark-qualified-button, #move-next-button, #mark-spam-button, #delete-active-lead-button')) {
       window.setTimeout(enrichCards, 160);
     }
   });
