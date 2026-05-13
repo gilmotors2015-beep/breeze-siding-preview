@@ -1,6 +1,7 @@
 (() => {
   const scheduleTemplatePath = 'D:\\OneDrive\\Breeze Siding documents\\Marketing\\emails\\Templates\\Website Style OFT\\schedule - website style.oft';
   const scheduleCommand = `Start-Process -FilePath '${scheduleTemplatePath.replace(/'/g, "''")}'`;
+  const customerRootPath = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
   const activeFolderStages = new Set(['qualified', 'contacted', 'scheduled', 'estimate-sent', 'won', 'review']);
   const followUpMessage = 'Hi, this is Ygil with Breeze Siding. I wanted to follow up on the estimate I sent over and see if you had any questions or wanted to review next steps. I am happy to clarify the scope, timeline, or materials.';
 
@@ -47,6 +48,38 @@
         font-size: 0.76rem;
         font-weight: 900;
       }
+      .lead-folder-path-button {
+        width: 100%;
+        min-height: 34px;
+        margin-top: 7px;
+        padding: 0 10px;
+        border: 1px solid #c8d6e8;
+        border-radius: 6px;
+        color: var(--blue-dark);
+        background: #eef6ff;
+        font-size: 0.78rem;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      .lead-folder-path-button:hover {
+        border-color: #8fb4e8;
+        background: #e4f0ff;
+      }
+      .folder-path-actions {
+        display: grid;
+        gap: 8px;
+        margin: 10px 0 12px;
+      }
+      .folder-path-actions .folder-path-preview {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        color: var(--muted);
+        background: #f8fbff;
+        font-size: 0.84rem;
+        font-weight: 800;
+        word-break: break-word;
+      }
       #dialog-folder-workspace .folder-path-card,
       #dialog-folder-workspace .folder-checklist {
         display: none;
@@ -90,6 +123,16 @@
       return [];
     }
     return [];
+  }
+
+  function safeFolderName(name) {
+    return String(name || 'Unnamed Customer').replace(/[<>:"/\\|?*]+/g, '-').replace(/\s+/g, ' ').trim() || 'Unnamed Customer';
+  }
+
+  function folderPathForLead(lead) {
+    if (!lead) return customerRootPath;
+    if (lead.folderPathOverride) return lead.folderPathOverride;
+    return `${customerRootPath}\\${safeFolderName(lead.name)}`;
   }
 
   function parseLeadDate(value) {
@@ -188,6 +231,44 @@
     panel.hidden = true;
   }
 
+  function ensureFolderPathActions(workspace) {
+    let actions = workspace.querySelector('#dialog-folder-path-actions');
+    if (actions) return actions;
+
+    actions = document.createElement('div');
+    actions.id = 'dialog-folder-path-actions';
+    actions.className = 'folder-path-actions';
+    actions.innerHTML = `
+      <button class="button primary" id="copy-folder-path-button" type="button">Copy OneDrive folder path</button>
+      <div class="folder-path-preview" id="dialog-folder-path-preview"></div>
+    `;
+    workspace.insertAdjacentElement('afterbegin', actions);
+
+    actions.querySelector('#copy-folder-path-button')?.addEventListener('click', async () => {
+      const lead = getActiveLead();
+      const button = actions.querySelector('#copy-folder-path-button');
+      try {
+        await navigator.clipboard.writeText(folderPathForLead(lead));
+        button.textContent = 'Copied folder path';
+      } catch {
+        button.textContent = 'Copy failed';
+      }
+    });
+
+    return actions;
+  }
+
+  function renderFolderPathActions() {
+    const workspace = document.querySelector('#dialog-folder-workspace');
+    if (!workspace) return;
+    const lead = getActiveLead();
+    const actions = ensureFolderPathActions(workspace);
+    const preview = actions.querySelector('#dialog-folder-path-preview');
+    const button = actions.querySelector('#copy-folder-path-button');
+    if (preview) preview.textContent = folderPathForLead(lead);
+    if (button) button.textContent = 'Copy OneDrive folder path';
+  }
+
   function simplifyFolderPanel() {
     const workspace = document.querySelector('#dialog-folder-workspace');
     if (!workspace) return;
@@ -199,11 +280,12 @@
     const button = document.querySelector('#copy-folder-command');
     const checklist = document.querySelector('#dialog-folder-checklist');
 
-    workspace.hidden = stage === 'spam' || stage === 'lost';
+    workspace.hidden = false;
     workspace.classList.toggle('is-folder-done', activeFolderStages.has(stage));
 
     if (title) title.textContent = activeFolderStages.has(stage) ? 'Folder status' : 'Folder action';
     if (checklist) checklist.hidden = true;
+    renderFolderPathActions();
 
     if (activeFolderStages.has(stage)) {
       if (status) status.textContent = 'Folder handled';
@@ -217,11 +299,21 @@
 
     if (stage === 'new') {
       if (status) status.textContent = 'Waiting for qualification';
-      if (note) note.textContent = 'Qualify the lead first. After it is qualified, folder creation will be treated as handled and the dashboard will move on to customer contact steps.';
+      if (note) note.textContent = 'Qualify the lead first. You can still copy the planned OneDrive folder path from here.';
       if (button) {
         button.hidden = false;
         button.disabled = true;
         button.textContent = 'Qualify first';
+      }
+      return;
+    }
+
+    if (stage === 'spam' || stage === 'lost') {
+      if (status) status.textContent = stage === 'spam' ? 'No folder needed' : 'Closed lead';
+      if (note) note.textContent = 'The OneDrive path button is available for lookup, but no new folder action is needed unless you decide to reopen this lead.';
+      if (button) {
+        button.hidden = true;
+        button.disabled = true;
       }
     }
   }
@@ -244,10 +336,41 @@
     });
   }
 
+  function addFolderPathButtons() {
+    const sourceLeads = getAllLeads();
+    if (!sourceLeads.length) return;
+
+    document.querySelectorAll('.lead-card').forEach((card) => {
+      const name = card.querySelector('.lead-name')?.textContent?.trim();
+      const lead = sourceLeads.find((item) => item.name === name);
+      if (!lead) return;
+
+      let button = card.querySelector('.lead-folder-path-button');
+      if (!button) {
+        button = document.createElement('button');
+        button.className = 'lead-folder-path-button';
+        button.type = 'button';
+        button.addEventListener('click', async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          try {
+            await navigator.clipboard.writeText(folderPathForLead(lead));
+            button.textContent = 'Copied OneDrive path';
+          } catch {
+            button.textContent = 'Copy failed';
+          }
+        });
+        card.append(button);
+      }
+      button.textContent = 'Copy OneDrive path';
+    });
+  }
+
   function refreshWorkflowActions() {
     renderNextStepActions();
     simplifyFolderPanel();
     addEstimateFlags();
+    addFolderPathButtons();
   }
 
   function hookLeadDialog() {
@@ -276,7 +399,10 @@
     const originalRenderAll = renderAll;
     const enhancedRenderAll = function enhancedEstimateFollowUpRenderAll() {
       originalRenderAll();
-      window.setTimeout(addEstimateFlags, 0);
+      window.setTimeout(() => {
+        addEstimateFlags();
+        addFolderPathButtons();
+      }, 0);
     };
     enhancedRenderAll.isEstimateFollowUpEnhanced = true;
     renderAll = enhancedRenderAll;
@@ -296,9 +422,9 @@
         window.setTimeout(refreshWorkflowActions, 150);
       }
     });
-    window.addEventListener('breeze-private-leads', () => window.setTimeout(addEstimateFlags, 0));
+    window.addEventListener('breeze-private-leads', () => window.setTimeout(refreshWorkflowActions, 0));
     window.setTimeout(refreshWorkflowActions, 500);
-    window.setTimeout(addEstimateFlags, 700);
+    window.setTimeout(refreshWorkflowActions, 700);
   }
 
   if (document.readyState === 'loading') {
