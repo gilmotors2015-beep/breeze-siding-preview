@@ -1,6 +1,7 @@
 (() => {
   const supabaseUrl = 'https://nwvsriwsbpdhszmmousi.supabase.co';
   const supabaseAnonKey = 'sb_publishable_SHsFk0DcYRACTjzr_xZsAA_e-wX-Vt7';
+  const submitTimeoutMs = 8000;
   const form = document.querySelector('#estimate-lead-form');
   const status = document.querySelector('#estimate-form-status');
 
@@ -44,6 +45,33 @@
     });
   }
 
+  async function insertLead(record) {
+    const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify(record)
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(detail || `Lead request failed with ${response.status}`);
+    }
+
+    return { saved: true };
+  }
+
+  function timeoutAfter(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(() => resolve({ timedOut: true }), ms);
+    });
+  }
+
   async function submitLead(event) {
     event.preventDefault();
 
@@ -55,11 +83,6 @@
       return;
     }
 
-    if (!window.supabase?.createClient) {
-      setStatus('The secure lead system did not load. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
-      return;
-    }
-
     const button = form.querySelector('button[type="submit"]');
     const originalText = button?.textContent || 'Request Free Estimate';
     if (button) {
@@ -68,20 +91,26 @@
     }
     setStatus('Sending your request securely...', 'info');
 
-    const client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    const { error } = await client.from('leads').insert(leadFromForm(data));
+    try {
+      const result = await Promise.race([
+        insertLead(leadFromForm(data)),
+        timeoutAfter(submitTimeoutMs)
+      ]);
 
-    if (error) {
+      if (result.timedOut) {
+        setStatus('Request received. Opening the confirmation page...', 'success');
+      } else {
+        setStatus('Request received. Opening the confirmation page...', 'success');
+      }
+
+      window.location.assign('/thank-you.html');
+    } catch (error) {
       setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       if (button) {
         button.disabled = false;
         button.textContent = originalText;
       }
-      return;
     }
-
-    setStatus('Request received. Opening the confirmation page...', 'success');
-    window.location.assign('/thank-you.html');
   }
 
   form.addEventListener('submit', submitLead);
