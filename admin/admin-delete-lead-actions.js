@@ -148,9 +148,20 @@
     showLead.isDeleteLeadEnhanced = true;
   }
 
+  function loadFolderCommandHelper() {
+    if (document.querySelector('script[data-admin-folder-command-polish]')) return;
+    const script = document.createElement('script');
+    script.src = '/admin/admin-folder-command-polish.js?v=folder-command-1';
+    script.defer = true;
+    script.async = false;
+    script.setAttribute('data-admin-folder-command-polish', 'true');
+    document.body.append(script);
+  }
+
   function init() {
     injectStyles();
     hookDialog();
+    loadFolderCommandHelper();
     window.setTimeout(refreshPanel, 500);
   }
 
