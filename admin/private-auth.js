@@ -38,20 +38,20 @@
     if (target) target.textContent = message;
   }
 
-  function appendEnhancementScript(src, flagName) {
-    if (document.querySelector(`script[data-${flagName}]`)) return null;
+  function appendEnhancementScript(src, attrName) {
+    if (document.querySelector(`script[data-${attrName}]`)) return null;
     const script = document.createElement('script');
     script.src = src;
     script.defer = true;
     script.async = false;
-    script.dataset[flagName] = 'true';
+    script.setAttribute(`data-${attrName}`, 'true');
     document.body.append(script);
     return script;
   }
 
   function loadDashboardEnhancements() {
-    const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'adminStatusEnhancement');
-    const loadWorkflowActions = () => appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-1', 'adminWorkflowActions');
+    const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
+    const loadWorkflowActions = () => appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-2', 'admin-workflow-actions');
 
     if (statusScript) {
       statusScript.addEventListener('load', loadWorkflowActions, { once: true });
