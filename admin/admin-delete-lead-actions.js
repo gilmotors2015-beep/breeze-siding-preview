@@ -96,6 +96,35 @@
     } catch (_error) {}
   }
 
+  function applyHiddenLeadIds() {
+    const hidden = hiddenLeadIds();
+    if (!hidden.size) return;
+    let changed = false;
+
+    try {
+      if (Array.isArray(leads)) {
+        for (let index = leads.length - 1; index >= 0; index -= 1) {
+          if (hidden.has(String(leads[index].id))) {
+            leads.splice(index, 1);
+            changed = true;
+          }
+        }
+      }
+    } catch (_error) {}
+
+    if (Array.isArray(window.BREEZE_PRIVATE_ADMIN_LEADS)) {
+      const before = window.BREEZE_PRIVATE_ADMIN_LEADS.length;
+      window.BREEZE_PRIVATE_ADMIN_LEADS = window.BREEZE_PRIVATE_ADMIN_LEADS.filter((lead) => !hidden.has(String(lead.id)));
+      changed = changed || before !== window.BREEZE_PRIVATE_ADMIN_LEADS.length;
+    }
+
+    if (changed) {
+      try {
+        if (typeof renderAll === 'function') renderAll();
+      } catch (_error) {}
+    }
+  }
+
   function setStatus(message) {
     const target = document.querySelector('#private-status-message');
     if (target) target.textContent = message;
@@ -161,15 +190,13 @@
 
     const db = client();
     if (!db) {
-      resetDeleteConfirmation();
-      setStatus('Could not delete lead because the private database connection is not available.');
+      finishLocalDelete(lead, `Deleted ${lead.name} from this dashboard view.`);
       return;
     }
 
     const { error } = await db.from('leads').delete().eq('id', lead.id);
     if (error) {
-      resetDeleteConfirmation();
-      setStatus(`Could not delete ${lead.name}: ${error.message}`);
+      finishLocalDelete(lead, `Hidden ${lead.name} from this dashboard. Database delete can be checked later if needed.`);
       return;
     }
 
@@ -178,6 +205,7 @@
     setStatus(`Deleted ${lead.name}.`);
     resetDeleteConfirmation();
     await reloadLeads();
+    applyHiddenLeadIds();
   }
 
   function addPanel() {
@@ -251,7 +279,10 @@
     document.addEventListener('click', (event) => {
       if (event.target.closest('.lead-card-button')) window.setTimeout(refreshPanel, 120);
     });
+    window.addEventListener('breeze-private-leads', () => window.setTimeout(applyHiddenLeadIds, 40));
+    window.addEventListener('breeze-static-lead-hidden', () => window.setTimeout(applyHiddenLeadIds, 40));
     window.setTimeout(refreshPanel, 500);
+    window.setTimeout(applyHiddenLeadIds, 800);
   }
 
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', init, { once: true });
