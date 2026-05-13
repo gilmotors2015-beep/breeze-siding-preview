@@ -77,7 +77,7 @@
       }
     };
     const loadDeleteActions = () => {
-      const deleteScript = appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-1', 'admin-delete-lead-actions');
+      const deleteScript = appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-2', 'admin-delete-lead-actions');
       if (deleteScript) {
         deleteScript.addEventListener('load', loadFlowPolish, { once: true });
       } else {
