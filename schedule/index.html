@@ -1,10 +1,104 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8"><base href="https://breezesiding.com/"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Schedule Service | Breeze Siding LLC</title><meta name="description" content="Request a service visit or project scheduling follow-up from Breeze Siding LLC."><meta name="robots" content="noindex, nofollow"><link rel="stylesheet" href="styles.css">
-    <style>.workflow-page{min-height:calc(100vh - 180px);display:grid;align-items:center;padding:clamp(58px,8vw,110px) clamp(18px,5vw,72px);background:linear-gradient(90deg,rgba(244,248,251,.96),rgba(244,248,251,.9)),url("assets/images/project-modern.jpg") center/cover}.workflow-layout{display:grid;grid-template-columns:minmax(0,.82fr) minmax(360px,1fr);gap:30px;align-items:start;width:100%}.workflow-card,.workflow-form{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}.workflow-card{padding:clamp(28px,4vw,46px)}.workflow-card h1{max-width:13ch;color:var(--ink)}.workflow-card p{max-width:42rem;color:var(--muted);font-size:1.08rem}.workflow-form{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:clamp(22px,4vw,34px)}@media(max-width:900px){.workflow-layout,.workflow-form{grid-template-columns:1fr}}</style>
+    <meta charset="utf-8">
+    <base href="https://breezesiding.com/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Schedule an Appointment | Breeze Siding LLC</title>
+    <meta name="description" content="Schedule an exterior estimate appointment with Breeze Siding LLC.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="canonical" href="https://breezesiding.com/schedule/">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      .schedule-page {
+        min-height: calc(100vh - 180px);
+        padding: clamp(54px, 8vw, 96px) clamp(18px, 5vw, 72px);
+        background:
+          linear-gradient(rgba(244, 248, 251, 0.96), rgba(244, 248, 251, 0.9)),
+          url("assets/images/project-modern.jpg") center / cover;
+      }
+      .schedule-shell {
+        max-width: 1120px;
+        margin: 0 auto;
+      }
+      .schedule-intro {
+        max-width: 760px;
+        margin-bottom: 26px;
+      }
+      .schedule-intro h1 {
+        max-width: 12ch;
+        color: var(--ink);
+      }
+      .schedule-intro p {
+        max-width: 46rem;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+      .scheduler-frame {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+        box-shadow: var(--shadow);
+      }
+      .scheduler-frame iframe {
+        display: block;
+        width: 100%;
+        min-height: 720px;
+        border: 0;
+      }
+      .schedule-note {
+        margin-top: 18px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      @media (max-width: 640px) {
+        .schedule-page { padding: 40px 16px; }
+        .scheduler-frame iframe { min-height: 680px; }
+      }
+    </style>
   </head>
-  <body><header class="site-header"><a class="brand" href="index.html#top" aria-label="Breeze Siding home"><img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257"></a><nav class="nav" aria-label="Main navigation"><a href="index.html#services">Services</a><a href="index.html#work">Projects</a><a href="index.html#areas">Areas</a><a href="index.html#faq">FAQ</a><a href="index.html#estimate">Estimate</a></nav><a class="header-call" href="tel:12532280531">Call 253-228-0531</a></header>
-    <main class="workflow-page"><div class="workflow-layout"><section class="workflow-card"><p class="eyebrow">Scheduling</p><h1>Request a service time.</h1><p>Use this page when Breeze Siding has already discussed your project and you want to request preferred appointment times, service details, or access notes.</p><div class="hero-actions"><a class="button secondary" href="tel:12532280531">Call 253-228-0531</a></div></section><form class="workflow-form" action="https://formsubmit.co/service@breezesiding.com" method="POST"><input type="hidden" name="_subject" value="Breeze Siding scheduling request"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_next" value="https://breezesiding.com/thank-you-schedule.html"><input class="form-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true"><label>Name<input name="name" autocomplete="name" required></label><label>Phone<input name="phone" autocomplete="tel" required></label><label>Email<input type="email" name="email" autocomplete="email"></label><label>Project address<input name="address" autocomplete="street-address"></label><label>Preferred date<input type="date" name="preferred_date"></label><label>Preferred time<select name="preferred_time"><option value="">Choose a time window</option><option>Morning</option><option>Midday</option><option>Afternoon</option><option>Evening</option></select></label><label class="wide">What are we scheduling?<select name="service_type"><option value="">Choose service type</option><option>Estimate appointment</option><option>Project walkthrough</option><option>Repair/service visit</option><option>Material or color review</option><option>Final walkthrough</option><option>Other</option></select></label><label class="wide">Access notes or project details<textarea name="message" rows="5" placeholder="Gate code, parking, pets, best entrance, project notes..."></textarea></label><button class="button primary wide" type="submit">Send Scheduling Request</button></form></div></main>
-    <footer class="footer"><div><img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257"><p>Exterior renovation services for Seattle, Tacoma, and the greater Puget Sound area.</p></div><address><a href="tel:12532280531">253-228-0531</a><span>service@breezesiding.com</span><span>Spanaway, WA</span></address></footer><a class="mobile-call" href="tel:12532280531">Call Breeze Siding</a><script src="workflow-forms.js" defer></script></body>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html#top" aria-label="Breeze Siding home">
+        <img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257">
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#work">Projects</a>
+        <a href="index.html#areas">Areas</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="index.html#estimate">Estimate</a>
+      </nav>
+      <a class="header-call" href="tel:12532280531">Call 253-228-0531</a>
+    </header>
+
+    <main class="schedule-page">
+      <section class="schedule-shell" aria-labelledby="schedule-title">
+        <div class="schedule-intro">
+          <p class="eyebrow">Schedule appointment</p>
+          <h1 id="schedule-title">Choose an estimate time.</h1>
+          <p>Select an available appointment slot for your siding, window, paint, deck, or exterior repair estimate. If the calendar does not show a time that works, call or text Breeze Siding directly.</p>
+        </div>
+        <div class="scheduler-frame">
+          <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0YQMp_TH2zvHyc2lXwwNCanwF2Ssn8DTrlm6wfv_NIJJvEfaIMcF8PSqiv6bGiS3U3FbjMyoHD?gv=true" title="Breeze Siding appointment scheduler" width="100%" height="720" frameborder="0"></iframe>
+        </div>
+        <p class="schedule-note">Need help scheduling? Call or text <a href="tel:12532280531">253-228-0531</a>.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <img src="assets/images/04-30-26%20Breeze%20Siding.png" alt="Breeze Siding LLC" width="997" height="257">
+        <p>Exterior renovation services for Seattle, Tacoma, and the greater Puget Sound area.</p>
+      </div>
+      <address>
+        <a href="tel:12532280531">253-228-0531</a>
+        <span>service@breezesiding.com</span>
+        <span>Spanaway, WA</span>
+      </address>
+    </footer>
+
+    <a class="mobile-call" href="tel:12532280531">Call Breeze Siding</a>
+  </body>
 </html>
