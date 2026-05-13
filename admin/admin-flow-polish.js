@@ -2,6 +2,7 @@
   const focusPanelId = 'flow-focus-panel';
   const quickActionsId = 'flow-quick-actions';
   const styleId = 'flow-polish-styles';
+  let attempts = 0;
 
   function injectStyles() {
     if (document.getElementById(styleId)) return;
@@ -21,7 +22,7 @@
       .flow-open-label { color: var(--blue-dark); font-weight: 900; }
       .flow-empty { margin: 0; padding: 10px; border: 1px dashed #b8c6d8; border-radius: 7px; color: var(--muted); background: rgba(255, 255, 255, 0.7); font-weight: 800; }
       .flow-card-alert { border-color: #f0cf9a; background: #fff8ed; }
-      .flow-quick-actions { display: grid; gap: 12px; margin-top: 18px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #f8fbff; }
+      .flow-quick-actions { display: grid; gap: 12px; margin: 18px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #f8fbff; }
       .flow-quick-actions h3 { margin: 0; line-height: 1.15; }
       .flow-action-grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 8px; }
       .flow-action-grid .button { min-height: 42px; width: 100%; padding: 0 12px; }
@@ -34,7 +35,7 @@
   }
 
   function getLeads() {
-    try { return Array.isArray(leads) ? leads : []; } catch (_error) { return []; }
+    try { return Array.isArray(leads) ? leads : []; } catch (_error) { return window.BREEZE_PRIVATE_ADMIN_LEADS || []; }
   }
 
   function getActiveLead() {
@@ -194,38 +195,52 @@
   }
 
   function hookDashboardRender() {
+    let ready = false;
     try {
-      if (typeof renderAll === 'function' && !renderAll.__flowPolished) {
-        const originalRenderAll = renderAll;
-        renderAll = function flowPolishedRenderAll(...args) {
-          const result = originalRenderAll.apply(this, args);
-          window.setTimeout(renderFocusPanel, 0);
-          return result;
-        };
-        renderAll.__flowPolished = true;
+      if (typeof renderAll === 'function') {
+        ready = true;
+        if (!renderAll.__flowPolished) {
+          const originalRenderAll = renderAll;
+          renderAll = function flowPolishedRenderAll(...args) {
+            const result = originalRenderAll.apply(this, args);
+            window.setTimeout(renderFocusPanel, 0);
+            return result;
+          };
+          renderAll.__flowPolished = true;
+        }
       }
     } catch (_error) {}
     try {
-      if (typeof showLead === 'function' && !showLead.__flowPolished) {
-        const originalShowLead = showLead;
-        showLead = function flowPolishedShowLead(...args) {
-          const result = originalShowLead.apply(this, args);
-          window.setTimeout(renderQuickActions, 0);
-          return result;
-        };
-        showLead.__flowPolished = true;
+      if (typeof showLead === 'function') {
+        ready = true;
+        if (!showLead.__flowPolished) {
+          const originalShowLead = showLead;
+          showLead = function flowPolishedShowLead(...args) {
+            const result = originalShowLead.apply(this, args);
+            window.setTimeout(renderQuickActions, 0);
+            return result;
+          };
+          showLead.__flowPolished = true;
+        }
       }
     } catch (_error) {}
+    return ready;
   }
 
   function boot() {
-    hookDashboardRender();
+    injectStyles();
+    const ready = hookDashboardRender();
     renderFocusPanel();
     renderQuickActions();
+    if (!ready && attempts < 30) {
+      attempts += 1;
+      window.setTimeout(boot, 200);
+    }
   }
 
   window.addEventListener('breeze-private-leads', () => window.setTimeout(boot, 0));
   window.addEventListener('breeze-private-logout', () => window.setTimeout(boot, 0));
+  window.addEventListener('load', () => window.setTimeout(boot, 0));
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', boot, { once: true });
   else window.setTimeout(boot, 0);
 })();
