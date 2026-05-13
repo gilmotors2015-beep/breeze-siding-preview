@@ -117,8 +117,14 @@
 
     const leads = (data || []).map(mapLead);
     window.BREEZE_PRIVATE_ADMIN_LEADS = leads;
-    window.dispatchEvent(new CustomEvent('breeze-private-leads', { detail: { leads } }));
-    setMessage(leads.length ? `Private mode loaded ${leads.length} customer record${leads.length === 1 ? '' : 's'}.` : 'Private mode is connected. No database leads have been entered yet.');
+
+    if (leads.length) {
+      window.dispatchEvent(new CustomEvent('breeze-private-leads', { detail: { leads } }));
+      setMessage(`Private mode loaded ${leads.length} customer record${leads.length === 1 ? '' : 's'}.`);
+      return;
+    }
+
+    setMessage('Private mode is connected. Showing the current customer records until database leads are entered.');
   }
 
   async function signOut() {
