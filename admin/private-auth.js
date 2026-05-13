@@ -41,7 +41,7 @@
   function loadDashboardEnhancements() {
     if (document.querySelector('script[data-admin-status-enhancement]')) return;
     const script = document.createElement('script');
-    script.src = '/admin/admin-status-enhancement.js?v=status-5';
+    script.src = '/admin/admin-status-enhancement.js?v=status-6';
     script.defer = true;
     script.dataset.adminStatusEnhancement = 'true';
     document.body.append(script);
