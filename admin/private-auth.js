@@ -51,7 +51,15 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadFlowPolish = () => appendEnhancementScript('/admin/admin-flow-polish.js?v=flow-2', 'admin-flow-polish');
+    const loadDialogPolish = () => appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-2', 'admin-lead-dialog-polish');
+    const loadFlowPolish = () => {
+      const flowScript = appendEnhancementScript('/admin/admin-flow-polish.js?v=flow-2', 'admin-flow-polish');
+      if (flowScript) {
+        flowScript.addEventListener('load', loadDialogPolish, { once: true });
+      } else {
+        loadDialogPolish();
+      }
+    };
     const loadDeleteActions = () => {
       const deleteScript = appendEnhancementScript('/admin/admin-delete-lead-actions.js?v=delete-1', 'admin-delete-lead-actions');
       if (deleteScript) {
@@ -135,6 +143,7 @@
       nextStep: row.next_step || 'Review and update next action.',
       notes: row.notes || '',
       createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || row.created_at || new Date().toISOString(),
       folderPathOverride: row.folder_path || ''
     };
   }
