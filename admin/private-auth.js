@@ -41,7 +41,7 @@
   function loadDashboardEnhancements() {
     if (document.querySelector('script[data-admin-status-enhancement]')) return;
     const script = document.createElement('script');
-    script.src = '/admin/admin-status-enhancement.js?v=status-6';
+    script.src = '/admin/admin-status-enhancement.js?v=status-7';
     script.defer = true;
     script.dataset.adminStatusEnhancement = 'true';
     document.body.append(script);
@@ -61,8 +61,8 @@
       needs_review: 'new',
       qualified: 'qualified',
       contacted: 'contacted',
-      estimate_sent: 'estimate-sent',
       scheduled: 'scheduled',
+      estimate_sent: 'estimate-sent',
       won: 'won',
       lost: 'lost',
       spam: 'spam',
