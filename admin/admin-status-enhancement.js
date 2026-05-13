@@ -11,6 +11,19 @@
     ['spam', 'Spam']
   ];
 
+  const projectTypeOptions = [
+    ['', 'Select project type'],
+    ['Siding replacement', 'Siding replacement'],
+    ['Siding repair', 'Siding repair'],
+    ['Window replacement', 'Window replacement'],
+    ['Exterior painting', 'Exterior painting'],
+    ['Deck building', 'Deck building'],
+    ['Trim or fascia repair', 'Trim or fascia repair'],
+    ['Multi-service exterior project', 'Multi-service exterior project'],
+    ['Commercial project', 'Commercial project'],
+    ['Other', 'Other']
+  ];
+
   const privateStage = {
     new: 'needs_review',
     qualified: 'qualified',
@@ -34,6 +47,19 @@
     lost: 'lost',
     spam: 'spam'
   };
+
+  const customerRoot = 'D:\\OneDrive\\Breeze Siding documents\\CUSTOMERS';
+  const folderSections = [
+    '01 Intake',
+    '02 Photos',
+    '03 Measurements',
+    '04 Estimate',
+    '05 Contract',
+    '06 Job Docs',
+    '07 Invoice',
+    '08 Follow Up',
+    '_Archive'
+  ];
 
   const stageByLabel = Object.fromEntries(statusOptions.map(([value, label]) => [label.toLowerCase(), value]));
 
@@ -63,13 +89,15 @@
 
   const qualifiedChecks = ['real-contact', 'service-area', 'real-project', 'not-spam'];
   let privateLeads = window.BREEZE_PRIVATE_ADMIN_LEADS || [];
+  let folderPathTouched = false;
 
   function injectStatusStyles() {
     if (document.querySelector('#lead-status-editor-styles')) return;
     const style = document.createElement('style');
     style.id = 'lead-status-editor-styles';
     style.textContent = `
-      .lead-status-editor {
+      .lead-status-editor,
+      .manual-folder-helper {
         display: grid;
         gap: 8px;
         margin-top: 14px;
@@ -84,10 +112,29 @@
         font-weight: 900;
       }
       .lead-status-editor select { min-height: 42px; }
-      .lead-status-editor span {
+      .lead-status-editor span,
+      .manual-folder-helper span {
         color: var(--muted);
         font-size: 0.9rem;
         font-weight: 800;
+      }
+      .manual-folder-helper strong {
+        color: var(--ink);
+        font-size: 0.98rem;
+      }
+      .manual-folder-helper code {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: #152235;
+        font-size: 0.85rem;
+      }
+      .manual-folder-helper .button {
+        width: fit-content;
       }
     `;
     document.head.append(style);
@@ -100,6 +147,33 @@
   function setStatusMessage(message) {
     const target = document.querySelector('#private-status-message');
     if (target) target.textContent = message;
+  }
+
+  function setManualMessage(message) {
+    const target = document.querySelector('#manual-lead-message');
+    if (target) target.textContent = message;
+  }
+
+  function safeFolderName(name) {
+    return String(name || '')
+      .replace(/[<>:"/\\|?*]+/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function folderPathForName(name) {
+    const cleanName = safeFolderName(name) || 'Customer Name';
+    return `${customerRoot}\\${cleanName}`;
+  }
+
+  function psQuote(value) {
+    return `'${String(value).replace(/'/g, "''")}'`;
+  }
+
+  function folderCommandForName(name) {
+    const root = folderPathForName(name);
+    const paths = [root, ...folderSections.map((section) => `${root}\\${section}`)];
+    return `New-Item -ItemType Directory -Force -Path ${paths.map(psQuote).join(', ')}`;
   }
 
   function rowToLead(row) {
@@ -125,6 +199,26 @@
       window.BREEZE_PRIVATE_ADMIN_LEADS = privateLeads;
     }
     return privateLeads;
+  }
+
+  function replaceProjectTypeInput() {
+    const form = document.querySelector('#manual-lead-form');
+    const input = form?.elements.project_type;
+    if (!form || !input || input.tagName === 'SELECT') return;
+
+    const select = document.createElement('select');
+    select.name = input.name;
+    select.required = input.required;
+    select.id = input.id || 'manual-project-type';
+
+    projectTypeOptions.forEach(([value, text]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = text;
+      select.append(option);
+    });
+
+    input.replaceWith(select);
   }
 
   function insertStatusField() {
@@ -154,11 +248,79 @@
     }
   }
 
+  function insertManualFolderHelper() {
+    const grid = document.querySelector('#manual-lead-form .manual-lead-grid');
+    const notesField = document.querySelector('#manual-lead-form textarea[name="notes"]')?.closest('label');
+    if (!grid || !notesField || document.querySelector('#manual-folder-helper')) return;
+
+    const helper = document.createElement('section');
+    helper.id = 'manual-folder-helper';
+    helper.className = 'manual-folder-helper wide';
+    helper.innerHTML = `
+      <strong>Customer folder command</strong>
+      <span>This creates the matching folder inside CUSTOMERS with the standard sections.</span>
+      <code id="manual-folder-path-preview"></code>
+      <code id="manual-folder-command-preview"></code>
+      <button class="button secondary" id="copy-manual-folder-command" type="button">Copy PowerShell command</button>
+    `;
+
+    grid.insertBefore(helper, notesField);
+
+    helper.querySelector('#copy-manual-folder-command')?.addEventListener('click', async () => {
+      const command = document.querySelector('#manual-folder-command-preview')?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(command);
+        helper.querySelector('#copy-manual-folder-command').textContent = 'Copied command';
+      } catch {
+        helper.querySelector('#copy-manual-folder-command').textContent = 'Copy failed';
+      }
+    });
+  }
+
+  function updateManualFolderHelper() {
+    const form = document.querySelector('#manual-lead-form');
+    if (!form) return;
+
+    const customerName = form.elements.customer_name?.value || '';
+    const folderPath = folderPathForName(customerName);
+    const pathField = form.elements.folder_path;
+
+    if (pathField && !folderPathTouched) pathField.value = folderPath;
+
+    const pathPreview = document.querySelector('#manual-folder-path-preview');
+    const commandPreview = document.querySelector('#manual-folder-command-preview');
+    if (pathPreview) pathPreview.textContent = folderPath;
+    if (commandPreview) commandPreview.textContent = folderCommandForName(customerName);
+  }
+
+  function hookManualFolderUpdates() {
+    const form = document.querySelector('#manual-lead-form');
+    if (!form || form.dataset.folderHelperReady) return;
+    form.dataset.folderHelperReady = 'true';
+
+    form.elements.customer_name?.addEventListener('input', () => {
+      document.querySelector('#copy-manual-folder-command')?.replaceChildren('Copy PowerShell command');
+      updateManualFolderHelper();
+    });
+
+    form.elements.folder_path?.addEventListener('input', () => {
+      folderPathTouched = Boolean(form.elements.folder_path.value.trim());
+    });
+
+    document.querySelector('#add-lead-button')?.addEventListener('click', () => {
+      folderPathTouched = false;
+      window.setTimeout(updateManualFolderHelper, 0);
+    });
+
+    updateManualFolderHelper();
+  }
+
   function enhanceLocalLeadBuilder() {
     if (typeof localLeadFromManualForm !== 'function' || localLeadFromManualForm.isStatusEnhanced) return;
 
     const original = localLeadFromManualForm;
     const enhanced = function enhancedLocalLeadFromManualForm() {
+      updateManualFolderHelper();
       const lead = original();
       const stage = selectedStage();
       lead.stage = stage;
@@ -180,6 +342,7 @@
 
     const original = privateLeadFromManualForm;
     const enhanced = function enhancedPrivateLeadFromManualForm() {
+      updateManualFolderHelper();
       const row = original();
       const stage = selectedStage();
       row.stage = privateStage[stage] || 'needs_review';
@@ -190,6 +353,59 @@
 
     enhanced.isStatusEnhanced = true;
     privateLeadFromManualForm = enhanced;
+  }
+
+  function enhanceManualLeadSave() {
+    const form = document.querySelector('#manual-lead-form');
+    if (!form || form.dataset.statusSaveEnhanced) return;
+    form.dataset.statusSaveEnhanced = 'true';
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      updateManualFolderHelper();
+
+      const lead = typeof localLeadFromManualForm === 'function' ? localLeadFromManualForm() : null;
+      if (!lead?.name) {
+        setManualMessage('Customer name is required.');
+        return;
+      }
+
+      const saveButton = document.querySelector('#save-manual-lead-button');
+      if (saveButton) saveButton.disabled = true;
+      setManualMessage('Saving lead...');
+
+      const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
+      if (client && typeof privateLeadFromManualForm === 'function') {
+        const { error } = await client.from('leads').insert(privateLeadFromManualForm());
+        if (error) {
+          if (saveButton) saveButton.disabled = false;
+          setManualMessage(`Could not save lead: ${error.message}`);
+          return;
+        }
+      }
+
+      if (Array.isArray(leads)) leads = [lead, ...leads];
+      if (typeof renderAll === 'function') renderAll();
+
+      if (saveButton) saveButton.disabled = false;
+      setManualMessage('Lead saved.');
+      document.querySelector('#manual-lead-dialog')?.close();
+      form.reset();
+      folderPathTouched = false;
+      updateManualFolderHelper();
+      setStatusMessage(`Added ${lead.name} to the pipeline.`);
+    }, true);
+  }
+
+  function mergePrivateLeadsWithStatic(incomingLeads) {
+    if (!Array.isArray(incomingLeads) || !incomingLeads.length) return;
+    if (!Array.isArray(customerRecords) || typeof renderAll !== 'function') return;
+
+    const incomingIds = new Set(incomingLeads.map((lead) => lead.id));
+    const staticLeads = customerRecords.filter((lead) => !incomingIds.has(lead.id));
+    leads = [...incomingLeads, ...staticLeads];
+    renderAll();
   }
 
   function currentDialogStage() {
@@ -353,9 +569,13 @@
 
   function init() {
     injectStatusStyles();
+    replaceProjectTypeInput();
     insertStatusField();
+    insertManualFolderHelper();
+    hookManualFolderUpdates();
     enhanceLocalLeadBuilder();
     enhancePrivateLeadBuilder();
+    enhanceManualLeadSave();
     hookShowLead();
     hookLeadCards();
     renderColumnProtocols();
@@ -365,6 +585,7 @@
   window.addEventListener('breeze-private-leads', (event) => {
     privateLeads = Array.isArray(event.detail?.leads) ? event.detail.leads : [];
     window.BREEZE_PRIVATE_ADMIN_LEADS = privateLeads;
+    mergePrivateLeadsWithStatic(privateLeads);
     window.setTimeout(renderColumnProtocols, 0);
   });
 
