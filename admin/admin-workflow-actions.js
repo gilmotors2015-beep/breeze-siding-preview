@@ -2,6 +2,7 @@
   const scheduleTemplatePath = 'D:\\OneDrive\\Breeze Siding documents\\Marketing\\emails\\Templates\\Website Style OFT\\schedule - website style.oft';
   const scheduleCommand = `Start-Process -FilePath '${scheduleTemplatePath.replace(/'/g, "''")}'`;
   const activeFolderStages = new Set(['qualified', 'contacted', 'scheduled', 'estimate-sent', 'won', 'review']);
+  const followUpMessage = 'Hi, this is Ygil with Breeze Siding. I wanted to follow up on the estimate I sent over and see if you had any questions or wanted to review next steps. I am happy to clarify the scope, timeline, or materials.';
 
   function injectStyles() {
     if (document.querySelector('#admin-workflow-action-styles')) return;
@@ -18,6 +19,10 @@
         background: #f8fbff;
       }
       .next-step-action-panel[hidden] { display: none; }
+      .next-step-action-panel.is-urgent {
+        border-color: #d87a12;
+        background: #fff7ec;
+      }
       .next-step-action-panel strong {
         color: var(--ink);
         font-size: 0.98rem;
@@ -29,6 +34,18 @@
       }
       .next-step-action-panel .lead-actions {
         justify-content: flex-start;
+      }
+      .lead-age-flag {
+        width: max-content;
+        max-width: 100%;
+        margin-top: 8px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        color: #8a3b00;
+        background: #fff0dc;
+        border: 1px solid #ffd09d;
+        font-size: 0.76rem;
+        font-weight: 900;
       }
       #dialog-folder-workspace .folder-path-card,
       #dialog-folder-workspace .folder-checklist {
@@ -57,6 +74,44 @@
     return map[label] || 'new';
   }
 
+  function getActiveLead() {
+    try {
+      if (typeof activeLead !== 'undefined') return activeLead;
+    } catch {
+      return null;
+    }
+    return null;
+  }
+
+  function getAllLeads() {
+    try {
+      if (Array.isArray(leads)) return leads;
+    } catch {
+      return [];
+    }
+    return [];
+  }
+
+  function parseLeadDate(value) {
+    if (!value || /proposal|stored|not/i.test(String(value))) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  }
+
+  function estimateAgeDays(lead) {
+    if (!lead) return null;
+    const date = parseLeadDate(lead.estimateDate) || parseLeadDate(lead.createdAt);
+    if (!date) return null;
+    const diff = Date.now() - date.getTime();
+    if (diff < 0) return 0;
+    return Math.floor(diff / 86400000);
+  }
+
+  function isEstimateOverdue(lead) {
+    return lead?.stage === 'estimate-sent' && Number(estimateAgeDays(lead)) >= 5;
+  }
+
   function ensureNextStepPanel() {
     const nextStep = document.querySelector('#dialog-next');
     const wrapper = nextStep?.closest('div');
@@ -70,24 +125,29 @@
     panel.className = 'next-step-action-panel';
     panel.hidden = true;
     panel.innerHTML = `
-      <strong>Scheduling email</strong>
-      <span>Use this once the customer has been contacted and is ready to schedule.</span>
-      <div class="lead-actions">
-        <button class="button primary" id="copy-schedule-template-command" type="button">Copy schedule email command</button>
-      </div>
+      <strong id="next-step-action-title"></strong>
+      <span id="next-step-action-text"></span>
+      <div class="lead-actions" id="next-step-action-buttons"></div>
     `;
 
     wrapper.insertAdjacentElement('afterend', panel);
-    panel.querySelector('#copy-schedule-template-command')?.addEventListener('click', async () => {
-      const button = panel.querySelector('#copy-schedule-template-command');
+    return panel;
+  }
+
+  function copyButton(label, copiedLabel, text) {
+    const button = document.createElement('button');
+    button.className = 'button primary';
+    button.type = 'button';
+    button.textContent = label;
+    button.addEventListener('click', async () => {
       try {
-        await navigator.clipboard.writeText(scheduleCommand);
-        button.textContent = 'Copied schedule command';
+        await navigator.clipboard.writeText(text);
+        button.textContent = copiedLabel;
       } catch {
         button.textContent = 'Copy failed';
       }
     });
-    return panel;
+    return button;
   }
 
   function renderNextStepActions() {
@@ -95,9 +155,37 @@
     if (!panel) return;
 
     const stage = currentStage();
-    panel.hidden = stage !== 'contacted';
-    const button = panel.querySelector('#copy-schedule-template-command');
-    if (button && !panel.hidden) button.textContent = 'Copy schedule email command';
+    const lead = getActiveLead();
+    const title = panel.querySelector('#next-step-action-title');
+    const text = panel.querySelector('#next-step-action-text');
+    const buttons = panel.querySelector('#next-step-action-buttons');
+    buttons.replaceChildren();
+    panel.classList.remove('is-urgent');
+
+    if (stage === 'contacted') {
+      panel.hidden = false;
+      title.textContent = 'Scheduling email';
+      text.textContent = 'Use this when the customer is ready to book an estimate appointment.';
+      buttons.append(copyButton('Copy schedule email command', 'Copied schedule command', scheduleCommand));
+      return;
+    }
+
+    if (stage === 'estimate-sent') {
+      const age = estimateAgeDays(lead);
+      const overdue = Number(age) >= 5;
+      panel.hidden = false;
+      panel.classList.toggle('is-urgent', overdue);
+      title.textContent = overdue ? 'Estimate follow-up due' : 'Estimate follow-up plan';
+      text.textContent = overdue
+        ? `This estimate has been out for ${age} days. Follow up today and log the response.`
+        : age === null
+          ? 'Estimate is sent. If the sent date is not stored, use a 5-day follow-up from memory or update the date in the lead record.'
+          : `Estimate sent ${age} day${age === 1 ? '' : 's'} ago. Light check-in at 2 days; full follow-up at 5 days.`;
+      buttons.append(copyButton('Copy follow-up message', 'Copied follow-up message', followUpMessage));
+      return;
+    }
+
+    panel.hidden = true;
   }
 
   function simplifyFolderPanel() {
@@ -138,9 +226,28 @@
     }
   }
 
+  function addEstimateFlags() {
+    const sourceLeads = getAllLeads();
+    if (!sourceLeads.length) return;
+
+    document.querySelectorAll('.lead-card').forEach((card) => {
+      card.querySelector('.lead-age-flag')?.remove();
+      const name = card.querySelector('.lead-name')?.textContent?.trim();
+      const lead = sourceLeads.find((item) => item.name === name);
+      if (!isEstimateOverdue(lead)) return;
+
+      const age = estimateAgeDays(lead);
+      const flag = document.createElement('span');
+      flag.className = 'lead-age-flag';
+      flag.textContent = `${age}+ day follow-up`;
+      card.querySelector('.lead-card-button')?.append(flag);
+    });
+  }
+
   function refreshWorkflowActions() {
     renderNextStepActions();
     simplifyFolderPanel();
+    addEstimateFlags();
   }
 
   function hookLeadDialog() {
@@ -159,20 +266,39 @@
     showLead = enhancedShowLead;
   }
 
+  function hookBoardRender() {
+    if (typeof renderAll !== 'function') {
+      window.setTimeout(hookBoardRender, 150);
+      return;
+    }
+    if (renderAll.isEstimateFollowUpEnhanced) return;
+
+    const originalRenderAll = renderAll;
+    const enhancedRenderAll = function enhancedEstimateFollowUpRenderAll() {
+      originalRenderAll();
+      window.setTimeout(addEstimateFlags, 0);
+    };
+    enhancedRenderAll.isEstimateFollowUpEnhanced = true;
+    renderAll = enhancedRenderAll;
+  }
+
   function init() {
     injectStyles();
     hookLeadDialog();
+    hookBoardRender();
     document.addEventListener('click', (event) => {
       if (event.target.closest('.lead-card-button, #mark-qualified-button, #move-next-button, #mark-spam-button')) {
         window.setTimeout(refreshWorkflowActions, 100);
       }
     });
     document.addEventListener('change', (event) => {
-      if (event.target.matches('#dialog-status-select')) {
+      if (event.target.matches('#dialog-status-select, #stage-filter')) {
         window.setTimeout(refreshWorkflowActions, 150);
       }
     });
+    window.addEventListener('breeze-private-leads', () => window.setTimeout(addEstimateFlags, 0));
     window.setTimeout(refreshWorkflowActions, 500);
+    window.setTimeout(addEstimateFlags, 700);
   }
 
   if (document.readyState === 'loading') {
