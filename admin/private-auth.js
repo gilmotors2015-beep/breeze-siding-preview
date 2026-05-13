@@ -38,13 +38,26 @@
     if (target) target.textContent = message;
   }
 
-  function loadDashboardEnhancements() {
-    if (document.querySelector('script[data-admin-status-enhancement]')) return;
+  function appendEnhancementScript(src, flagName) {
+    if (document.querySelector(`script[data-${flagName}]`)) return null;
     const script = document.createElement('script');
-    script.src = '/admin/admin-status-enhancement.js?v=status-7';
+    script.src = src;
     script.defer = true;
-    script.dataset.adminStatusEnhancement = 'true';
+    script.async = false;
+    script.dataset[flagName] = 'true';
     document.body.append(script);
+    return script;
+  }
+
+  function loadDashboardEnhancements() {
+    const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'adminStatusEnhancement');
+    const loadWorkflowActions = () => appendEnhancementScript('/admin/admin-workflow-actions.js?v=workflow-1', 'adminWorkflowActions');
+
+    if (statusScript) {
+      statusScript.addEventListener('load', loadWorkflowActions, { once: true });
+    } else {
+      loadWorkflowActions();
+    }
   }
 
   function unlockDashboard() {
