@@ -1,7 +1,6 @@
 (() => {
   const supabaseUrl = 'https://nwvsriwsbpdhszmmousi.supabase.co';
   const supabaseAnonKey = 'sb_publishable_SHsFk0DcYRACTjzr_xZsAA_e-wX-Vt7';
-  const submitTimeoutMs = 8000;
   const form = document.querySelector('#estimate-lead-form');
   const status = document.querySelector('#estimate-form-status');
 
@@ -45,12 +44,6 @@
     });
   }
 
-  function timeoutAfter(ms) {
-    return new Promise((resolve) => {
-      window.setTimeout(() => resolve({ timedOut: true }), ms);
-    });
-  }
-
   async function submitLead(event) {
     event.preventDefault();
 
@@ -76,19 +69,9 @@
     setStatus('Sending your request securely...', 'info');
 
     const client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-    const submitRequest = client.from('leads').insert(leadFromForm(data));
-    const result = await Promise.race([submitRequest, timeoutAfter(submitTimeoutMs)]);
+    const { error } = await client.from('leads').insert(leadFromForm(data));
 
-    if (result?.timedOut) {
-      setStatus('This is taking longer than expected. Please wait a moment or call 253-228-0531.', 'error');
-      if (button) {
-        button.disabled = false;
-        button.textContent = originalText;
-      }
-      return;
-    }
-
-    if (result?.error) {
+    if (error) {
       setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       if (button) {
         button.disabled = false;
