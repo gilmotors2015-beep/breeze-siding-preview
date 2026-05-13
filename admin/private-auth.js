@@ -51,7 +51,15 @@
 
   function loadDashboardEnhancements() {
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
-    const loadDialogPolish = () => appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-2', 'admin-lead-dialog-polish');
+    const loadSchedulePolish = () => appendEnhancementScript('/admin/admin-schedule-action-polish.js?v=schedule-1', 'admin-schedule-action-polish');
+    const loadDialogPolish = () => {
+      const dialogScript = appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-3', 'admin-lead-dialog-polish');
+      if (dialogScript) {
+        dialogScript.addEventListener('load', loadSchedulePolish, { once: true });
+      } else {
+        loadSchedulePolish();
+      }
+    };
     const loadFlowPolish = () => {
       const flowScript = appendEnhancementScript('/admin/admin-flow-polish.js?v=flow-2', 'admin-flow-polish');
       if (flowScript) {
@@ -130,7 +138,11 @@
       email: row.email || 'Not set',
       phone: row.phone || 'Not set',
       address: address || 'Not set',
+      addressLine: row.address_line || '',
       city: cityStateZip || row.city || 'Not set',
+      cityName: row.city || '',
+      state: row.state || 'WA',
+      zip: row.zip || '',
       project: row.project_summary || row.project_type || 'Not set',
       estimateNo: row.estimate_no || '',
       estimateDate: row.estimate_date || '',
