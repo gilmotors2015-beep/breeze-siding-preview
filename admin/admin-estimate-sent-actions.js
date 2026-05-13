@@ -1,4 +1,7 @@
 (() => {
+  const followUpTemplatePath = 'D:\\OneDrive\\Breeze Siding documents\\Marketing\\emails\\Templates\\Website Style OFT\\Follow up - website style.oft';
+  const followUpCommand = `Start-Process -FilePath '${followUpTemplatePath.replace(/'/g, "''")}'`;
+
   function todayDateString() {
     const now = new Date();
     return `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
@@ -8,6 +11,11 @@
     const value = String(lead?.estimateDate || '').trim();
     if (!value || /proposal|stored|not/i.test(value)) return false;
     return !Number.isNaN(new Date(value).getTime());
+  }
+
+  function currentStage() {
+    const label = document.querySelector('#dialog-stage')?.textContent?.trim().toLowerCase() || '';
+    return label === 'estimate sent' ? 'estimate-sent' : label;
   }
 
   function bridge() {
@@ -29,6 +37,28 @@
     if (!error) await bridge()?.loadLeads?.();
   }
 
+  function addFollowUpTemplateButton() {
+    if (currentStage() !== 'estimate-sent') return;
+
+    const buttons = document.querySelector('#next-step-action-buttons');
+    if (!buttons || buttons.querySelector('#copy-follow-up-template-command')) return;
+
+    const button = document.createElement('button');
+    button.className = 'button secondary';
+    button.id = 'copy-follow-up-template-command';
+    button.type = 'button';
+    button.textContent = 'Copy follow-up email command';
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(followUpCommand);
+        button.textContent = 'Copied follow-up command';
+      } catch {
+        button.textContent = 'Copy failed';
+      }
+    });
+    buttons.prepend(button);
+  }
+
   function hookPersistStage() {
     if (typeof persistStage !== 'function') {
       window.setTimeout(hookPersistStage, 150);
@@ -47,6 +77,7 @@
 
       const result = await originalPersistStage(lead, stage);
       if (estimateDate) await saveEstimateDate(lead, estimateDate);
+      window.setTimeout(addFollowUpTemplateButton, 50);
       return result;
     };
 
@@ -54,9 +85,24 @@
     persistStage = enhancedPersistStage;
   }
 
-  if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', hookPersistStage, { once: true });
-  } else {
+  function init() {
     hookPersistStage();
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('.lead-card-button, #move-next-button, #mark-qualified-button')) {
+        window.setTimeout(addFollowUpTemplateButton, 150);
+      }
+    });
+    document.addEventListener('change', (event) => {
+      if (event.target.matches('#stage-filter')) {
+        window.setTimeout(addFollowUpTemplateButton, 150);
+      }
+    });
+    window.setTimeout(addFollowUpTemplateButton, 700);
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
   }
 })();
