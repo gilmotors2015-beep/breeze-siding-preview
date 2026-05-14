@@ -67,12 +67,11 @@
         body: JSON.stringify(record)
       });
     } catch (error) {
-      throw new Error(`network: ${error?.message || 'request blocked'}`);
+      throw new Error(error?.message || 'The request was blocked by the browser.');
     }
 
     if (!response.ok) {
-      const details = await response.text().catch(() => '');
-      throw new Error(`http ${response.status}: ${details || response.statusText || 'request rejected'}`);
+      throw new Error('The lead request was rejected.');
     }
 
     return { ok: true };
@@ -80,12 +79,6 @@
 
   function openConfirmation() {
     window.location.assign(thankYouUrl);
-  }
-
-  function shortError(error) {
-    return String(error?.message || error || 'unknown error')
-      .replace(/\s+/g, ' ')
-      .slice(0, 180);
   }
 
   async function submitLead(event) {
@@ -131,9 +124,9 @@
 
       setStatus('Request received. Opening the confirmation page...', 'success');
       openConfirmation();
-    } catch (error) {
+    } catch (_error) {
       window.clearTimeout(noticeTimer);
-      setStatus(`The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com. Diagnostic: ${shortError(error)}`, 'error');
+      setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       if (button) {
         button.disabled = false;
         button.textContent = originalText;
