@@ -60,8 +60,7 @@
         'Content-Type': 'application/json',
         Prefer: 'return=minimal'
       },
-      body: JSON.stringify(record),
-      keepalive: true
+      body: JSON.stringify(record)
     });
 
     if (!response.ok) {
