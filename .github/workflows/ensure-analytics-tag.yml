@@ -1,0 +1,37 @@
+name: Ensure Analytics Tag
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+      - 'analytics.js'
+      - 'scripts/ensure-analytics-tag.mjs'
+      - '.github/workflows/ensure-analytics-tag.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ensure-analytics:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Add analytics tag to public pages
+        run: node scripts/ensure-analytics-tag.mjs
+      - name: Commit analytics tag updates
+        run: |
+          if git diff --quiet; then
+            echo "No analytics tag changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Ensure Analytics tag on public pages"
+          git push
