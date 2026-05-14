@@ -1,5 +1,4 @@
 (() => {
-  const googleAnalyticsId = 'G-6F5K9JGX39';
   const supabaseUrl = 'https://nwvsriwsbpdhszmmousi.supabase.co';
   const supabaseAnonKey = 'sb_publishable_SHsFk0DcYRACTjzr_xZsAA_e-wX-Vt7';
   const form = document.querySelector('#estimate-lead-form');
@@ -7,35 +6,6 @@
   const thankYouUrl = '/thank-you.html';
   const softNoticeMs = 1400;
   const redirectTimeoutMs = 4200;
-
-  function loadGoogleAnalytics() {
-    if (!googleAnalyticsId || window.__breezeAnalyticsLoaded) return;
-    window.__breezeAnalyticsLoaded = true;
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = window.gtag || function gtag() {
-      window.dataLayer.push(arguments);
-    };
-
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(googleAnalyticsId)}`;
-    document.head.appendChild(script);
-
-    window.gtag('js', new Date());
-    window.gtag('config', googleAnalyticsId);
-  }
-
-  function trackLeadSubmission(record) {
-    if (typeof window.gtag !== 'function') return;
-    window.gtag('event', 'generate_lead', {
-      event_category: 'lead',
-      event_label: record.project_type || 'Website lead',
-      method: 'website_form'
-    });
-  }
-
-  loadGoogleAnalytics();
 
   if (!form || !status) return;
 
@@ -96,7 +66,7 @@
     const client = factory.createClient(supabaseUrl, supabaseAnonKey);
     const { error } = await client.from('leads').insert(record);
     if (error) throw error;
-    return { ok: true, record };
+    return { ok: true };
   }
 
   function openConfirmation() {
@@ -144,7 +114,6 @@
         return;
       }
 
-      trackLeadSubmission(result.record || {});
       setStatus('Request received. Opening the confirmation page...', 'success');
       openConfirmation();
     } catch (_error) {
