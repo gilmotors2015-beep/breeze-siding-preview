@@ -52,20 +52,27 @@
   }
 
   async function insertLead(record) {
-    const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
-      method: 'POST',
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
-      body: JSON.stringify(record)
-    });
+    let response;
+    try {
+      response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify(record)
+      });
+    } catch (error) {
+      throw new Error(`network: ${error?.message || 'request blocked'}`);
+    }
 
     if (!response.ok) {
       const details = await response.text().catch(() => '');
-      throw new Error(details || `Lead request failed with ${response.status}`);
+      throw new Error(`http ${response.status}: ${details || response.statusText || 'request rejected'}`);
     }
 
     return { ok: true };
@@ -73,6 +80,12 @@
 
   function openConfirmation() {
     window.location.assign(thankYouUrl);
+  }
+
+  function shortError(error) {
+    return String(error?.message || error || 'unknown error')
+      .replace(/\s+/g, ' ')
+      .slice(0, 180);
   }
 
   async function submitLead(event) {
@@ -118,9 +131,9 @@
 
       setStatus('Request received. Opening the confirmation page...', 'success');
       openConfirmation();
-    } catch (_error) {
+    } catch (error) {
       window.clearTimeout(noticeTimer);
-      setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
+      setStatus(`The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com. Diagnostic: ${shortError(error)}`, 'error');
       if (button) {
         button.disabled = false;
         button.textContent = originalText;
