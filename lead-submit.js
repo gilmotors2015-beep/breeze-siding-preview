@@ -5,7 +5,7 @@
   const status = document.querySelector('#estimate-form-status');
   const thankYouUrl = '/thank-you.html';
   const softNoticeMs = 1400;
-  const redirectTimeoutMs = 4200;
+  const redirectTimeoutMs = 6500;
 
   if (!form || !status) return;
 
@@ -51,21 +51,24 @@
     return new Promise((resolve) => window.setTimeout(() => resolve(value), ms));
   }
 
-  async function waitForSupabaseFactory() {
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      if (window.supabase?.createClient) return window.supabase;
-      await delay(100);
-    }
-    return null;
-  }
-
   async function insertLead(record) {
-    const factory = await waitForSupabaseFactory();
-    if (!factory?.createClient) throw new Error('Lead system is still loading.');
+    const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify(record),
+      keepalive: true
+    });
 
-    const client = factory.createClient(supabaseUrl, supabaseAnonKey);
-    const { error } = await client.from('leads').insert(record);
-    if (error) throw error;
+    if (!response.ok) {
+      const details = await response.text().catch(() => '');
+      throw new Error(details || `Lead request failed with ${response.status}`);
+    }
+
     return { ok: true };
   }
 
