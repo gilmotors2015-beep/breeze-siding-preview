@@ -1,7 +1,7 @@
 (() => {
   const mounts = document.querySelectorAll('[data-estimate-form]');
   const intro = document.querySelector('.landing-intro');
-  const imagePool = [
+  const approvedImages = [
     { src: '/assets/images/hmx0xllvnpridzeogaix.jpeg', alt: 'Finished siding exterior with crisp window and trim details', caption: 'Finished exterior details should look tidy and protect vulnerable openings.' },
     { src: '/assets/images/Untitled%20design.jpg', alt: 'Crisp trim and shingle siding detail on a high-end exterior', caption: 'Crisp trim and balanced siding profiles for a refined exterior.' },
     { src: '/assets/images/Breeze%20Siding_-17.jpeg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
@@ -13,186 +13,82 @@
     { src: '/assets/images/wf2yhzrrt6kac8qrdxvt.jpeg', alt: 'Modern exterior with panel siding and wood accent siding', caption: 'Warm accent siding paired with modern panel detailing.' }
   ];
 
-  const cityContent = {
-    Tacoma: {
-      benefits: {
-        eyebrow: 'Tacoma homeowner value',
-        title: 'Siding work should respect older homes, busy streets, and South Sound weather.',
-        body: [
-          'Tacoma homes often have a mix of original wood details, older additions, and remodel work completed at different times. A strong siding project can clean up that history while protecting the home from rain, wind, and shaded-wall moisture.',
-          'Breeze Siding helps Tacoma homeowners prioritize the details that matter most: trim condition, window transitions, paint failure, lower-wall exposure, and curb appeal that feels appropriate for the neighborhood.'
-        ],
-        cards: [
-          ['Older-home fit', 'Exterior scopes can account for craftsman, mid-century, and updated South Sound homes without making the finish feel generic.'],
-          ['Moisture control', 'We look closely at lower walls, roof returns, penetrations, and trim areas where Tacoma rain tends to show up first.'],
-          ['Street presence', 'A cleaner siding and trim package can make the home feel sharper from the curb without losing local character.'],
-          ['Repair clarity', 'Visible rot, loose trim, paint breakdown, and window issues can be organized into one more useful estimate conversation.']
-        ]
-      },
-      products: {
-        eyebrow: 'Tacoma siding materials',
-        title: 'Durable products for older homes, remodels, and South Sound exposure.',
-        body: [
-          'Tacoma projects often need siding products that can handle weather while still fitting the character of established neighborhoods. James Hardie lap siding, fiber cement trim, and carefully selected panel accents can modernize the home without making it feel out of place.',
-          'We pay close attention to flashing, clearances, window trim, deck connections, and paint-ready details so the exterior is more than a surface refresh.'
-        ]
-      },
-      processTitle: 'A Tacoma siding process that starts with condition, not assumptions.'
+  const profiles = {
+    Seattle: {
+      region: 'Seattle', nearby: ['Ballard', 'West Seattle', 'Queen Anne', 'Magnolia', 'Capitol Hill', 'Green Lake', 'Wallingford', 'Phinney Ridge'], exposure: 'shade, mature trees, older trim details, and long wet seasons', value: 'protect older wall assemblies while keeping the exterior appropriate for the neighborhood', tone: 'city home', links: ['/seattle-siding-costs.html', '/siding-window-flashing-details.html']
     },
-    Kent: {
-      benefits: {
-        eyebrow: 'Kent homeowner value',
-        title: 'A better siding project protects the home through wet winters and busy everyday use.',
-        body: [
-          'Kent homes range from older South King County properties to newer subdivisions where siding failure can show up around trim, windows, and high-exposure elevations. A well-planned exterior can improve the look of the home while reducing maintenance surprises.',
-          'Breeze Siding helps Kent homeowners compare practical material options, identify repair-prone areas, and choose a scope that fits the home instead of forcing a one-size-fits-all package.'
-        ],
-        cards: [
-          ['Practical curb appeal', 'Fresh siding, straight trim, and clean color transitions can make a Kent home feel newer and better maintained.'],
-          ['Weather resilience', 'Fiber cement, good clearances, and better detailing help protect the home through long wet stretches.'],
-          ['Scope control', 'We help separate must-fix issues from optional upgrades so the estimate stays understandable.'],
-          ['Connected details', 'Windows, paint, trim, and deck-adjacent siding can be reviewed together when they affect the same wall system.']
-        ]
-      },
-      products: {
-        eyebrow: 'Kent exterior systems',
-        title: 'Material choices should balance durability, budget, and long-term maintenance.',
-        body: [
-          'For Kent homes, fiber cement and James Hardie siding are common choices because they offer a durable finish when installed with proper trim, flashing, and paint details. Panel accents can work well when the home needs a cleaner modern update.',
-          'The important part is not only the product. It is how the siding ties into windows, corners, penetrations, ground clearances, and water-shedding details.'
-        ]
-      },
-      processTitle: 'A Kent estimate process built around practical priorities.'
+    Tacoma: {
+      region: 'South Sound', nearby: ['North Tacoma', 'Proctor District', 'Old Town', 'Central Tacoma', 'South Tacoma', 'Fircrest', 'University Place'], exposure: 'older home details, porch transitions, wind-driven rain, and mixed remodel history', value: 'respect Tacoma character while correcting the details that lead to rot and paint failure', tone: 'South Sound home', links: ['/siding-replacement-proctor-district.html', '/dry-rot-repair-seattle.html']
+    },
+    'Proctor District': {
+      region: 'North Tacoma', nearby: ['Proctor', 'Old Town', 'Stadium District', 'Ruston', 'University Place', 'North End Tacoma'], exposure: 'older homes, porch details, mature trees, and visible street-facing elevations', value: 'preserve neighborhood character while adding better moisture protection and cleaner trim', tone: 'North Tacoma home', links: ['/tacoma-siding-replacement-contractor/', '/siding-replacement-university-place.html']
+    },
+    'University Place': {
+      region: 'West Tacoma', nearby: ['University Place', 'Chambers Bay', 'Fircrest', 'Lakewood', 'West Tacoma', 'Steilacoom'], exposure: 'marine air, exposed elevations, bluff weather, and homes with larger window openings', value: 'tighten the exterior with siding, trim, and window details that hold up near the Sound', tone: 'University Place home', links: ['/tacoma-siding-replacement-contractor/', '/siding-replacement-lakewood.html']
     },
     Bellevue: {
-      benefits: {
-        eyebrow: 'Bellevue homeowner value',
-        title: 'Premium siding should elevate the architecture and protect the investment.',
-        body: [
-          'Bellevue homeowners often care about design alignment, resale confidence, and a finished exterior that feels intentional from the street. The siding scope may involve panel accents, lap siding, window trim, paint coordination, and details that need to look sharp up close.',
-          'Breeze Siding helps connect product choice with curb appeal and weather protection, so the finished project supports both the look of the home and long-term exterior performance.'
-        ],
-        cards: [
-          ['Design alignment', 'Panel placement, trim width, color contrast, and window details are reviewed as part of the overall exterior look.'],
-          ['Investment protection', 'A cleaner exterior can support value when it also handles rain, shade, and wall transitions correctly.'],
-          ['Modern options', 'Hardie panel, lap siding, and reveal-style details can be combined when the home calls for a more contemporary finish.'],
-          ['Finish discipline', 'Straight lines, consistent transitions, and crisp trim details matter on higher-visibility Bellevue projects.']
-        ]
-      },
-      products: {
-        eyebrow: 'Bellevue product strategy',
-        title: 'Modern materials need careful detailing to feel high-end.',
-        body: [
-          'Bellevue projects are a strong fit for James Hardie siding, Hardie panel, fiber cement trim, and modern reveal details when the design calls for cleaner lines. These products can look elevated when the proportions and transitions are planned before installation begins.',
-          'We also look at weather barrier continuity, window integration, flashing, and paint coordination so the exterior is not just attractive, but built for Northwest exposure.'
-        ]
-      },
-      processTitle: 'A Bellevue exterior process focused on design, protection, and clear decisions.'
+      region: 'Eastside', nearby: ['West Bellevue', 'Somerset', 'Newport Hills', 'Bridle Trails', 'Lake Hills', 'Medina', 'Clyde Hill'], exposure: 'high-visibility architecture, large windows, remodel details, and wet Eastside weather', value: 'align premium curb appeal with durable siding and window transitions', tone: 'Eastside home', links: ['/top-rated-siding-replacement-contractor-in-bellevue-wa/', '/siding-replacement-medina.html']
     },
     'Clyde Hill': {
-      benefits: {
-        eyebrow: 'Clyde Hill homeowner value',
-        title: 'High-value homes need exterior details that feel deliberate, not rushed.',
-        body: [
-          'Clyde Hill siding work should be planned with the same care as the rest of the home. The wrong trim profile, panel spacing, or color transition can make an expensive project feel ordinary. The right scope can sharpen the architecture and protect the structure at the same time.',
-          'Breeze Siding helps homeowners think through product selection, premium finish details, moisture management, and the full exterior presentation before the work begins.'
-        ],
-        cards: [
-          ['Architectural fit', 'The siding profile, trim package, and panel details should support the home instead of competing with it.'],
-          ['Premium finish', 'Crisp lines, clean corners, and careful transitions help the finished exterior match the value of the property.'],
-          ['Weather planning', 'Even high-end homes need careful flashing, clearances, and moisture-conscious exterior assemblies.'],
-          ['Decision clarity', 'We help organize product and scope decisions so the estimate conversation feels focused and useful.']
-        ]
-      },
-      products: {
-        eyebrow: 'Clyde Hill material approach',
-        title: 'Premium siding choices should support both architecture and performance.',
-        body: [
-          'Clyde Hill projects can benefit from Hardie panel, fiber cement lap siding, refined trim packages, and selective wood accents when the design calls for warmth. The best result comes from matching the material to the home rather than choosing products in isolation.',
-          'We pay special attention to reveal lines, window transitions, panel layout, drainage strategy, and paint coordination so the project feels intentional from every angle.'
-        ]
-      },
-      processTitle: 'A Clyde Hill siding process built around premium details and careful scope planning.'
+      region: 'Eastside', nearby: ['Clyde Hill', 'Medina', 'Yarrow Point', 'Hunts Point', 'West Bellevue', 'Bellevue'], exposure: 'premium architecture, clean reveal lines, large trim surfaces, and shaded wet walls', value: 'protect the home while keeping every visible detail refined and intentional', tone: 'Clyde Hill home', links: ['/siding-replacement-medina.html', '/top-rated-siding-replacement-contractor-in-bellevue-wa/']
+    },
+    Medina: {
+      region: 'Eastside', nearby: ['Medina', 'Evergreen Point', 'Medina Heights', 'Hunts Point', 'Yarrow Point', 'Clyde Hill'], exposure: 'waterfront-area weather, custom architecture, large windows, and high finish expectations', value: 'coordinate materials, trim, paint, and flashing around the value of the property', tone: 'Medina home', links: ['/clyde-hill-siding-replacement-contractor/', '/siding-replacement-mercer-island.html']
+    },
+    'Mercer Island': {
+      region: 'Eastside', nearby: ['North End', 'First Hill', 'East Seattle', 'Island Crest', 'South End', 'West Mercer'], exposure: 'lake-area moisture, hillside homes, shaded elevations, and complex window details', value: 'match the level of the property while improving protection behind the siding', tone: 'Mercer Island home', links: ['/siding-replacement-bellevue.html', '/siding-window-flashing-details.html']
+    },
+    Issaquah: {
+      region: 'Eastside', nearby: ['Issaquah Highlands', 'Squak Mountain', 'Talus', 'South Lake Sammamish', 'Mirrormont', 'Preston'], exposure: 'tree cover, hillside drainage, shaded walls, and heavy seasonal rain', value: 'solve moisture-prone details while improving curb appeal on hillside and plateau homes', tone: 'Issaquah home', links: ['/siding-replacement-sammamish.html', '/house-wrap-siding-replacement.html']
+    },
+    Sammamish: {
+      region: 'Eastside', nearby: ['Sahalee', 'Pine Lake', 'Klahanie', 'Beaver Lake', 'Inglewood', 'Trossachs'], exposure: 'larger homes, many roofline transitions, shaded sides, and wet plateau conditions', value: 'support long-term value with premium siding, trim, and clean material transitions', tone: 'Sammamish home', links: ['/siding-replacement-issaquah.html', '/hardie-board-vs-vinyl-seattle.html']
+    },
+    Newcastle: {
+      region: 'Eastside', nearby: ['Newcastle', 'China Creek', 'Hazelwood', 'Olympus', 'Coal Creek', 'Newport Hills'], exposure: 'hillside lots, shaded walls, wooded areas, and modern remodel expectations', value: 'pair refined curb appeal with siding details that manage moisture and movement', tone: 'Newcastle home', links: ['/siding-replacement-bellevue.html', '/siding-replacement-renton.html']
+    },
+    Kirkland: {
+      region: 'Eastside', nearby: ['Juanita', 'Houghton', 'Finn Hill', 'Bridle Trails', 'Totem Lake', 'Rose Hill'], exposure: 'lake-area weather, remodel additions, mature trees, and high-visibility elevations', value: 'modernize the exterior while improving the wall details that protect the home', tone: 'Kirkland home', links: ['/siding-replacement-redmond.html', '/window-installation.html']
+    },
+    Redmond: {
+      region: 'Eastside', nearby: ['Education Hill', 'Overlake', 'Grass Lawn', 'Bear Creek', 'Downtown Redmond', 'Union Hill'], exposure: 'rain, shaded suburban lots, older trim packages, and energy-conscious remodels', value: 'balance durable materials, clean design, and long-term maintenance goals', tone: 'Redmond home', links: ['/siding-replacement-kirkland.html', '/insulation-under-siding.html']
+    },
+    Kent: {
+      region: 'South King County', nearby: ['East Hill', 'West Hill', 'Lake Meridian', 'Panther Lake', 'Covington', 'Auburn'], exposure: 'wet winters, older siding, busy family homes, and lower-wall moisture', value: 'organize practical repairs and siding choices into a clear, durable exterior scope', tone: 'Kent home', links: ['/siding-replacement-renton.html', '/siding-replacement-auburn.html']
+    },
+    Renton: {
+      region: 'South King County', nearby: ['Renton Highlands', 'Kennydale', 'Fairwood', 'Talbot Hill', 'Maplewood', 'Newcastle'], exposure: 'hillside lots, older siding, lake-area moisture, and remodel transitions', value: 'connect siding, trim, window, and repair details so the exterior feels complete', tone: 'Renton home', links: ['/siding-replacement-newcastle.html', '/siding-replacement-kent.html']
+    },
+    'Des Moines': {
+      region: 'South King County', nearby: ['Des Moines', 'Redondo', 'North Hill', 'Woodmont', 'Saltwater State Park area', 'Federal Way'], exposure: 'marine air, wind, rain, and homes close to Puget Sound', value: 'use siding, trim, and flashing details that help the exterior handle coastal weather', tone: 'Des Moines home', links: ['/siding-replacement-federal-way.html', '/window-leak-repair-seattle.html']
+    },
+    Edgewood: {
+      region: 'Pierce County', nearby: ['Edgewood', 'North Hill', 'Milton', 'Sumner', 'Puyallup', 'Federal Way'], exposure: 'open lots, wind-driven rain, rural edges, and older trim details', value: 'give the home a cleaner exterior while correcting moisture-prone siding areas', tone: 'Edgewood home', links: ['/puyallup-siding-replacement-contractor/', '/siding-replacement-federal-way.html']
+    },
+    Lakewood: {
+      region: 'South Sound', nearby: ['Lakewood', 'Steilacoom', 'University Place', 'Tillicum', 'Oakbrook', 'Tacoma'], exposure: 'lake-area moisture, shaded lots, older siding, and military-area rental wear', value: 'create a durable exterior scope that improves curb appeal and reduces repeat repairs', tone: 'Lakewood home', links: ['/siding-replacement-university-place.html', '/tacoma-siding-replacement-contractor/']
+    },
+    Graham: {
+      region: 'Pierce County', nearby: ['Graham', 'Frederickson', 'Spanaway', 'Puyallup', 'South Hill', 'Elk Plain'], exposure: 'larger lots, exposed elevations, rain, wind, and homes with practical maintenance needs', value: 'make the exterior easier to maintain while improving protection and appearance', tone: 'Graham home', links: ['/siding-replacement-spanaway.html', '/puyallup-siding-replacement-contractor/']
     },
     Puyallup: {
-      benefits: {
-        eyebrow: 'Puyallup homeowner value',
-        title: 'A South Sound exterior should handle weather, wear, and everyday curb appeal.',
-        body: [
-          'Puyallup homes can see wind-driven rain, exposed elevations, lower-wall moisture, and siding wear around decks, entries, and trim. A good siding project should make the home look better while solving the details that caused trouble in the first place.',
-          'Breeze Siding helps Puyallup homeowners build practical scopes for siding replacement, dry rot repair, trim updates, windows, paint, and connected exterior work.'
-        ],
-        cards: [
-          ['Nearby crew', 'A local South Sound contractor can respond with practical knowledge of Puyallup, South Hill, and Pierce County homes.'],
-          ['Better first impression', 'Updated siding, trim, and entry details can dramatically improve how the home feels from the driveway.'],
-          ['Weather-ready scope', 'We review lower walls, deck connections, window trim, and exposed elevations where moisture problems often begin.'],
-          ['Project flexibility', 'Siding, paint, windows, and deck-adjacent details can be coordinated when the home needs more than one trade.']
-        ]
-      },
-      products: {
-        eyebrow: 'Puyallup material planning',
-        title: 'Choose siding that fits the home, the weather, and the maintenance goal.',
-        body: [
-          'For Puyallup homeowners, fiber cement and James Hardie products are useful options when the goal is durability and a cleaner long-term finish. Cedar-style looks, panel accents, and warm entry details can also help the exterior feel more custom.',
-          'We focus on the details that make the product perform: clearances, trim, weather barrier tie-ins, window transitions, and paint-ready installation.'
-        ]
-      },
-      processTitle: 'A Puyallup siding process that keeps the scope practical and the finish sharp.'
+      region: 'Pierce County', nearby: ['South Hill', 'Downtown Puyallup', 'Edgewood', 'Sumner', 'Bonney Lake', 'Graham'], exposure: 'wind-driven rain, lower-wall moisture, deck connections, and high-sun exposures', value: 'refresh curb appeal while addressing the details that cause siding and trim problems', tone: 'Puyallup home', links: ['/puyallup-siding-replacement-contractor/', '/siding-replacement-graham.html']
     },
-    Seattle: {
-      benefits: {
-        eyebrow: 'Seattle homeowner value',
-        title: 'Seattle siding needs moisture awareness from the first estimate conversation.',
-        body: [
-          'Seattle homes often have shaded elevations, mature trees, older trim details, and siding that stays damp longer than homeowners expect. A strong siding project can improve curb appeal while addressing the details that keep causing rot, paint failure, and water intrusion.',
-          'Breeze Siding looks at the whole exterior: siding, trim, windows, penetrations, weather barrier, decks, and roofline transitions that affect how the home performs in a wet climate.'
-        ],
-        cards: [
-          ['Moisture diagnosis', 'We look beyond visible siding to the trim, windows, and transitions where Seattle homes often fail first.'],
-          ['Curb appeal', 'Clean siding and trim can make an older Seattle exterior feel refreshed without losing neighborhood character.'],
-          ['Energy comfort', 'Siding projects are a good time to review drafts, window tie-ins, and weather barrier concerns.'],
-          ['Long-term value', 'A more complete exterior scope can reduce repeat repairs and support stronger resale confidence.']
-        ]
-      },
-      products: {
-        eyebrow: 'Seattle exterior systems',
-        title: 'Materials need to work with rain, shade, and complex wall details.',
-        body: [
-          'Seattle homes benefit from siding products and weather details that account for damp walls, shaded sides, older window openings, and roofline transitions. James Hardie, fiber cement, rainscreen thinking, and better flashing details can all play a role.',
-          'We help homeowners choose materials that look appropriate for the home while improving the way the exterior manages water.'
-        ]
-      },
-      processTitle: 'A Seattle siding process built around moisture, trim, and window details.'
+    'Federal Way': {
+      region: 'South King County', nearby: ['Federal Way', 'Twin Lakes', 'Dash Point', 'Lakota', 'Redondo', 'Des Moines'], exposure: 'marine air, wooded lots, wet winters, and older exterior packages', value: 'replace failing siding with practical material choices and stronger weather details', tone: 'Federal Way home', links: ['/siding-replacement-des-moines.html', '/siding-replacement-auburn.html']
+    },
+    Auburn: {
+      region: 'South King County', nearby: ['Auburn', 'Lea Hill', 'Lakeland Hills', 'Algona', 'Pacific', 'Kent'], exposure: 'valley moisture, mixed home ages, exposed walls, and busy family use', value: 'organize siding, trim, and repair work into a clear scope that improves the whole exterior', tone: 'Auburn home', links: ['/siding-replacement-kent.html', '/siding-replacement-puyallup.html']
+    },
+    Spanaway: {
+      region: 'Pierce County', nearby: ['Spanaway', 'Frederickson', 'Parkland', 'Graham', 'Elk Plain', 'Puyallup'], exposure: 'wet winters, exposed siding, older trim, and practical repair needs', value: 'deliver a stronger, cleaner exterior for homeowners close to Breeze Siding’s home base', tone: 'Spanaway home', links: ['/siding-replacement-graham.html', '/puyallup-siding-replacement-contractor/']
+    },
+    'Gig Harbor': {
+      region: 'South Sound', nearby: ['Gig Harbor', 'Artondale', 'Rosedale', 'Fox Island', 'Canterwood', 'Wollochet'], exposure: 'marine air, wooded lots, custom homes, and waterfront weather', value: 'combine premium curb appeal with moisture-conscious siding and trim details', tone: 'Gig Harbor home', links: ['/siding-replacement-university-place.html', '/commercial-siding.html']
     }
   };
 
-  const locationMeta = {
-    Seattle: ['Ballard', 'West Seattle', 'Queen Anne', 'Magnolia', 'Capitol Hill', 'Green Lake', 'Wallingford', 'Phinney Ridge'],
-    Tacoma: ['North Tacoma', 'Proctor District', 'Old Town', 'Central Tacoma', 'South Tacoma', 'Fircrest', 'University Place'],
-    'Proctor District': ['Proctor', 'North Tacoma', 'Old Town', 'Stadium District', 'Ruston', 'University Place'],
-    'University Place': ['University Place', 'Fircrest', 'Chambers Bay', 'West Tacoma', 'Lakewood', 'Tacoma'],
-    Bellevue: ['West Bellevue', 'Somerset', 'Newport Hills', 'Bridle Trails', 'Lake Hills', 'Clyde Hill', 'Medina'],
-    'Clyde Hill': ['Clyde Hill', 'Medina', 'Yarrow Point', 'Hunts Point', 'West Bellevue', 'Bellevue'],
-    Medina: ['Medina', 'Evergreen Point', 'Medina Heights', 'Hunts Point', 'Yarrow Point', 'Clyde Hill'],
-    'Mercer Island': ['North End', 'First Hill', 'East Seattle', 'Island Crest', 'South End', 'West Mercer'],
-    Issaquah: ['Issaquah Highlands', 'Squak Mountain', 'Talus', 'South Lake Sammamish', 'Mirrormont', 'Preston'],
-    Sammamish: ['Sahalee', 'Pine Lake', 'Klahanie', 'Beaver Lake', 'Inglewood', 'Trossachs'],
-    Newcastle: ['Newcastle', 'China Creek', 'Hazelwood', 'Olympus', 'Coal Creek', 'Newport Hills'],
-    Kirkland: ['Juanita', 'Houghton', 'Finn Hill', 'Bridle Trails', 'Totem Lake', 'Rose Hill'],
-    Redmond: ['Education Hill', 'Overlake', 'Grass Lawn', 'Bear Creek', 'Downtown Redmond', 'Union Hill'],
-    Kent: ['East Hill', 'West Hill', 'Lake Meridian', 'Panther Lake', 'Covington', 'Auburn'],
-    Renton: ['Renton Highlands', 'Kennydale', 'Fairwood', 'Talbot Hill', 'Maplewood', 'Newcastle'],
-    'Des Moines': ['Des Moines', 'Redondo', 'North Hill', 'Woodmont', 'Saltwater State Park area', 'Federal Way'],
-    Edgewood: ['Edgewood', 'North Hill', 'Milton', 'Sumner', 'Puyallup', 'Federal Way'],
-    Lakewood: ['Lakewood', 'Steilacoom', 'University Place', 'Tillicum', 'Oakbrook', 'Tacoma'],
-    Graham: ['Graham', 'Frederickson', 'Spanaway', 'Puyallup', 'South Hill', 'Elk Plain'],
-    'Federal Way': ['Federal Way', 'Twin Lakes', 'Dash Point', 'Lakota', 'Redondo', 'Des Moines'],
-    Auburn: ['Auburn', 'Lea Hill', 'Lakeland Hills', 'Algona', 'Pacific', 'Kent'],
-    Spanaway: ['Spanaway', 'Frederickson', 'Parkland', 'Graham', 'Elk Plain', 'Puyallup'],
-    'Gig Harbor': ['Gig Harbor', 'Artondale', 'Rosedale', 'Fox Island', 'Canterwood', 'Wollochet']
-  };
-
-  const defaultContent = cityContent.Seattle;
+  const fallbackProfile = profiles.Seattle;
 
   function normalizeImage(value) {
     return String(value || '').split('?')[0].replace(/^https?:\/\/[^/]+/, '').replace(/^url\(["']?|["']?\)$/g, '');
@@ -200,8 +96,7 @@
 
   function getHeroImage() {
     const hero = document.querySelector('.local-hero');
-    const inlineImage = hero?.style.getPropertyValue('--hero-image');
-    return normalizeImage(inlineImage);
+    return normalizeImage(hero?.style.getPropertyValue('--hero-image'));
   }
 
   function removeRepeatedProjectImages() {
@@ -219,8 +114,7 @@
         used.add(current);
         return;
       }
-
-      const replacement = imagePool.find((candidate) => !used.has(normalizeImage(candidate.src)));
+      const replacement = approvedImages.find((candidate) => !used.has(normalizeImage(candidate.src)));
       if (!replacement) return;
       img.src = replacement.src;
       img.alt = replacement.alt;
@@ -230,8 +124,8 @@
     });
   }
 
-  function contentFor(city) {
-    return cityContent[city] || defaultContent;
+  function profileFor(city) {
+    return profiles[city] || fallbackProfile;
   }
 
   function addMeta(name, content) {
@@ -249,15 +143,15 @@
 
   function addLocationStructuredData(city) {
     if (document.getElementById('breeze-location-schema')) return;
-    const neighborhoods = locationMeta[city] || [];
+    const profile = profileFor(city);
     const title = document.querySelector('h1')?.textContent?.trim() || `${city} siding replacement`;
     const description = document.querySelector('meta[name="description"]')?.content || `Siding replacement, fiber cement siding, trim repair, and exterior renovation services in ${city}, WA.`;
     const url = pageUrl();
-    const areaServed = [city, ...neighborhoods].filter(Boolean).map((name) => ({ '@type': 'Place', name: `${name}, WA` }));
+    const areaServed = [city, ...profile.nearby].filter(Boolean).map((name) => ({ '@type': 'Place', name: `${name}, WA` }));
 
     addMeta('geo.region', 'US-WA');
     addMeta('geo.placename', `${city}, Washington`);
-    addMeta('service-area', [city, ...neighborhoods].join(', '));
+    addMeta('service-area', [city, ...profile.nearby].join(', '));
 
     const schema = {
       '@context': 'https://schema.org',
@@ -270,12 +164,7 @@
           telephone: '+1-253-228-0531',
           email: 'service@breezesiding.com',
           image: 'https://breezesiding.com/assets/images/04-30-26%20Breeze%20Siding.png',
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: 'Spanaway',
-            addressRegion: 'WA',
-            addressCountry: 'US'
-          },
+          address: { '@type': 'PostalAddress', addressLocality: 'Spanaway', addressRegion: 'WA', addressCountry: 'US' },
           areaServed
         },
         {
@@ -288,36 +177,17 @@
           url,
           description
         },
-        {
-          '@type': 'WebPage',
-          '@id': `${url}#webpage`,
-          url,
-          name: title,
-          description,
-          about: { '@id': `${url}#service` },
-          mainEntity: { '@id': `${url}#service` }
-        }
+        { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: title, description, about: { '@id': `${url}#service` }, mainEntity: { '@id': `${url}#service` } }
       ]
     };
 
     const faqItems = [...document.querySelectorAll('.local-faq details')].slice(0, 6).map((item) => {
       const question = item.querySelector('summary')?.textContent?.trim();
       const answer = item.querySelector('p')?.textContent?.trim();
-      if (!question || !answer) return null;
-      return {
-        '@type': 'Question',
-        name: question,
-        acceptedAnswer: { '@type': 'Answer', text: answer }
-      };
+      return question && answer ? { '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } } : null;
     }).filter(Boolean);
 
-    if (faqItems.length) {
-      schema['@graph'].push({
-        '@type': 'FAQPage',
-        '@id': `${url}#faq`,
-        mainEntity: faqItems
-      });
-    }
+    if (faqItems.length) schema['@graph'].push({ '@type': 'FAQPage', '@id': `${url}#faq`, mainEntity: faqItems });
 
     const script = document.createElement('script');
     script.type = 'application/ld+json';
@@ -331,53 +201,44 @@
     const hero = document.querySelector('.local-hero');
     const trust = document.querySelector('.trust-strip');
     if (!main || !hero || !trust || !mount) return;
-
     main.style.display = 'flex';
     main.style.flexDirection = 'column';
     hero.style.order = '1';
     trust.style.order = '2';
     mount.style.order = '3';
-
-    if (main.firstElementChild !== hero) {
-      main.insertBefore(hero, main.firstElementChild);
-    }
-    if (hero.nextElementSibling !== trust) {
-      hero.insertAdjacentElement('afterend', trust);
-    }
-    if (trust.nextElementSibling !== mount) {
-      trust.insertAdjacentElement('afterend', mount);
-    }
+    if (main.firstElementChild !== hero) main.insertBefore(hero, main.firstElementChild);
+    if (hero.nextElementSibling !== trust) hero.insertAdjacentElement('afterend', trust);
+    if (trust.nextElementSibling !== mount) trust.insertAdjacentElement('afterend', mount);
   }
 
   function addBenefits(city) {
     if (!intro || document.querySelector('.homeowner-benefits')) return;
-    const data = contentFor(city).benefits;
-    const cards = data.cards.map(([title, text]) => `<article><strong>${title}</strong><span>${text}</span></article>`).join('');
+    const profile = profileFor(city);
     const benefits = document.createElement('section');
     benefits.className = 'section homeowner-benefits';
-    benefits.innerHTML = `<div class="benefit-copy"><p class="eyebrow">${data.eyebrow}</p><h2>${data.title}</h2>${data.body.map((text) => `<p>${text}</p>`).join('')}</div><div class="benefit-metrics">${cards}</div>`;
+    benefits.innerHTML = `<div class="benefit-copy"><p class="eyebrow">${city} homeowner value</p><h2>A better siding project should improve protection, appearance, and confidence.</h2><p>${city} homes deal with ${profile.exposure}. Breeze Siding plans siding replacement around those local realities so the work is not just a surface refresh.</p><p>The right scope can ${profile.value}. That means coordinating siding, trim, windows, paint, repair work, and weather details before the project starts.</p></div><div class="benefit-metrics"><article><strong>Curb appeal</strong><span>Fresh siding and crisp trim can make a ${profile.tone} look cleaner, newer, and better maintained.</span></article><article><strong>Moisture control</strong><span>Flashing, clearances, and window transitions help protect the wall assembly through Northwest weather.</span></article><article><strong>Material fit</strong><span>James Hardie, fiber cement, lap siding, panels, and warm accents are matched to the home and neighborhood.</span></article><article><strong>Scope clarity</strong><span>Visible damage, optional upgrades, and must-fix details are organized into a more useful estimate.</span></article></div>`;
     intro.insertAdjacentElement('afterend', benefits);
   }
 
   function addProductResources(city) {
     if (document.querySelector('.product-links')) return;
-    const data = contentFor(city).products;
+    const profile = profileFor(city);
     const anchor = document.querySelector('.value-grid')?.closest('.section') || document.querySelector('.homeowner-benefits') || intro;
     if (!anchor) return;
+    const links = [...new Set(['/siding-materials-seattle.html', '/hardieplank-siding-cost-seattle.html', ...profile.links])].slice(0, 4);
     const resources = document.createElement('section');
     resources.className = 'section product-links';
-    resources.innerHTML = `<div><p class="eyebrow">${data.eyebrow}</p><h2>${data.title}</h2>${data.body.map((text) => `<p>${text}</p>`).join('')}</div><ul class="resource-list" aria-label="Helpful exterior product resources"><li><a href="https://www.jameshardie.com/" target="_blank" rel="noopener">James Hardie fiber cement siding information</a></li><li><a href="https://vaproshield.com/" target="_blank" rel="noopener">VaproShield weather-resistive barrier and rainscreen resources</a></li><li><a href="https://www.energystar.gov/products/windows_doors_skylights" target="_blank" rel="noopener">ENERGY STAR window and exterior efficiency guidance</a></li></ul>`;
+    resources.innerHTML = `<div><p class="eyebrow">${city} product strategy</p><h2>Material choices should support the home, the climate, and the finish details.</h2><p>For ${city} homeowners, siding choice should connect with trim, windows, weather barrier, paint, and maintenance expectations. James Hardie and fiber cement are strong options when the installation details are planned correctly.</p><p>Breeze Siding also considers panel accents, warm wood-inspired details, lap siding profiles, and repair needs so the final exterior feels complete.</p></div><ul class="resource-list" aria-label="Helpful exterior product resources"><li><a href="https://www.jameshardie.com/" target="_blank" rel="noopener">James Hardie fiber cement siding information</a></li><li><a href="https://vaproshield.com/" target="_blank" rel="noopener">VaproShield weather barrier and rainscreen resources</a></li>${links.map((href) => `<li><a href="${href}">${href.replace(/^\//, '').replace(/\.html$/, '').replace(/-/g, ' ')}</a></li>`).join('')}</ul>`;
     anchor.insertAdjacentElement('afterend', resources);
   }
 
   function addProcess(city) {
     if (document.querySelector('.process')) return;
-    const data = contentFor(city);
     const anchor = document.querySelector('.area-copy') || document.querySelector('.product-links') || document.querySelector('.value-grid')?.closest('.section') || document.querySelector('.photo-band');
     if (!anchor) return;
     const process = document.createElement('section');
     process.className = 'section process';
-    process.innerHTML = `<div class="section-heading"><p class="eyebrow">Process</p><h2>${data.processTitle}</h2></div><ol class="steps"><li><strong>Share the basics.</strong> Tell us the location, project type, timing, and visible concerns.</li><li><strong>Walk the exterior.</strong> We review siding, trim, windows, penetrations, and weather exposure.</li><li><strong>Confirm the scope.</strong> You get practical recommendations for siding, repairs, and related exterior work.</li><li><strong>Build with care.</strong> Our crew installs the approved scope and leaves the property ready for the final walkthrough.</li></ol>`;
+    process.innerHTML = `<div class="section-heading"><p class="eyebrow">Process</p><h2>A ${city} siding process built around condition, details, and clear decisions.</h2></div><ol class="steps"><li><strong>Share the basics.</strong> Tell us the location, project type, timing, and visible concerns.</li><li><strong>Walk the exterior.</strong> We review siding, trim, windows, penetrations, and weather exposure.</li><li><strong>Confirm the scope.</strong> You get practical recommendations for siding, repairs, and related exterior work.</li><li><strong>Build with care.</strong> Our crew installs the approved scope and leaves the property ready for the final walkthrough.</li></ol>`;
     anchor.insertAdjacentElement('afterend', process);
   }
 
@@ -386,7 +247,7 @@
   mounts.forEach((mount) => {
     const city = mount.dataset.city || 'Seattle';
     const heading = mount.dataset.heading || 'Start with a smarter exterior estimate.';
-    const copy = mount.dataset.copy || 'Tell us what is happening with the home and the form will organize the details Breeze Siding needs for a useful first call.';
+    const copy = mount.dataset.copy || 'Tell us what is happening with the home and Breeze Siding will follow up for a useful first conversation.';
 
     lockTopOrder(mount);
     removeRepeatedProjectImages();
