@@ -2,6 +2,29 @@
   const mounts = document.querySelectorAll('[data-estimate-form]');
   const intro = document.querySelector('.landing-intro');
 
+  function lockTopOrder(mount) {
+    const main = document.querySelector('main');
+    const hero = document.querySelector('.local-hero');
+    const trust = document.querySelector('.trust-strip');
+    if (!main || !hero || !trust || !mount) return;
+
+    main.style.display = 'flex';
+    main.style.flexDirection = 'column';
+    hero.style.order = '1';
+    trust.style.order = '2';
+    mount.style.order = '3';
+
+    if (main.firstElementChild !== hero) {
+      main.insertBefore(hero, main.firstElementChild);
+    }
+    if (hero.nextElementSibling !== trust) {
+      hero.insertAdjacentElement('afterend', trust);
+    }
+    if (trust.nextElementSibling !== mount) {
+      trust.insertAdjacentElement('afterend', mount);
+    }
+  }
+
   function addBenefits(city) {
     if (!intro || document.querySelector('.homeowner-benefits')) return;
     const benefits = document.createElement('section');
@@ -26,12 +49,8 @@
     const city = mount.dataset.city || 'Seattle, Tacoma, Spanaway...';
     const heading = mount.dataset.heading || 'Start with a smarter exterior estimate.';
     const copy = mount.dataset.copy || 'Tell us what is happening with the home and the form will organize the details Breeze Siding needs for a useful first call.';
-    const trust = document.querySelector('.trust-strip');
 
-    if (trust && trust.nextElementSibling !== mount) {
-      trust.insertAdjacentElement('afterend', mount);
-    }
-
+    lockTopOrder(mount);
     addBenefits(city);
     addProductResources();
 
