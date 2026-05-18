@@ -1,6 +1,15 @@
 (() => {
   const mounts = document.querySelectorAll('[data-estimate-form]');
   const intro = document.querySelector('.landing-intro');
+  const imagePool = [
+    { src: '/assets/images/project-closeup.jpg', alt: 'Detailed siding and trim work around windows', caption: 'Close-up siding and trim work around vulnerable openings.' },
+    { src: '/assets/images/hardie-panel-multifamily-siding-detail.jpg?v=5', alt: 'Hardie panel siding with clean reveal lines', caption: 'Hardie panel siding and clean reveal lines for modern exterior work.' },
+    { src: '/assets/images/single-story-cedar-exterior-window-project.jpg?v=6', alt: 'Wood siding exterior with large black windows', caption: 'Warm siding tones paired with large black window details.' },
+    { src: '/assets/images/residential-covered-entry-siding-wood-accent.webp?v=4', alt: 'Residential siding with covered entry and wood accent', caption: 'Covered entry with crisp siding, trim, and warm wood detail.' },
+    { src: '/assets/images/project-home.jpg', alt: 'Two-story home with updated siding and windows', caption: 'Updated siding and window details for a clean finished exterior.' },
+    { src: '/assets/images/project-modern.jpg', alt: 'Modern exterior siding and windows', caption: 'Modern siding and window combinations for refined curb appeal.' },
+    { src: '/assets/images/covered-deck-patio-renovation.jpg', alt: 'Covered deck and patio exterior renovation', caption: 'Exterior updates can include siding, decks, and adjacent details.' }
+  ];
 
   const cityContent = {
     Tacoma: {
@@ -157,6 +166,42 @@
 
   const defaultContent = cityContent.Seattle;
 
+  function normalizeImage(value) {
+    return String(value || '').split('?')[0].replace(/^https?:\/\/[^/]+/, '').replace(/^url\(["']?|["']?\)$/g, '');
+  }
+
+  function getHeroImage() {
+    const hero = document.querySelector('.local-hero');
+    const inlineImage = hero?.style.getPropertyValue('--hero-image');
+    return normalizeImage(inlineImage);
+  }
+
+  function removeRepeatedProjectImages() {
+    const figures = document.querySelectorAll('.photo-band figure');
+    if (!figures.length) return;
+    const used = new Set();
+    const heroImage = getHeroImage();
+    if (heroImage) used.add(heroImage);
+
+    figures.forEach((figure) => {
+      const img = figure.querySelector('img');
+      if (!img) return;
+      const current = normalizeImage(img.getAttribute('src'));
+      if (!used.has(current)) {
+        used.add(current);
+        return;
+      }
+
+      const replacement = imagePool.find((candidate) => !used.has(normalizeImage(candidate.src)));
+      if (!replacement) return;
+      img.src = replacement.src;
+      img.alt = replacement.alt;
+      const caption = figure.querySelector('figcaption');
+      if (caption) caption.textContent = replacement.caption;
+      used.add(normalizeImage(replacement.src));
+    });
+  }
+
   function contentFor(city) {
     return cityContent[city] || defaultContent;
   }
@@ -224,6 +269,7 @@
     const copy = mount.dataset.copy || 'Tell us what is happening with the home and the form will organize the details Breeze Siding needs for a useful first call.';
 
     lockTopOrder(mount);
+    removeRepeatedProjectImages();
     addBenefits(city);
     addProductResources(city);
     addProcess(city);
