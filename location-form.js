@@ -2,13 +2,15 @@
   const mounts = document.querySelectorAll('[data-estimate-form]');
   const intro = document.querySelector('.landing-intro');
   const imagePool = [
-    { src: '/assets/images/project-closeup.jpg', alt: 'Detailed siding and trim work around windows', caption: 'Close-up siding and trim work around vulnerable openings.' },
-    { src: '/assets/images/hardie-panel-multifamily-siding-detail.jpg?v=5', alt: 'Hardie panel siding with clean reveal lines', caption: 'Hardie panel siding and clean reveal lines for modern exterior work.' },
-    { src: '/assets/images/single-story-cedar-exterior-window-project.jpg?v=6', alt: 'Wood siding exterior with large black windows', caption: 'Warm siding tones paired with large black window details.' },
-    { src: '/assets/images/residential-covered-entry-siding-wood-accent.webp?v=4', alt: 'Residential siding with covered entry and wood accent', caption: 'Covered entry with crisp siding, trim, and warm wood detail.' },
-    { src: '/assets/images/project-home.jpg', alt: 'Two-story home with updated siding and windows', caption: 'Updated siding and window details for a clean finished exterior.' },
-    { src: '/assets/images/project-modern.jpg', alt: 'Modern exterior siding and windows', caption: 'Modern siding and window combinations for refined curb appeal.' },
-    { src: '/assets/images/covered-deck-patio-renovation.jpg', alt: 'Covered deck and patio exterior renovation', caption: 'Exterior updates can include siding, decks, and adjacent details.' }
+    { src: '/assets/images/hmx0xllvnpridzeogaix.jpeg', alt: 'Finished siding exterior with crisp window and trim details', caption: 'Finished exterior details should look tidy and protect vulnerable openings.' },
+    { src: '/assets/images/Untitled%20design.jpg', alt: 'Crisp trim and shingle siding detail on a high-end exterior', caption: 'Crisp trim and balanced siding profiles for a refined exterior.' },
+    { src: '/assets/images/Breeze%20Siding_-17.jpeg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
+    { src: '/assets/images/ht4uwffxakqccg7ihv6a.jpeg', alt: 'Warm cedar siding and large windows on a custom home', caption: 'Warm siding tones paired with large black window details.' },
+    { src: '/assets/images/paint.jpg', alt: 'Exterior painting and siding finish detail', caption: 'Paint and siding details should work together for a durable finish.' },
+    { src: '/assets/images/project-modern.jpg', alt: 'Modern Hardie panel siding detail', caption: 'Hardie panel accents can modernize the exterior without making it feel busy.' },
+    { src: '/assets/images/residential-covered-entry-siding-wood-accent.webp', alt: 'Covered entry with white siding and warm wood accent', caption: 'Covered entries and transitions deserve careful siding and trim planning.' },
+    { src: '/assets/images/t9vynx7bpr928viscvwl.jpeg', alt: 'Residential lap siding and trim detail on a multi-story home', caption: 'Lap siding and trim details should align cleanly across the exterior.' },
+    { src: '/assets/images/wf2yhzrrt6kac8qrdxvt.jpeg', alt: 'Modern exterior with panel siding and wood accent siding', caption: 'Warm accent siding paired with modern panel detailing.' }
   ];
 
   const cityContent = {
@@ -164,6 +166,32 @@
     }
   };
 
+  const locationMeta = {
+    Seattle: ['Ballard', 'West Seattle', 'Queen Anne', 'Magnolia', 'Capitol Hill', 'Green Lake', 'Wallingford', 'Phinney Ridge'],
+    Tacoma: ['North Tacoma', 'Proctor District', 'Old Town', 'Central Tacoma', 'South Tacoma', 'Fircrest', 'University Place'],
+    'Proctor District': ['Proctor', 'North Tacoma', 'Old Town', 'Stadium District', 'Ruston', 'University Place'],
+    'University Place': ['University Place', 'Fircrest', 'Chambers Bay', 'West Tacoma', 'Lakewood', 'Tacoma'],
+    Bellevue: ['West Bellevue', 'Somerset', 'Newport Hills', 'Bridle Trails', 'Lake Hills', 'Clyde Hill', 'Medina'],
+    'Clyde Hill': ['Clyde Hill', 'Medina', 'Yarrow Point', 'Hunts Point', 'West Bellevue', 'Bellevue'],
+    Medina: ['Medina', 'Evergreen Point', 'Medina Heights', 'Hunts Point', 'Yarrow Point', 'Clyde Hill'],
+    'Mercer Island': ['North End', 'First Hill', 'East Seattle', 'Island Crest', 'South End', 'West Mercer'],
+    Issaquah: ['Issaquah Highlands', 'Squak Mountain', 'Talus', 'South Lake Sammamish', 'Mirrormont', 'Preston'],
+    Sammamish: ['Sahalee', 'Pine Lake', 'Klahanie', 'Beaver Lake', 'Inglewood', 'Trossachs'],
+    Newcastle: ['Newcastle', 'China Creek', 'Hazelwood', 'Olympus', 'Coal Creek', 'Newport Hills'],
+    Kirkland: ['Juanita', 'Houghton', 'Finn Hill', 'Bridle Trails', 'Totem Lake', 'Rose Hill'],
+    Redmond: ['Education Hill', 'Overlake', 'Grass Lawn', 'Bear Creek', 'Downtown Redmond', 'Union Hill'],
+    Kent: ['East Hill', 'West Hill', 'Lake Meridian', 'Panther Lake', 'Covington', 'Auburn'],
+    Renton: ['Renton Highlands', 'Kennydale', 'Fairwood', 'Talbot Hill', 'Maplewood', 'Newcastle'],
+    'Des Moines': ['Des Moines', 'Redondo', 'North Hill', 'Woodmont', 'Saltwater State Park area', 'Federal Way'],
+    Edgewood: ['Edgewood', 'North Hill', 'Milton', 'Sumner', 'Puyallup', 'Federal Way'],
+    Lakewood: ['Lakewood', 'Steilacoom', 'University Place', 'Tillicum', 'Oakbrook', 'Tacoma'],
+    Graham: ['Graham', 'Frederickson', 'Spanaway', 'Puyallup', 'South Hill', 'Elk Plain'],
+    'Federal Way': ['Federal Way', 'Twin Lakes', 'Dash Point', 'Lakota', 'Redondo', 'Des Moines'],
+    Auburn: ['Auburn', 'Lea Hill', 'Lakeland Hills', 'Algona', 'Pacific', 'Kent'],
+    Spanaway: ['Spanaway', 'Frederickson', 'Parkland', 'Graham', 'Elk Plain', 'Puyallup'],
+    'Gig Harbor': ['Gig Harbor', 'Artondale', 'Rosedale', 'Fox Island', 'Canterwood', 'Wollochet']
+  };
+
   const defaultContent = cityContent.Seattle;
 
   function normalizeImage(value) {
@@ -204,6 +232,98 @@
 
   function contentFor(city) {
     return cityContent[city] || defaultContent;
+  }
+
+  function addMeta(name, content) {
+    if (!content || document.querySelector(`meta[name="${name}"]`)) return;
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.appendChild(meta);
+  }
+
+  function pageUrl() {
+    const canonical = document.querySelector('link[rel="canonical"]');
+    return canonical?.href || window.location.href.split('#')[0];
+  }
+
+  function addLocationStructuredData(city) {
+    if (document.getElementById('breeze-location-schema')) return;
+    const neighborhoods = locationMeta[city] || [];
+    const title = document.querySelector('h1')?.textContent?.trim() || `${city} siding replacement`;
+    const description = document.querySelector('meta[name="description"]')?.content || `Siding replacement, fiber cement siding, trim repair, and exterior renovation services in ${city}, WA.`;
+    const url = pageUrl();
+    const areaServed = [city, ...neighborhoods].filter(Boolean).map((name) => ({ '@type': 'Place', name: `${name}, WA` }));
+
+    addMeta('geo.region', 'US-WA');
+    addMeta('geo.placename', `${city}, Washington`);
+    addMeta('service-area', [city, ...neighborhoods].join(', '));
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'HomeAndConstructionBusiness',
+          '@id': 'https://breezesiding.com/#business',
+          name: 'Breeze Siding LLC',
+          url: 'https://breezesiding.com/',
+          telephone: '+1-253-228-0531',
+          email: 'service@breezesiding.com',
+          image: 'https://breezesiding.com/assets/images/04-30-26%20Breeze%20Siding.png',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Spanaway',
+            addressRegion: 'WA',
+            addressCountry: 'US'
+          },
+          areaServed
+        },
+        {
+          '@type': 'Service',
+          '@id': `${url}#service`,
+          name: `${city} siding replacement and exterior renovation`,
+          serviceType: ['Siding replacement', 'Fiber cement siding', 'James Hardie siding', 'Trim repair', 'Exterior painting', 'Window coordination'],
+          provider: { '@id': 'https://breezesiding.com/#business' },
+          areaServed,
+          url,
+          description
+        },
+        {
+          '@type': 'WebPage',
+          '@id': `${url}#webpage`,
+          url,
+          name: title,
+          description,
+          about: { '@id': `${url}#service` },
+          mainEntity: { '@id': `${url}#service` }
+        }
+      ]
+    };
+
+    const faqItems = [...document.querySelectorAll('.local-faq details')].slice(0, 6).map((item) => {
+      const question = item.querySelector('summary')?.textContent?.trim();
+      const answer = item.querySelector('p')?.textContent?.trim();
+      if (!question || !answer) return null;
+      return {
+        '@type': 'Question',
+        name: question,
+        acceptedAnswer: { '@type': 'Answer', text: answer }
+      };
+    }).filter(Boolean);
+
+    if (faqItems.length) {
+      schema['@graph'].push({
+        '@type': 'FAQPage',
+        '@id': `${url}#faq`,
+        mainEntity: faqItems
+      });
+    }
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'breeze-location-schema';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
   }
 
   function lockTopOrder(mount) {
@@ -275,5 +395,7 @@
     addProcess(city);
 
     mount.innerHTML = `<section class="estimate" id="estimate"><div class="estimate-shell"><div class="estimate-heading"><p class="eyebrow">Free estimate</p><h2>${heading}</h2><p>${copy}</p></div><form class="estimate-form" id="estimate-lead-form" method="POST"><input class="form-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="smart-estimate wide" aria-label="Project type helper"><div class="assistant-options" role="group" aria-label="Choose a project type"><button type="button" class="assistant-option is-active" data-project="Siding replacement">Siding</button><button type="button" class="assistant-option" data-project="Window replacement / installation">Windows</button><button type="button" class="assistant-option" data-project="Exterior painting">Paint</button><button type="button" class="assistant-option" data-project="Deck building">Deck</button><button type="button" class="assistant-option" data-project="Commercial / multifamily">Commercial</button><button type="button" class="assistant-option" data-project="Not sure yet">Not sure</button></div><div class="assistant-panel" id="assistant-panel" aria-live="polite" hidden><span class="assistant-kicker">Recommended details</span><strong id="assistant-title">Siding replacement</strong><p id="assistant-copy">Helpful details: existing siding type, damaged areas, number of sides, photos of problem spots, and whether windows or paint should be included.</p><ul class="assistant-list" id="assistant-list"><li>Attach or mention exterior photos if available.</li><li>Share your city and ideal timing.</li><li>Note leaks, soft trim, or areas with weather damage.</li></ul></div></div><label>Name<input name="name" autocomplete="name" required></label><label>Phone (optional)<input name="phone" autocomplete="tel"></label><label>Email<input type="email" name="email" autocomplete="email" required></label><label>City (optional)<input name="city" autocomplete="address-level2" placeholder="${city}"></label><label>Project type<select name="project" required><option value="" selected disabled>Choose project type</option><option>Siding replacement</option><option>Siding installation / new construction</option><option>Window replacement / installation</option><option>Exterior painting</option><option>Deck building</option><option>Commercial / multifamily</option><option>Not sure yet</option></select></label><label>Timeline (optional)<select name="timeline"><option value="">Choose timeline</option><option>As soon as possible</option><option>Within 1-3 months</option><option>Planning ahead</option><option>Just comparing options</option></select></label><label class="wide">Project notes (optional)<textarea name="message" rows="5" placeholder="Tell us about the home, siding condition, photos you can provide, or what you want changed."></textarea></label><div class="estimate-actions wide"><button class="button primary" type="submit">Request Free Estimate</button><a class="button secondary" href="tel:12532280531">Call 253-228-0531</a></div><p class="form-status wide" id="estimate-form-status" aria-live="polite"></p></form></div></section>`;
+
+    addLocationStructuredData(city);
   });
 })();
