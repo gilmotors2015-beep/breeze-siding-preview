@@ -48,9 +48,24 @@
     document.head.appendChild(link);
   }
 
+  function ensureCanonical() {
+    const expected = `https://breezesiding.com${window.location.pathname}`;
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    if (canonical.href.includes('github.io') || canonical.href.includes('breeze-siding-preview')) {
+      canonical.href = expected;
+    }
+  }
+
   function addLegacyLocationForm() {
     const config = legacyLocationPages[window.location.pathname];
-    if (!config || document.querySelector('[data-estimate-form]')) return;
+    if (!config) return;
+    ensureCanonical();
+    if (document.querySelector('[data-estimate-form]')) return;
     const [city, heading] = config;
     const target = document.querySelector('.resource-hero, .local-hero, main > section:first-child');
     if (!target) return;
