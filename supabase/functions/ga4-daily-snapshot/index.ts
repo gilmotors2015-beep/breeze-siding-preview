@@ -11,10 +11,22 @@ type SnapshotRow = {
   not_indexed_pages?: number | null;
 };
 
+type SearchConsoleMetrics = {
+  clicks: number | null;
+  impressions: number | null;
+  ctr: number | null;
+  position: number | null;
+  note?: string;
+};
+
 const jsonHeaders = { 'content-type': 'application/json' };
-const analyticsScope = 'https://www.googleapis.com/auth/analytics.readonly';
+const googleScopes = [
+  'https://www.googleapis.com/auth/analytics.readonly',
+  'https://www.googleapis.com/auth/webmasters.readonly'
+].join(' ');
 const tokenUrl = 'https://oauth2.googleapis.com/token';
 const analyticsApi = 'https://analyticsdata.googleapis.com/v1beta';
+const searchConsoleApi = 'https://searchconsole.googleapis.com/webmasters/v3';
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') {
@@ -33,6 +45,7 @@ Deno.serve(async (request) => {
     const propertyId = requiredEnv('GA4_PROPERTY_ID').replace(/^properties\//, '');
     const clientEmail = requiredEnv('GA4_CLIENT_EMAIL');
     const privateKey = requiredEnv('GA4_PRIVATE_KEY').replace(/\\n/g, '\n');
+    const searchConsoleSiteUrl = Deno.env.get('SEARCH_CONSOLE_SITE_URL') || 'sc-domain:breezesiding.com';
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false }
@@ -40,8 +53,9 @@ Deno.serve(async (request) => {
 
     const accessToken = await getAccessToken(clientEmail, privateKey);
     const checkedOn = pacificDate();
+    const searchRange = dateRange(28);
 
-    const [summary, channels, cities, pages, leads, existing] = await Promise.all([
+    const [summary, channels, cities, pages, leads, existing, search] = await Promise.all([
       runReport(propertyId, accessToken, {
         dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
         metrics: [
@@ -87,7 +101,8 @@ Deno.serve(async (request) => {
         limit: 12
       }),
       loadLeadCounts(supabase),
-      loadExistingSnapshot(supabase, checkedOn)
+      loadExistingSnapshot(supabase, checkedOn),
+      loadSearchConsoleMetrics(searchConsoleSiteUrl, accessToken, searchRange.startDate, searchRange.endDate)
     ]);
 
     const summaryRow = firstMetricRow(summary);
@@ -102,10 +117,10 @@ Deno.serve(async (request) => {
       visitors_per_day: round(visitorCount / 28),
       leads_7d: leads.leads7,
       leads_28d: leads.leads28,
-      search_clicks_28d: existing?.search_clicks_28d ?? null,
-      search_impressions_28d: existing?.search_impressions_28d ?? null,
-      search_ctr: existing?.search_ctr ?? null,
-      average_position: existing?.average_position ?? null,
+      search_clicks_28d: search.clicks ?? existing?.search_clicks_28d ?? null,
+      search_impressions_28d: search.impressions ?? existing?.search_impressions_28d ?? null,
+      search_ctr: search.ctr ?? existing?.search_ctr ?? null,
+      average_position: search.position ?? existing?.average_position ?? null,
       indexed_pages: existing?.indexed_pages ?? null,
       not_indexed_pages: existing?.not_indexed_pages ?? null,
       wa_active_users_28d: visitorCount,
@@ -129,8 +144,8 @@ Deno.serve(async (request) => {
         sessions: asInteger(row.sessions),
         engagedSessions: asInteger(row.engagedSessions)
       })),
-      source: 'ga4-auto',
-      notes: 'Daily GA4 sync for Washington traffic. Search Console fields are preserved for the next Search Console integration pass.',
+      source: search.note ? 'ga4-auto' : 'ga4-search-console-auto',
+      notes: search.note || 'Daily GA4 and Search Console sync for Washington traffic and organic search performance.',
       synced_at: new Date().toISOString()
     };
 
@@ -142,7 +157,7 @@ Deno.serve(async (request) => {
 
     if (error) throw error;
 
-    return json({ ok: true, checkedOn, snapshot: data });
+    return json({ ok: true, checkedOn, snapshot: data, searchConsole: search });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('GA4 daily snapshot failed:', message);
@@ -193,7 +208,7 @@ async function signJwt(clientEmail: string, privateKey: string) {
   const header = { alg: 'RS256', typ: 'JWT' };
   const claim = {
     iss: clientEmail,
-    scope: analyticsScope,
+    scope: googleScopes,
     aud: tokenUrl,
     exp: now + 3600,
     iat: now
@@ -248,6 +263,47 @@ async function runReport(propertyId: string, accessToken: string, body: Record<s
   return await response.json();
 }
 
+async function loadSearchConsoleMetrics(siteUrl: string, accessToken: string, startDate: string, endDate: string): Promise<SearchConsoleMetrics> {
+  try {
+    const response = await fetch(`${searchConsoleApi}/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ startDate, endDate, rowLimit: 1 })
+    });
+
+    if (!response.ok) {
+      return {
+        clicks: null,
+        impressions: null,
+        ctr: null,
+        position: null,
+        note: `Daily GA4 sync succeeded. Search Console was not imported yet: ${response.status} ${await response.text()}`
+      };
+    }
+
+    const payload = await response.json();
+    const row = payload.rows?.[0] || {};
+    return {
+      clicks: asInteger(row.clicks),
+      impressions: asInteger(row.impressions),
+      ctr: round(asNumber(row.ctr) * 100),
+      position: round(asNumber(row.position))
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      clicks: null,
+      impressions: null,
+      ctr: null,
+      position: null,
+      note: `Daily GA4 sync succeeded. Search Console was not imported yet: ${message}`
+    };
+  }
+}
+
 function rows(report: any): MetricRow[] {
   const dimensionNames = (report.dimensionHeaders || []).map((header: any) => header.name);
   const metricNames = (report.metricHeaders || []).map((header: any) => header.name);
@@ -285,6 +341,17 @@ function pacificDate() {
   }).formatToParts(new Date());
   const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
   return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+function dateRange(days: number) {
+  const end = new Date();
+  end.setUTCDate(end.getUTCDate() - 1);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - Math.max(days - 1, 0));
+  return {
+    startDate: start.toISOString().slice(0, 10),
+    endDate: end.toISOString().slice(0, 10)
+  };
 }
 
 async function loadLeadCounts(supabase: ReturnType<typeof createClient>) {
