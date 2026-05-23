@@ -84,6 +84,10 @@
       .seo-trend-title h4 { margin: 0; line-height: 1.1; }
       .seo-trend-title span { color: var(--muted); font-size: .78rem; font-weight: 900; text-transform: uppercase; }
       .seo-trend-value { display: none; }
+      .seo-trend-current { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: #f8fbff; }
+      .seo-trend-current span { color: var(--muted); font-size: .74rem; font-weight: 900; text-transform: uppercase; }
+      .seo-trend-current strong { color: var(--ink); font-size: 1.05rem; line-height: 1; }
+      .seo-trend-current small { font-size: .78rem; font-weight: 850; text-align: right; }
       .seo-trend-svg { width: 100%; height: 150px; border-radius: 8px; background: linear-gradient(180deg, #f8fbff, #ffffff); }
       .seo-trend-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .82rem; font-weight: 850; }
       .seo-trend-positive { color: #0f8f72; }
@@ -91,7 +95,7 @@
       .seo-trend-flat { color: var(--muted); }
       .seo-trend-empty { min-height: 150px; display: grid; place-items: center; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; font-weight: 850; padding: 20px; }
       @media (max-width: 1120px) { .seo-trend-grid { grid-template-columns: 1fr; } }
-      @media (max-width: 720px) { .seo-trend-heading, .seo-trend-top, .seo-trend-meta { display: grid; } }
+      @media (max-width: 720px) { .seo-trend-heading, .seo-trend-top, .seo-trend-meta, .seo-trend-current { display: grid; } .seo-trend-current small { text-align: left; } }
     `;
     document.head.append(style);
   }
@@ -142,7 +146,7 @@
 
   function deltaLabel(current, previous) {
     const delta = current - previous;
-    if (!delta) return { text: 'No change', className: 'seo-trend-flat' };
+    if (!delta) return { text: 'No change yet', className: 'seo-trend-flat' };
     const sign = delta > 0 ? '+' : '';
     return {
       text: `${sign}${formatNumber(delta)} since first snapshot`,
@@ -172,6 +176,11 @@
             </div>
           </div>
           ${buildSparkline(points, chart.color, chart.target)}
+          <div class="seo-trend-current">
+            <span>Current snapshot</span>
+            <strong>${escapeHtml(formatNumber(current))}</strong>
+            <small class="${delta.className}">${escapeHtml(delta.text)}</small>
+          </div>
           <div class="seo-trend-meta"><span>${escapeHtml(firstDate || 'Waiting')}</span><span>Goal marker</span><span>${escapeHtml(lastDate || 'More data soon')}</span></div>
         </div>
       </article>
