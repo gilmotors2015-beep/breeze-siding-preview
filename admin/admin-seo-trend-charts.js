@@ -68,20 +68,22 @@
     const style = document.createElement('style');
     style.id = 'seo-trend-chart-styles';
     style.textContent = `
+      #performance-snapshot-form { display: none !important; }
+      .seo-snapshot-visual-note { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(135deg, #f8fbff, #ffffff); }
+      .seo-snapshot-visual-note p { margin: 0; color: var(--muted); font-weight: 800; }
+      .seo-snapshot-visual-note strong { color: var(--ink); font-size: 1.05rem; }
       .seo-trend-panel { display: grid; gap: 14px; margin: 18px 0; }
       .seo-trend-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
       .seo-trend-heading h3 { margin: 0; line-height: 1.1; }
       .seo-trend-heading p { margin: 0; color: var(--muted); font-weight: 750; }
       .seo-trend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
       .seo-trend-card { border: 1px solid var(--line); border-radius: 8px; background: var(--white); box-shadow: var(--shadow); overflow: hidden; }
-      .seo-trend-card-inner { display: grid; gap: 12px; padding: 16px; }
-      .seo-trend-top { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+      .seo-trend-card-inner { display: grid; gap: 14px; padding: 16px; }
+      .seo-trend-top { display: flex; align-items: start; justify-content: start; gap: 12px; }
       .seo-trend-title { display: grid; gap: 5px; }
       .seo-trend-title h4 { margin: 0; line-height: 1.1; }
       .seo-trend-title span { color: var(--muted); font-size: .78rem; font-weight: 900; text-transform: uppercase; }
-      .seo-trend-value { text-align: right; }
-      .seo-trend-value strong { display: block; color: var(--ink); font-size: 1.7rem; line-height: 1; }
-      .seo-trend-value span { color: var(--muted); font-size: .82rem; font-weight: 900; }
+      .seo-trend-value { display: none; }
       .seo-trend-svg { width: 100%; height: 150px; border-radius: 8px; background: linear-gradient(180deg, #f8fbff, #ffffff); }
       .seo-trend-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .82rem; font-weight: 850; }
       .seo-trend-positive { color: #0f8f72; }
@@ -89,9 +91,19 @@
       .seo-trend-flat { color: var(--muted); }
       .seo-trend-empty { min-height: 150px; display: grid; place-items: center; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; font-weight: 850; padding: 20px; }
       @media (max-width: 1120px) { .seo-trend-grid { grid-template-columns: 1fr; } }
-      @media (max-width: 720px) { .seo-trend-heading, .seo-trend-top, .seo-trend-meta { display: grid; } .seo-trend-value { text-align: left; } }
+      @media (max-width: 720px) { .seo-trend-heading, .seo-trend-top, .seo-trend-meta { display: grid; } }
     `;
     document.head.append(style);
+  }
+
+  function replaceManualSnapshot() {
+    const form = document.querySelector('#performance-snapshot-form');
+    if (!form || document.querySelector('#seo-snapshot-visual-note')) return;
+    const note = document.createElement('div');
+    note.id = 'seo-snapshot-visual-note';
+    note.className = 'seo-snapshot-visual-note';
+    note.innerHTML = '<strong>Numbers are now tracked automatically.</strong><p>The snapshot is shown as graph trends instead of manual input fields. Daily syncs will make the charts more useful over time.</p>';
+    form.insertAdjacentElement('beforebegin', note);
   }
 
   function buildSparkline(points, color, target) {
@@ -168,6 +180,7 @@
 
   function render(rows) {
     injectStyles();
+    replaceManualSnapshot();
     const heartbeat = document.querySelector('#seo-website-heartbeat');
     const hero = document.querySelector('#performance-tab .performance-hero');
     const anchor = heartbeat || hero;
@@ -200,6 +213,8 @@
   }
 
   async function loadTrendRows() {
+    injectStyles();
+    replaceManualSnapshot();
     const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
     if (!client) return;
 
@@ -217,6 +232,7 @@
   function scheduleLoad() {
     window.setTimeout(loadTrendRows, 900);
     window.setTimeout(loadTrendRows, 2200);
+    window.setTimeout(loadTrendRows, 3600);
   }
 
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', scheduleLoad, { once: true });
