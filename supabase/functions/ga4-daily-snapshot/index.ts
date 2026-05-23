@@ -11,11 +11,20 @@ type SnapshotRow = {
   not_indexed_pages?: number | null;
 };
 
+type SearchConsoleDailyPoint = {
+  date: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+};
+
 type SearchConsoleMetrics = {
   clicks: number | null;
   impressions: number | null;
   ctr: number | null;
   position: number | null;
+  daily: SearchConsoleDailyPoint[];
   note?: string;
 };
 
@@ -54,8 +63,9 @@ Deno.serve(async (request) => {
     const accessToken = await getAccessToken(clientEmail, privateKey);
     const checkedOn = pacificDate();
     const searchRange = dateRange(28);
+    const canStoreDailySeries = await supportsColumn(supabase, 'daily_series');
 
-    const [summary, channels, cities, pages, leads, existing, search] = await Promise.all([
+    const [summary, channels, cities, pages, dailyTraffic, dailyOrganic, leads, existing, search] = await Promise.all([
       runReport(propertyId, accessToken, {
         dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
         metrics: [
@@ -100,6 +110,26 @@ Deno.serve(async (request) => {
         orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
         limit: 12
       }),
+      runReport(propertyId, accessToken, {
+        dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
+        dimensions: [{ name: 'date' }],
+        metrics: [
+          { name: 'activeUsers' },
+          { name: 'sessions' },
+          { name: 'engagedSessions' }
+        ],
+        dimensionFilter: washingtonFilter(),
+        orderBys: [{ dimension: { dimensionName: 'date' } }],
+        limit: 100
+      }),
+      runReport(propertyId, accessToken, {
+        dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
+        dimensions: [{ name: 'date' }],
+        metrics: [{ name: 'sessions' }],
+        dimensionFilter: washingtonOrganicFilter(),
+        orderBys: [{ dimension: { dimensionName: 'date' } }],
+        limit: 100
+      }),
       loadLeadCounts(supabase),
       loadExistingSnapshot(supabase, checkedOn),
       loadSearchConsoleMetrics(searchConsoleSiteUrl, accessToken, searchRange.startDate, searchRange.endDate)
@@ -110,8 +140,9 @@ Deno.serve(async (request) => {
     const organicSearchSessions = rows(channels)
       .filter((row) => String(row.sessionDefaultChannelGroup).toLowerCase() === 'organic search')
       .reduce((total, row) => total + asInteger(row.sessions), 0);
+    const dailySeries = buildDailySeries(dailyTraffic, dailyOrganic, search.daily, searchRange.startDate, searchRange.endDate);
 
-    const snapshot = {
+    const snapshot: Record<string, unknown> = {
       checked_on: checkedOn,
       visitors_28d: visitorCount,
       visitors_per_day: round(visitorCount / 28),
@@ -149,6 +180,8 @@ Deno.serve(async (request) => {
       synced_at: new Date().toISOString()
     };
 
+    if (canStoreDailySeries) snapshot.daily_series = dailySeries;
+
     const { data, error } = await supabase
       .from('seo_snapshots')
       .upsert(snapshot, { onConflict: 'checked_on' })
@@ -157,7 +190,7 @@ Deno.serve(async (request) => {
 
     if (error) throw error;
 
-    return json({ ok: true, checkedOn, snapshot: data, searchConsole: search });
+    return json({ ok: true, checkedOn, snapshot: data, searchConsole: search, dailySeriesStored: canStoreDailySeries });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('GA4 daily snapshot failed:', message);
@@ -184,6 +217,23 @@ function washingtonFilter() {
       ]
     }
   };
+}
+
+function washingtonOrganicFilter() {
+  return {
+    andGroup: {
+      expressions: [
+        { filter: { fieldName: 'country', stringFilter: { matchType: 'EXACT', value: 'United States' } } },
+        { filter: { fieldName: 'region', stringFilter: { matchType: 'EXACT', value: 'Washington' } } },
+        { filter: { fieldName: 'sessionDefaultChannelGroup', stringFilter: { matchType: 'EXACT', value: 'Organic Search' } } }
+      ]
+    }
+  };
+}
+
+async function supportsColumn(supabase: ReturnType<typeof createClient>, column: string) {
+  const { error } = await supabase.from('seo_snapshots').select(column).limit(1);
+  return !error;
 }
 
 async function getAccessToken(clientEmail: string, privateKey: string) {
@@ -271,7 +321,7 @@ async function loadSearchConsoleMetrics(siteUrl: string, accessToken: string, st
         authorization: `Bearer ${accessToken}`,
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ startDate, endDate, rowLimit: 1 })
+      body: JSON.stringify({ startDate, endDate, dimensions: ['date'], rowLimit: 1000 })
     });
 
     if (!response.ok) {
@@ -280,17 +330,32 @@ async function loadSearchConsoleMetrics(siteUrl: string, accessToken: string, st
         impressions: null,
         ctr: null,
         position: null,
+        daily: [],
         note: `Daily GA4 sync succeeded. Search Console was not imported yet: ${response.status} ${await response.text()}`
       };
     }
 
     const payload = await response.json();
-    const row = payload.rows?.[0] || {};
-    return {
+    const daily = (payload.rows || []).map((row: any) => ({
+      date: row.keys?.[0] || '',
       clicks: asInteger(row.clicks),
       impressions: asInteger(row.impressions),
       ctr: round(asNumber(row.ctr) * 100),
       position: round(asNumber(row.position))
+    })).filter((row: SearchConsoleDailyPoint) => row.date);
+
+    const clicks = daily.reduce((total: number, row: SearchConsoleDailyPoint) => total + row.clicks, 0);
+    const impressions = daily.reduce((total: number, row: SearchConsoleDailyPoint) => total + row.impressions, 0);
+    const weightedPosition = impressions
+      ? daily.reduce((total: number, row: SearchConsoleDailyPoint) => total + (row.position * row.impressions), 0) / impressions
+      : 0;
+
+    return {
+      clicks,
+      impressions,
+      ctr: impressions ? round((clicks / impressions) * 100) : 0,
+      position: round(weightedPosition),
+      daily
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -299,9 +364,41 @@ async function loadSearchConsoleMetrics(siteUrl: string, accessToken: string, st
       impressions: null,
       ctr: null,
       position: null,
+      daily: [],
       note: `Daily GA4 sync succeeded. Search Console was not imported yet: ${message}`
     };
   }
+}
+
+function buildDailySeries(dailyTrafficReport: any, dailyOrganicReport: any, searchDaily: SearchConsoleDailyPoint[], startDate: string, endDate: string) {
+  const trafficMap = new Map<string, MetricRow>();
+  rows(dailyTrafficReport).forEach((row) => trafficMap.set(normalizeAnalyticsDate(row.date), row));
+
+  const organicMap = new Map<string, number>();
+  rows(dailyOrganicReport).forEach((row) => organicMap.set(normalizeAnalyticsDate(row.date), asInteger(row.sessions)));
+
+  const searchMap = new Map<string, SearchConsoleDailyPoint>();
+  searchDaily.forEach((row) => searchMap.set(row.date, row));
+
+  return eachDate(startDate, endDate).map((date) => {
+    const traffic = trafficMap.get(date) || {};
+    const organicSearch = organicMap.get(date) || 0;
+    const search = searchMap.get(date) || { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+    const localVisitors = asInteger(traffic.activeUsers);
+    const sessions = asInteger(traffic.sessions);
+    const engagedSessions = asInteger(traffic.engagedSessions);
+    const searchClicks = asInteger(search.clicks);
+    return {
+      date,
+      localVisitors,
+      sessions,
+      engagedSessions,
+      organicSearch,
+      localDemand: localVisitors + engagedSessions + organicSearch + searchClicks,
+      searchClicks,
+      searchImpressions: asInteger(search.impressions)
+    };
+  });
 }
 
 function rows(report: any): MetricRow[] {
@@ -352,6 +449,24 @@ function dateRange(days: number) {
     startDate: start.toISOString().slice(0, 10),
     endDate: end.toISOString().slice(0, 10)
   };
+}
+
+function normalizeAnalyticsDate(value: unknown) {
+  const raw = String(value || '');
+  if (raw.includes('-')) return raw;
+  if (raw.length === 8) return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+  return raw;
+}
+
+function eachDate(startDate: string, endDate: string) {
+  const dates: string[] = [];
+  const cursor = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+  while (cursor <= end) {
+    dates.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return dates;
 }
 
 async function loadLeadCounts(supabase: ReturnType<typeof createClient>) {
