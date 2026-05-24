@@ -1,0 +1,133 @@
+name: One-time approved image reference cleanup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-reference-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply approved image filename references') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace old image references
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const replacements = [
+            ['assets/images/Breeze Siding_-13.jpg', 'assets/images/hardie-panel-cedar-soffit-exterior-paint.jpg'],
+            ['assets/images/Breeze%20Siding_-13.jpg', 'assets/images/hardie-panel-cedar-soffit-exterior-paint.jpg'],
+            ['assets/images/Breeze Siding_-17.jpeg', 'assets/images/seattle-exterior-paint.jpg'],
+            ['assets/images/Breeze%20Siding_-17.jpeg', 'assets/images/seattle-exterior-paint.jpg'],
+            ['assets/images/Edgewood.jpg', 'assets/images/james-hardie-color-plus-cedar-accent.jpg'],
+            ['assets/images/Marybeth (1 of 1)-2.jpg', 'assets/images/fiber-cement-panels-cedar-detail.jpg'],
+            ['assets/images/Marybeth%20(1%20of%201)-2.jpg', 'assets/images/fiber-cement-panels-cedar-detail.jpg'],
+            ['assets/images/Marybeth (1 of 1).jpg', 'assets/images/window-installation.jpg'],
+            ['assets/images/Marybeth%20(1%20of%201).jpg', 'assets/images/window-installation.jpg'],
+            ['assets/images/Seattle Siding Replacement.jpg', 'assets/images/seattle-siding-replacement.jpg'],
+            ['assets/images/Seattle%20Siding%20Replacement.jpg', 'assets/images/seattle-siding-replacement.jpg'],
+            ['assets/images/Umbach 3.jpg', 'assets/images/james-hardie-lap-siding-cedar-detail.jpg'],
+            ['assets/images/Umbach%203.jpg', 'assets/images/james-hardie-lap-siding-cedar-detail.jpg'],
+            ['assets/images/Umbach 4.jpg', 'assets/images/board-and-batten-cedar-channel-lap.jpg'],
+            ['assets/images/Umbach%204.jpg', 'assets/images/board-and-batten-cedar-channel-lap.jpg'],
+            ['assets/images/Umbach.jpg', 'assets/images/cedar-channel-lap-siding.jpg'],
+            ['assets/images/Umbach1.jpg', 'assets/images/cedar-siding.jpg'],
+            ['assets/images/Untitled design.jpg', 'assets/images/bellevue-siding-installation.jpg'],
+            ['assets/images/Untitled%20design.jpg', 'assets/images/bellevue-siding-installation.jpg'],
+            ['assets/images/multifamily-townhome-siding-breeze-van-enhanced.jpg', 'assets/images/multi-family-siding.jpg'],
+            ['assets/images/paint.jpg', 'assets/images/high-end-siding-installation.jpg'],
+            ['assets/images/project-cedar.jpg', 'assets/images/exterior-paint.jpg'],
+            ['assets/images/t9vynx7bpr928viscvwl.jpeg', 'assets/images/full-exterior-renovation.jpg'],
+            ['assets/images/umbach 5.jpg', 'assets/images/modern-design.jpg'],
+            ['assets/images/umbach%205.jpg', 'assets/images/modern-design.jpg'],
+            ['assets/images/wf2yhzrrt6kac8qrdxvt.jpeg', 'assets/images/exterior-detail.jpg'],
+            ['assets/images/hmx0xllvnpridzeogaix.jpeg', 'assets/images/window-installation.jpg'],
+            ['assets/images/ht4uwffxakqccg7ihv6a.jpeg', 'assets/images/fiber-cement-panels-cedar-detail.jpg'],
+            ['assets/images/project-modern.jpg', 'assets/images/cedar-siding.jpg'],
+            ['assets/images/project-umbach-2.jpg', 'assets/images/cedar-siding.jpg'],
+            ['assets/images/residential-covered-entry-siding-wood-accent.webp', 'assets/images/james-hardie-color-plus-cedar-accent.jpg']
+          ];
+
+          const textExt = new Set(['.html', '.css', '.js', '.json', '.xml', '.txt', '.md']);
+          const skipDirs = new Set(['.git', 'node_modules']);
+          const changed = [];
+
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (skipDirs.has(entry.name)) continue;
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(full);
+                continue;
+              }
+              if (!textExt.has(path.extname(entry.name).toLowerCase())) continue;
+              let content = fs.readFileSync(full, 'utf8');
+              const original = content;
+              for (const [from, to] of replacements) {
+                content = content.split(from).join(to);
+              }
+              if (content !== original) {
+                fs.writeFileSync(full, content);
+                changed.push(full);
+              }
+            }
+          }
+
+          walk(process.cwd());
+
+          const deleteCandidates = [
+            'assets/images/Breeze Siding_-13.jpg',
+            'assets/images/Breeze Siding_-17.jpeg',
+            'assets/images/Edgewood.jpg',
+            'assets/images/Marybeth (1 of 1)-2.jpg',
+            'assets/images/Marybeth (1 of 1).jpg',
+            'assets/images/Seattle Siding Replacement.jpg',
+            'assets/images/Umbach 3.jpg',
+            'assets/images/Umbach 4.jpg',
+            'assets/images/Umbach.jpg',
+            'assets/images/Umbach1.jpg',
+            'assets/images/Untitled design.jpg',
+            'assets/images/hmx0xllvnpridzeogaix.jpeg',
+            'assets/images/ht4uwffxakqccg7ihv6a.jpeg',
+            'assets/images/multifamily-townhome-siding-breeze-van-enhanced.jpg',
+            'assets/images/paint.jpg',
+            'assets/images/project-cedar.jpg',
+            'assets/images/project-modern.jpg',
+            'assets/images/project-umbach-2.jpg',
+            'assets/images/residential-covered-entry-siding-wood-accent.webp',
+            'assets/images/t9vynx7bpr928viscvwl.jpeg',
+            'assets/images/umbach 5.jpg',
+            'assets/images/wf2yhzrrt6kac8qrdxvt.jpeg'
+          ];
+
+          for (const file of deleteCandidates) {
+            if (fs.existsSync(file)) fs.rmSync(file);
+          }
+
+          fs.rmSync('.github/workflows/image-reference-cleanup.yml', { force: true });
+          console.log(`Updated ${changed.length} text files and removed old image aliases.`);
+          NODE
+
+      - name: Commit cleanup
+        run: |
+          if git diff --quiet; then
+            echo "No cleanup changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Apply approved image filename references"
+          git push
