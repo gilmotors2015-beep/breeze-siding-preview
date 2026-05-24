@@ -107,7 +107,7 @@ summary:focus-visible {
   min-height: 520px;
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.15), rgba(20, 32, 51, 0.8)),
-    url("assets/images/Untitled%20design.jpg") center / cover;
+    url("assets/images/bellevue-siding-installation.jpg") center / cover;
   filter: contrast(1.04) saturate(1.03);
 }
 
@@ -157,19 +157,19 @@ summary:focus-visible {
 .siding-page {
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.88), rgba(20, 32, 51, 0.28)),
-    url("assets/images/project-cedar.jpg") center / cover;
+    url("assets/images/exterior-paint.jpg") center / cover;
 }
 
 .window-page {
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.88), rgba(20, 32, 51, 0.28)),
-    url("assets/images/project-modern.jpg") center / cover;
+    url("assets/images/cedar-siding.jpg") center / cover;
 }
 
 .paint-page {
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.88), rgba(20, 32, 51, 0.28)),
-    url("assets/images/paint.jpg") center / cover;
+    url("assets/images/high-end-siding-installation.jpg") center / cover;
 }
 
 .deck-page {
@@ -613,7 +613,7 @@ details p {
   contain-intrinsic-size: 760px;
   background:
     linear-gradient(rgba(244, 248, 251, 0.94), rgba(244, 248, 251, 0.94)),
-    url("assets/images/project-umbach-2.jpg") center / cover;
+    url("assets/images/cedar-siding.jpg") center / cover;
 }
 
 .estimate-card,

@@ -2,15 +2,15 @@
   const mounts = document.querySelectorAll('[data-estimate-form]');
   const intro = document.querySelector('.landing-intro');
   const approvedImages = [
-    { src: '/assets/images/hmx0xllvnpridzeogaix.jpeg', alt: 'Finished siding exterior with crisp window and trim details', caption: 'Finished exterior details should look tidy and protect vulnerable openings.' },
-    { src: '/assets/images/Untitled%20design.jpg', alt: 'Crisp trim and shingle siding detail on a high-end exterior', caption: 'Crisp trim and balanced siding profiles for a refined exterior.' },
-    { src: '/assets/images/Breeze%20Siding_-17.jpeg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
-    { src: '/assets/images/ht4uwffxakqccg7ihv6a.jpeg', alt: 'Warm cedar siding and large windows on a custom home', caption: 'Warm siding tones paired with large black window details.' },
-    { src: '/assets/images/paint.jpg', alt: 'Exterior painting and siding finish detail', caption: 'Paint and siding details should work together for a durable finish.' },
-    { src: '/assets/images/project-modern.jpg', alt: 'Modern Hardie panel siding detail', caption: 'Hardie panel accents can modernize the exterior without making it feel busy.' },
-    { src: '/assets/images/residential-covered-entry-siding-wood-accent.webp', alt: 'Covered entry with white siding and warm wood accent', caption: 'Covered entries and transitions deserve careful siding and trim planning.' },
-    { src: '/assets/images/t9vynx7bpr928viscvwl.jpeg', alt: 'Residential lap siding and trim detail on a multi-story home', caption: 'Lap siding and trim details should align cleanly across the exterior.' },
-    { src: '/assets/images/wf2yhzrrt6kac8qrdxvt.jpeg', alt: 'Modern exterior with panel siding and wood accent siding', caption: 'Warm accent siding paired with modern panel detailing.' }
+    { src: '/assets/images/window-installation.jpg', alt: 'Finished siding exterior with crisp window and trim details', caption: 'Finished exterior details should look tidy and protect vulnerable openings.' },
+    { src: '/assets/images/bellevue-siding-installation.jpg', alt: 'Crisp trim and shingle siding detail on a high-end exterior', caption: 'Crisp trim and balanced siding profiles for a refined exterior.' },
+    { src: '/assets/images/seattle-exterior-paint.jpg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
+    { src: '/assets/images/fiber-cement-panels-cedar-detail.jpg', alt: 'Warm cedar siding and large windows on a custom home', caption: 'Warm siding tones paired with large black window details.' },
+    { src: '/assets/images/high-end-siding-installation.jpg', alt: 'Exterior painting and siding finish detail', caption: 'Paint and siding details should work together for a durable finish.' },
+    { src: '/assets/images/cedar-siding.jpg', alt: 'Modern Hardie panel siding detail', caption: 'Hardie panel accents can modernize the exterior without making it feel busy.' },
+    { src: '/assets/images/james-hardie-color-plus-cedar-accent.jpg', alt: 'Covered entry with white siding and warm wood accent', caption: 'Covered entries and transitions deserve careful siding and trim planning.' },
+    { src: '/assets/images/full-exterior-renovation.jpg', alt: 'Residential lap siding and trim detail on a multi-story home', caption: 'Lap siding and trim details should align cleanly across the exterior.' },
+    { src: '/assets/images/exterior-detail.jpg', alt: 'Modern exterior with panel siding and wood accent siding', caption: 'Warm accent siding paired with modern panel detailing.' }
   ];
 
   const profiles = {

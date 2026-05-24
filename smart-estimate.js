@@ -8,7 +8,7 @@
       contain-intrinsic-size: 760px;
       background:
         linear-gradient(rgba(244, 248, 251, 0.94), rgba(244, 248, 251, 0.94)),
-        url("assets/images/project-umbach-2.jpg") center / cover;
+        url("assets/images/cedar-siding.jpg") center / cover;
     }
 
     .estimate-shell {
