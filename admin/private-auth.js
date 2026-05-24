@@ -63,7 +63,7 @@
         }
       };
 
-      const reliabilityScript = appendEnhancementScript('/admin/admin-save-reliability.js?v=save-1', 'admin-save-reliability');
+      const reliabilityScript = appendEnhancementScript('/admin/admin-save-reliability.js?v=save-2', 'admin-save-reliability');
       if (reliabilityScript) {
         reliabilityScript.addEventListener('load', loadController, { once: true });
       } else {
@@ -79,7 +79,7 @@
       }
     };
     const loadDialogPolish = () => {
-      const dialogScript = appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-3', 'admin-lead-dialog-polish');
+      const dialogScript = appendEnhancementScript('/admin/admin-lead-dialog-polish.js?v=dialog-4', 'admin-lead-dialog-polish');
       if (dialogScript) {
         dialogScript.addEventListener('load', loadSchedulePolish, { once: true });
       } else {
