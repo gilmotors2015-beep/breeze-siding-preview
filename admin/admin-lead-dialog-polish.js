@@ -1,5 +1,6 @@
 (() => {
   const styleId = 'lead-dialog-polish-styles';
+  const contactPanelId = 'lead-contact-editor-panel';
   const notesPanelId = 'lead-notes-editor-panel';
   const locationPanelId = 'lead-location-editor-panel';
   const visibleDetailLabels = new Set(['Contact person', 'Contact', 'Address']);
@@ -16,6 +17,7 @@
       .lead-details.is-compact [data-dialog-detail-hidden='true'] {
         display: none;
       }
+      .lead-contact-editor,
       .lead-location-editor,
       .lead-notes-editor {
         display: grid;
@@ -26,25 +28,33 @@
         border-radius: 8px;
         background: #fffdf8;
       }
+      .lead-contact-editor,
       .lead-location-editor {
         background: #f8fbff;
       }
+      .lead-contact-editor h3,
       .lead-location-editor h3,
       .lead-notes-editor h3 {
         margin: 0;
         line-height: 1.15;
       }
+      .lead-contact-help,
       .lead-location-help {
         margin: 0;
         color: var(--muted);
         font-weight: 800;
         line-height: 1.45;
       }
+      .lead-contact-grid,
       .lead-location-grid {
         display: grid;
-        grid-template-columns: 2fr 1fr 90px 110px;
+        grid-template-columns: 1.25fr 1fr 1.25fr;
         gap: 10px;
       }
+      .lead-location-grid {
+        grid-template-columns: 2fr 1fr 90px 110px;
+      }
+      .lead-contact-grid label,
       .lead-location-grid label,
       .lead-notes-editor label {
         display: grid;
@@ -52,6 +62,7 @@
         color: var(--ink);
         font-weight: 900;
       }
+      .lead-contact-grid input,
       .lead-location-grid input,
       .lead-notes-editor textarea {
         width: 100%;
@@ -62,6 +73,7 @@
         font: inherit;
         font-weight: 700;
       }
+      .lead-contact-grid input,
       .lead-location-grid input {
         min-height: 42px;
         padding: 0 10px;
@@ -95,6 +107,7 @@
         padding: 11px 12px;
         line-height: 1.45;
       }
+      .lead-contact-save-row,
       .lead-notes-save-row,
       .lead-location-save-row {
         display: flex;
@@ -102,6 +115,7 @@
         gap: 10px;
         flex-wrap: wrap;
       }
+      .lead-contact-message,
       .lead-notes-message,
       .lead-location-message {
         margin: 0;
@@ -109,12 +123,14 @@
         font-weight: 800;
       }
       @media (max-width: 900px) {
+        .lead-contact-grid,
         .lead-location-grid {
           grid-template-columns: 1fr 1fr;
         }
       }
       @media (max-width: 760px) {
         .lead-details.is-compact,
+        .lead-contact-grid,
         .lead-date-grid,
         .lead-location-grid {
           grid-template-columns: 1fr;
@@ -155,6 +171,10 @@
     return !value || value === 'Not set' || value === 'Stored privately' || value === 'Stored in private customer record';
   }
 
+  function cleanDisplayValue(value) {
+    return isBlank(value) ? '' : String(value).trim();
+  }
+
   function parseAddress(lead) {
     const address = isBlank(lead?.address) ? '' : String(lead.address);
     const city = isBlank(lead?.city) ? '' : String(lead.city);
@@ -180,11 +200,40 @@
     });
   }
 
-  function ensureLocationPanel() {
-    let panel = document.getElementById(locationPanelId);
+  function ensureContactPanel() {
+    let panel = document.getElementById(contactPanelId);
     if (panel) return panel;
     const details = document.querySelector('#lead-dialog .lead-details');
     if (!details) return null;
+
+    panel = document.createElement('section');
+    panel.id = contactPanelId;
+    panel.className = 'lead-contact-editor';
+    panel.innerHTML = `
+      <h3>Contact info</h3>
+      <p class="lead-contact-help">Use this when a form comes in with partial details, or when you get better phone/email information during the first call.</p>
+      <div class="lead-contact-grid">
+        <label>Contact person<input id="lead-contact-person" autocomplete="name" placeholder="Customer or main contact"></label>
+        <label>Phone<input id="lead-contact-phone" autocomplete="tel" placeholder="253-228-0531"></label>
+        <label>Email<input id="lead-contact-email" type="email" autocomplete="email" placeholder="customer@email.com"></label>
+      </div>
+      <div class="lead-contact-save-row">
+        <button class="button primary" type="button" id="save-lead-contact-button">Save contact info</button>
+        <button class="button secondary" type="button" id="copy-contact-question-button">Copy contact question</button>
+        <p class="lead-contact-message" id="lead-contact-save-message">Fill in missing contact details after the first reply or call.</p>
+      </div>
+    `;
+    details.insertAdjacentElement('afterend', panel);
+    panel.querySelector('#save-lead-contact-button')?.addEventListener('click', saveContact);
+    panel.querySelector('#copy-contact-question-button')?.addEventListener('click', copyContactQuestion);
+    return panel;
+  }
+
+  function ensureLocationPanel() {
+    let panel = document.getElementById(locationPanelId);
+    if (panel) return panel;
+    const contactPanel = ensureContactPanel();
+    if (!contactPanel) return null;
 
     panel = document.createElement('section');
     panel.id = locationPanelId;
@@ -204,7 +253,7 @@
         <p class="lead-location-message" id="lead-location-save-message">Ask for this before confirming the appointment.</p>
       </div>
     `;
-    details.insertAdjacentElement('afterend', panel);
+    contactPanel.insertAdjacentElement('afterend', panel);
     panel.querySelector('#save-lead-location-button')?.addEventListener('click', saveLocation);
     panel.querySelector('#copy-location-question-button')?.addEventListener('click', copyAddressQuestion);
     return panel;
@@ -242,6 +291,23 @@
     panel.hidden = currentStage() !== 'new';
   }
 
+  function renderContactPanel() {
+    const lead = getActiveLead();
+    const panel = ensureContactPanel();
+    if (!lead || !panel) return;
+    const fields = {
+      '#lead-contact-person': cleanDisplayValue(lead.contactPerson) || cleanDisplayValue(lead.name),
+      '#lead-contact-phone': cleanDisplayValue(lead.phone),
+      '#lead-contact-email': cleanDisplayValue(lead.email)
+    };
+    Object.entries(fields).forEach(([selector, value]) => {
+      const input = panel.querySelector(selector);
+      if (input && document.activeElement !== input) input.value = value || '';
+    });
+    const message = panel.querySelector('#lead-contact-save-message');
+    if (message) message.textContent = 'Fill in missing contact details after the first reply or call.';
+  }
+
   function renderLocationPanel() {
     const lead = getActiveLead();
     const panel = ensureLocationPanel();
@@ -275,6 +341,17 @@
     if (message) message.textContent = 'Notes stay with this lead record.';
   }
 
+  async function copyContactQuestion() {
+    const message = document.querySelector('#lead-contact-save-message');
+    const text = 'What is the best phone number and email address for your estimate updates?';
+    try {
+      await navigator.clipboard.writeText(text);
+      if (message) message.textContent = 'Contact question copied.';
+    } catch (_error) {
+      if (message) message.textContent = 'Could not copy the contact question.';
+    }
+  }
+
   async function copyAddressQuestion() {
     const message = document.querySelector('#lead-location-save-message');
     const text = 'Before we confirm the appointment, what is the exact project address where you would like us to meet for the estimate?';
@@ -284,6 +361,44 @@
     } catch (_error) {
       if (message) message.textContent = 'Could not copy the address question.';
     }
+  }
+
+  async function saveContact() {
+    const lead = getActiveLead();
+    const message = document.querySelector('#lead-contact-save-message');
+    const button = document.querySelector('#save-lead-contact-button');
+    if (!lead) return;
+
+    const contactPerson = document.querySelector('#lead-contact-person')?.value.trim() || lead.name || '';
+    const phone = document.querySelector('#lead-contact-phone')?.value.trim() || '';
+    const email = document.querySelector('#lead-contact-email')?.value.trim() || '';
+
+    lead.contactPerson = contactPerson || 'Not set';
+    lead.phone = phone || 'Not set';
+    lead.email = email || 'Not set';
+    lead.updatedAt = new Date().toISOString();
+
+    const contactPersonDisplay = document.querySelector('#dialog-contact-person');
+    const contactDisplay = document.querySelector('#dialog-contact');
+    if (contactPersonDisplay) contactPersonDisplay.textContent = lead.contactPerson;
+    if (contactDisplay) contactDisplay.textContent = `${lead.phone} - ${lead.email}`;
+
+    const client = window.BREEZE_PRIVATE_ADMIN_BRIDGE?.client;
+    if (!client || String(lead.id || '').startsWith('lead-') || String(lead.id || '').startsWith('manual-')) {
+      if (message) message.textContent = 'Contact info updated on this screen.';
+      return;
+    }
+
+    if (button) button.disabled = true;
+    if (message) message.textContent = 'Saving contact info...';
+    const { error } = await client.from('leads').update({ contact_person: contactPerson, phone, email }).eq('id', lead.id);
+    if (button) button.disabled = false;
+    if (error) {
+      if (message) message.textContent = `Could not save contact info: ${error.message}`;
+      return;
+    }
+    if (message) message.textContent = 'Contact info saved.';
+    await window.BREEZE_PRIVATE_ADMIN_BRIDGE?.loadLeads?.();
   }
 
   async function saveLocation() {
@@ -364,6 +479,7 @@
     injectStyles();
     setDetailsCompact();
     hideCompletedLeadReview();
+    renderContactPanel();
     renderLocationPanel();
     renderNotesPanel();
   }
