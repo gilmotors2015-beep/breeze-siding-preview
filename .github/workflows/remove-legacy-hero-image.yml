@@ -1,0 +1,72 @@
+name: One-time remove legacy hero image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/remove-legacy-hero-image.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message, 'Remove legacy hero image') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Replace hero image references
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = process.cwd();
+          const textExtensions = new Set([
+            '.html', '.css', '.js', '.mjs', '.json', '.md', '.txt', '.xml', '.svg'
+          ]);
+          const skipDirs = new Set(['.git', 'node_modules', 'dist', 'build']);
+
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              const rel = path.relative(root, full).replaceAll(path.sep, '/');
+              if (entry.isDirectory()) {
+                if (!skipDirs.has(entry.name)) walk(full);
+                continue;
+              }
+              if (!textExtensions.has(path.extname(entry.name).toLowerCase())) continue;
+
+              let text = fs.readFileSync(full, 'utf8');
+              const before = text;
+              text = text
+                .replaceAll('assets/images/hero.jpg', 'assets/images/high-end-siding-installation.jpg')
+                .replaceAll('Clean siding detail around modern windows', 'High-end siding installation detail')
+                .replace(/\n- `hero\.jpg`\n/g, '\n');
+
+              if (text !== before) {
+                fs.writeFileSync(full, text);
+                console.log(`updated ${rel}`);
+              }
+            }
+          }
+
+          walk(root);
+          fs.rmSync(path.join(root, 'assets/images/hero.jpg'), { force: true });
+          fs.rmSync(path.join(root, '.github/workflows/remove-legacy-hero-image.yml'), { force: true });
+          NODE
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No cleanup changes needed."
+          else
+            git commit -m "Remove legacy hero image"
+            git push
+          fi
