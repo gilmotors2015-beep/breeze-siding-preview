@@ -137,7 +137,7 @@ summary:focus-visible {
   color: var(--white);
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.88), rgba(20, 32, 51, 0.28)),
-    url("assets/images/hero.jpg") center / cover;
+    url("assets/images/high-end-siding-installation.jpg") center / cover;
 }
 
 .page-hero > div {

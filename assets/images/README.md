@@ -35,7 +35,6 @@ Before deleting, renaming, or replacing any file listed here, update and verify 
 - `before-after.jpg`
 - `covered-deck-patio-renovation.jpg`
 - `hardie-panel-multifamily-siding-detail.jpg`
-- `hero.jpg`
 - `project-closeup.jpg`
 - `project-detail.jpg`
 - `project-home.jpg`
