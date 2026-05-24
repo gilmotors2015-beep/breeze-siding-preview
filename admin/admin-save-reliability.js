@@ -94,6 +94,7 @@
       '#private-status-message',
       '#dialog-status-save-message',
       '#status-controller-message',
+      '#lead-contact-save-message',
       '#lead-notes-save-message',
       '#lead-location-save-message'
     ].forEach((selector) => {
@@ -103,11 +104,19 @@
   }
 
   function setBusyState(isBusy) {
-    ['#mark-qualified-button', '#move-next-button', '#mark-spam-button', '#dialog-status-select', '#status-next-step-button', '#save-lead-notes-button', '#save-lead-location-button']
-      .forEach((selector) => {
-        const target = document.querySelector(selector);
-        if (target) target.disabled = isBusy;
-      });
+    [
+      '#mark-qualified-button',
+      '#move-next-button',
+      '#mark-spam-button',
+      '#dialog-status-select',
+      '#status-next-step-button',
+      '#save-lead-contact-button',
+      '#save-lead-notes-button',
+      '#save-lead-location-button'
+    ].forEach((selector) => {
+      const target = document.querySelector(selector);
+      if (target) target.disabled = isBusy;
+    });
   }
 
   function parseAddress(lead) {
@@ -193,6 +202,8 @@
     const nextNode = document.querySelector('#dialog-next');
     const guidance = document.querySelector('#dialog-stage-guidance');
     const select = document.querySelector('#dialog-status-select');
+    const contactPersonNode = document.querySelector('#dialog-contact-person');
+    const contactNode = document.querySelector('#dialog-contact');
     const notesNode = document.querySelector('#dialog-notes');
     const addressNode = document.querySelector('#dialog-address');
     const cityNode = document.querySelector('#dialog-city');
@@ -201,6 +212,8 @@
     if (nextNode) nextNode.textContent = lead.nextStep || nextStepText[lead.stage] || '';
     if (guidance) guidance.textContent = lead.nextStep || nextStepText[lead.stage] || '';
     if (select) select.value = lead.stage || 'new';
+    if (contactPersonNode) contactPersonNode.textContent = lead.contactPerson || lead.name || 'Not set';
+    if (contactNode) contactNode.textContent = `${lead.phone || 'Not set'} - ${lead.email || 'Not set'}`;
     if (notesNode) notesNode.textContent = lead.notes || 'Not set';
     if (addressNode) addressNode.textContent = lead.address || 'Not set';
     if (cityNode) cityNode.textContent = lead.city || 'Not set';
@@ -258,6 +271,39 @@
     isSaving = false;
     setMessage(`${lead.name} saved as ${labelByStage[stage] || stage}.`);
     window.dispatchEvent(new CustomEvent('breeze-lead-stage-changed', { detail: { lead, stage, source } }));
+  }
+
+  async function saveContact() {
+    if (isSaving) return;
+    const lead = getActiveLead();
+    if (!lead) return;
+
+    const contactPerson = document.querySelector('#lead-contact-person')?.value.trim() || lead.name || '';
+    const phone = document.querySelector('#lead-contact-phone')?.value.trim() || '';
+    const email = document.querySelector('#lead-contact-email')?.value.trim() || '';
+
+    isSaving = true;
+    setBusyState(true);
+    setMessage('Saving contact info...');
+
+    const { error } = await saveLeadRecord(lead, { contact_person: contactPerson, phone, email });
+    if (error) {
+      setBusyState(false);
+      isSaving = false;
+      setMessage(`Could not save contact info: ${error.message}`);
+      return;
+    }
+
+    updateLeadLocally(lead, {
+      contactPerson: contactPerson || 'Not set',
+      phone: phone || 'Not set',
+      email: email || 'Not set'
+    });
+    rerender(lead);
+    await loadLeads();
+    setBusyState(false);
+    isSaving = false;
+    setMessage('Contact info saved.');
   }
 
   async function saveNotes() {
@@ -349,6 +395,12 @@
       if (target.closest('#mark-qualified-button')) stage = 'qualified';
       if (target.closest('#mark-spam-button')) stage = 'spam';
       if (target.closest('#move-next-button') || target.closest('#status-next-step-button')) stage = stageFlow[currentStage()] || '';
+      if (target.closest('#save-lead-contact-button')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        saveContact();
+        return;
+      }
       if (target.closest('#save-lead-notes-button')) {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -381,6 +433,7 @@
   window.BREEZE_ADMIN_SAVE_RELIABILITY = {
     saveLeadRecord,
     saveStage,
+    saveContact,
     saveNotes,
     saveLocation
   };
