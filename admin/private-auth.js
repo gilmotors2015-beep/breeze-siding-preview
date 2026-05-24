@@ -53,12 +53,21 @@
     appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-2', 'admin-static-lead-restore');
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
     const loadStatusController = () => {
-      const controllerScript = appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-1', 'admin-status-controller');
-      const loadScheduledStagePolish = () => appendEnhancementScript('/admin/admin-scheduled-stage-polish.js?v=scheduled-1', 'admin-scheduled-stage-polish');
-      if (controllerScript) {
-        controllerScript.addEventListener('load', loadScheduledStagePolish, { once: true });
+      const loadController = () => {
+        const controllerScript = appendEnhancementScript('/admin/admin-status-controller.js?v=status-controller-2', 'admin-status-controller');
+        const loadScheduledStagePolish = () => appendEnhancementScript('/admin/admin-scheduled-stage-polish.js?v=scheduled-1', 'admin-scheduled-stage-polish');
+        if (controllerScript) {
+          controllerScript.addEventListener('load', loadScheduledStagePolish, { once: true });
+        } else {
+          loadScheduledStagePolish();
+        }
+      };
+
+      const reliabilityScript = appendEnhancementScript('/admin/admin-save-reliability.js?v=save-1', 'admin-save-reliability');
+      if (reliabilityScript) {
+        reliabilityScript.addEventListener('load', loadController, { once: true });
       } else {
-        loadScheduledStagePolish();
+        loadController();
       }
     };
     const loadSchedulePolish = () => {
