@@ -1,0 +1,85 @@
+name: One-time retire low-quality images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/retire-low-quality-images.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message, 'Retire low-quality image assets') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Replace retired image references
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const root = process.cwd();
+          const textExtensions = new Set(['.html', '.css', '.js', '.mjs', '.json', '.md', '.txt', '.xml', '.svg']);
+          const skipDirs = new Set(['.git', 'node_modules', 'dist', 'build']);
+          const replacements = [
+            ['assets/images/project-closeup.jpg', 'assets/images/full-exterior-renovation.jpg'],
+            ['assets/images/project-home.jpg', 'assets/images/full-exterior-renovation.jpg'],
+            ['assets/images/seattle-exterior-paint.jpg', 'assets/images/seattle-siding-replacement.jpg'],
+          ];
+          const retiredNames = [
+            'project-closeup.jpg',
+            'project-home.jpg',
+            'seattle-exterior-paint.jpg',
+          ];
+
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              const rel = path.relative(root, full).split(path.sep).join('/');
+              if (entry.isDirectory()) {
+                if (!skipDirs.has(entry.name)) walk(full);
+                continue;
+              }
+              if (!textExtensions.has(path.extname(entry.name).toLowerCase())) continue;
+
+              let text = fs.readFileSync(full, 'utf8');
+              const before = text;
+              for (const pair of replacements) {
+                text = text.split(pair[0]).join(pair[1]);
+              }
+              if (rel === 'assets/images/README.md') {
+                text = text
+                  .split('\n')
+                  .filter((line) => !retiredNames.some((name) => line.includes('`' + name + '`') || line.trim() === '- ' + name))
+                  .join('\n');
+              }
+              if (text !== before) {
+                fs.writeFileSync(full, text);
+                console.log('updated ' + rel);
+              }
+            }
+          }
+
+          walk(root);
+          for (const name of retiredNames) {
+            fs.rmSync(path.join(root, 'assets/images', name), { force: true });
+          }
+          fs.rmSync(path.join(root, '.github/workflows/retire-low-quality-images.yml'), { force: true });
+          NODE
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No cleanup changes needed."
+          else
+            git commit -m "Retire low-quality image assets"
+            git push
+          fi
