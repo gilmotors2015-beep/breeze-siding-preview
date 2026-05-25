@@ -4,7 +4,7 @@
   const approvedImages = [
     { src: '/assets/images/window-installation.jpg', alt: 'Finished siding exterior with crisp window and trim details', caption: 'Finished exterior details should look tidy and protect vulnerable openings.' },
     { src: '/assets/images/bellevue-siding-installation.jpg', alt: 'Crisp trim and shingle siding detail on a high-end exterior', caption: 'Crisp trim and balanced siding profiles for a refined exterior.' },
-    { src: '/assets/images/seattle-exterior-paint.jpg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
+    { src: '/assets/images/seattle-siding-replacement.jpg', alt: 'Updated residential exterior with clean siding and dark trim', caption: 'Clean siding and dark trim for a sharper street-facing finish.' },
     { src: '/assets/images/fiber-cement-panels-cedar-detail.jpg', alt: 'Warm cedar siding and large windows on a custom home', caption: 'Warm siding tones paired with large black window details.' },
     { src: '/assets/images/high-end-siding-installation.jpg', alt: 'Exterior painting and siding finish detail', caption: 'Paint and siding details should work together for a durable finish.' },
     { src: '/assets/images/cedar-siding.jpg', alt: 'Modern Hardie panel siding detail', caption: 'Hardie panel accents can modernize the exterior without making it feel busy.' },

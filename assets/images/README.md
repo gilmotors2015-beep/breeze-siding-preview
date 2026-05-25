@@ -26,7 +26,6 @@ Before deleting, renaming, or replacing any file listed here, update and verify 
 - `james-hardie-lap-siding-cedar-detail.jpg`
 - `modern-design.jpg`
 - `multi-family-siding.jpg`
-- `seattle-exterior-paint.jpg`
 - `seattle-siding-replacement.jpg`
 - `window-installation.jpg`
 
@@ -35,9 +34,7 @@ Before deleting, renaming, or replacing any file listed here, update and verify 
 - `before-after.jpg`
 - `covered-deck-patio-renovation.jpg`
 - `hardie-panel-multifamily-siding-detail.jpg`
-- `project-closeup.jpg`
 - `project-detail.jpg`
-- `project-home.jpg`
 - `single-story-cedar-exterior-window-project.jpg`
 
 ## Cleanup workflow

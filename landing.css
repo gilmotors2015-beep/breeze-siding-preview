@@ -6,7 +6,7 @@
   color: var(--white);
   background:
     linear-gradient(90deg, rgba(20, 32, 51, 0.9), rgba(20, 32, 51, 0.32)),
-    url("assets/images/project-home.jpg") center / cover;
+    url("assets/images/full-exterior-renovation.jpg") center / cover;
 }
 
 .resource-hero > div {
