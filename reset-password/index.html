@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reset Admin Password | Breeze Siding</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="/admin-login/login.css?v=login-3">
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-card" aria-labelledby="reset-title">
+        <p class="eyebrow">Breeze Siding Admin</p>
+        <h1 id="reset-title">Reset password</h1>
+        <p class="login-copy" id="reset-copy">Enter the admin email and we will send a secure reset link.</p>
+
+        <form id="reset-request-form" class="login-form">
+          <label>
+            Email
+            <input id="reset-email" type="email" autocomplete="username" required>
+          </label>
+          <button class="button primary" type="submit">Send reset link</button>
+          <p class="login-help"><a href="/admin-login/">Back to login</a></p>
+          <p class="login-message" id="reset-request-message" aria-live="polite">Reset is ready.</p>
+        </form>
+
+        <form id="reset-update-form" class="login-form" hidden>
+          <label>
+            New password
+            <input id="reset-password" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <label>
+            Confirm new password
+            <input id="reset-password-confirm" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <button class="button primary" type="submit">Update password</button>
+          <p class="login-help"><a href="/admin-login/">Back to login</a></p>
+          <p class="login-message" id="reset-update-message" aria-live="polite">Choose a strong password.</p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+    <script src="/admin/private-admin-config.js?v=login-2" defer></script>
+    <script src="reset-password.js?v=reset-1" defer></script>
+  </body>
+</html>
