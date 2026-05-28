@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://breezesiding.com/sitemap.xml
-Sitemap: https://breezesiding.com/sitemap-recovered.xml
