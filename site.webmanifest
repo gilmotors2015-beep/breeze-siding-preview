@@ -1,0 +1,19 @@
+{
+  "name": "Breeze Siding",
+  "short_name": "Breeze Siding",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/assets/images/breeze-icon.png",
+      "sizes": "800x600",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0f2442",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
