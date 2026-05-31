@@ -4,17 +4,33 @@
   const bootText = document.querySelector('#auth-check-screen span');
   if (bootText) bootText.textContent = 'Checking your saved login session...';
 
-  function loginUrl() {
-    const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    return `/admin-login/?next=${encodeURIComponent(next || '/admin/')}`;
+  function clearSavedAuthStorage() {
+    const stores = [window.localStorage, window.sessionStorage].filter(Boolean);
+    stores.forEach((store) => {
+      try {
+        Object.keys(store).forEach((key) => {
+          const lower = key.toLowerCase();
+          if ((lower.startsWith('sb-') && lower.includes('auth-token')) || lower.includes('supabase.auth.token')) {
+            store.removeItem(key);
+          }
+        });
+      } catch (_error) {}
+    });
   }
 
-  function showLoginNeeded(message = 'Secure login is needed before this dashboard can open.') {
+  function loginUrl({ fresh = false } = {}) {
+    const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const params = new URLSearchParams({ next: next || '/admin/' });
+    if (fresh) params.set('fresh', '1');
+    return `/admin-login/?${params.toString()}`;
+  }
+
+  function showLoginNeeded(message = 'Secure login is needed before this dashboard can open.', options = {}) {
     const screen = document.querySelector('#auth-check-screen');
     const text = screen?.querySelector('span');
     const link = screen?.querySelector('a');
     if (text) text.textContent = message;
-    if (link) link.setAttribute('href', loginUrl());
+    if (link) link.setAttribute('href', loginUrl(options));
   }
 
   function withTimeout(promise, ms, fallback) {
@@ -25,7 +41,7 @@
   }
 
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
-    showLoginNeeded('Secure login could not load. Refresh once, or use the login button below.');
+    showLoginNeeded('Secure login could not load. Refresh once, or use the login button below.', { fresh: true });
     return;
   }
 
@@ -213,23 +229,25 @@
 
   async function signOut() {
     await client.auth.signOut();
+    clearSavedAuthStorage();
     window.dispatchEvent(new CustomEvent('breeze-private-logout'));
-    window.location.replace('/admin-login/');
+    window.location.replace('/admin-login/?fresh=1');
   }
 
   async function init() {
     document.querySelector('#private-auth-logout')?.addEventListener('click', signOut);
 
-    const sessionResult = await withTimeout(client.auth.getSession(), 5000, { timedOut: true });
+    const sessionResult = await withTimeout(client.auth.getSession(), 10000, { timedOut: true });
     if (sessionResult?.timedOut) {
-      showLoginNeeded('Saved login could not be confirmed. Please sign in again.');
+      clearSavedAuthStorage();
+      showLoginNeeded('Saved login could not be confirmed. The old browser session has been cleared. Please sign in again.', { fresh: true });
       return;
     }
 
     currentSession = sessionResult?.data?.session || null;
 
     if (!currentSession) {
-      showLoginNeeded('You are not signed in. Use the secure login button below.');
+      showLoginNeeded('You are not signed in. Use the secure login button below.', { fresh: true });
       return;
     }
 
@@ -241,7 +259,8 @@
       client.auth.onAuthStateChange(async (_event, session) => {
         currentSession = session;
         if (!session) {
-          showLoginNeeded('You are not signed in. Use the secure login button below.');
+          clearSavedAuthStorage();
+          showLoginNeeded('You are not signed in. Use the secure login button below.', { fresh: true });
           return;
         }
         unlockDashboard();
