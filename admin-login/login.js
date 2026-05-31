@@ -6,6 +6,7 @@
   const passwordInput = document.querySelector('#admin-login-password');
   const message = document.querySelector('#admin-login-message');
   const submitButton = form?.querySelector('button[type="submit"]');
+  const searchParams = new URLSearchParams(window.location.search);
 
   function setMessage(text, type = '') {
     if (!message) return;
@@ -14,9 +15,22 @@
     message.classList.toggle('is-success', type === 'success');
   }
 
+  function clearSavedAuthStorage() {
+    const stores = [window.localStorage, window.sessionStorage].filter(Boolean);
+    stores.forEach((store) => {
+      try {
+        Object.keys(store).forEach((key) => {
+          const lower = key.toLowerCase();
+          if ((lower.startsWith('sb-') && lower.includes('auth-token')) || lower.includes('supabase.auth.token')) {
+            store.removeItem(key);
+          }
+        });
+      } catch (_error) {}
+    });
+  }
+
   function nextUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const next = params.get('next');
+    const next = searchParams.get('next');
     const destination = next && next.startsWith('/admin/') ? next : '/admin/';
     const separator = destination.includes('?') ? '&' : '?';
     return `${destination}${separator}v=auth-${Date.now()}`;
@@ -42,11 +56,18 @@
   }
 
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
+  const isFreshLogin = searchParams.get('fresh') === '1';
   if (emailInput && config.ownerEmail) emailInput.value = config.ownerEmail;
 
-  client.auth.getSession().then(({ data }) => {
-    if (data.session) window.location.replace(nextUrl());
-  });
+  if (isFreshLogin) {
+    clearSavedAuthStorage();
+    client.auth.signOut({ scope: 'local' }).catch(() => {});
+    setMessage('Old saved login cleared. Sign in again to open the dashboard.');
+  } else {
+    client.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.replace(nextUrl());
+    });
+  }
 
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
