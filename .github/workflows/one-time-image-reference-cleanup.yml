@@ -1,0 +1,100 @@
+name: One-time approved image reference cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-image-reference-cleanup.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace old image references with approved resized image pack
+        shell: python
+        run: |
+          from pathlib import Path
+
+          approved = "/assets/images/approved-resized-images-for-github-20260530-224527/"
+          replacements = {
+              "/assets/images/04-30-26%20Breeze%20Siding.png": "/assets/images/breeze-siding-logo.png",
+              "assets/images/04-30-26%20Breeze%20Siding.png": "assets/images/breeze-siding-logo.png",
+              "/assets/images/bellevue-siding-installation.jpg": approved + "bellevue-siding-installation.jpg",
+              "assets/images/bellevue-siding-installation.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/bellevue-siding-installation.jpg",
+              "/assets/images/full-exterior-renovation.jpg": approved + "full-exterior-renovation.jpg",
+              "assets/images/full-exterior-renovation.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/full-exterior-renovation.jpg",
+              "/assets/images/window-installation.jpg": approved + "residential-covered-entry-siding-wood-accent.jpg",
+              "assets/images/window-installation.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/residential-covered-entry-siding-wood-accent.jpg",
+              "/assets/images/james-hardie-color-plus-cedar-accent.jpg": approved + "residential-covered-entry-siding-wood-accent.jpg",
+              "assets/images/james-hardie-color-plus-cedar-accent.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/residential-covered-entry-siding-wood-accent.jpg",
+              "/assets/images/fiber-cement-panels-cedar-detail.jpg": approved + "custom-panel-detail.jpg",
+              "assets/images/fiber-cement-panels-cedar-detail.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/custom-panel-detail.jpg",
+              "/assets/images/cedar-siding.jpg": approved + "cedar-channel-lap-siding.jpg",
+              "assets/images/cedar-siding.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/cedar-channel-lap-siding.jpg",
+              "/assets/images/high-end-siding-installation.jpg": approved + "high-end-siding-installation.jpg",
+              "assets/images/high-end-siding-installation.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/high-end-siding-installation.jpg",
+              "/assets/images/seattle-siding-replacement.jpg": approved + "seattle-siding-renovation.jpg",
+              "assets/images/seattle-siding-replacement.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/seattle-siding-renovation.jpg",
+              "/assets/images/exterior-detail.jpg": approved + "exterior-detail.jpg",
+              "assets/images/exterior-detail.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/exterior-detail.jpg",
+              "/assets/images/hardie-panel-multifamily-siding-detail.jpg": approved + "hardie-panel-multifamily-siding-detail.jpg",
+              "assets/images/hardie-panel-multifamily-siding-detail.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/hardie-panel-multifamily-siding-detail.jpg",
+              "/assets/images/multi-family-siding.jpg": approved + "james-hardie-hz10-smooth.jpg",
+              "assets/images/multi-family-siding.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/james-hardie-hz10-smooth.jpg",
+              "/assets/images/exterior-paint.jpg": approved + "high-end-siding-installation.jpg",
+              "assets/images/exterior-paint.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/high-end-siding-installation.jpg",
+              "/assets/images/covered-deck-patio-renovation.jpg": approved + "siding-and-new-deck.jpg",
+              "assets/images/covered-deck-patio-renovation.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/siding-and-new-deck.jpg",
+              "/assets/images/before-after.jpg": approved + "full-exterior-renovation.jpg",
+              "assets/images/before-after.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/full-exterior-renovation.jpg",
+              "/assets/images/project-closeup.jpg": approved + "full-exterior-renovation.jpg",
+              "assets/images/project-closeup.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/full-exterior-renovation.jpg",
+              "/assets/images/project-home.jpg": approved + "full-exterior-renovation.jpg",
+              "assets/images/project-home.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/full-exterior-renovation.jpg",
+              "/assets/images/seattle-exterior-paint.jpg": approved + "seattle-siding-renovation.jpg",
+              "assets/images/seattle-exterior-paint.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/seattle-siding-renovation.jpg",
+              "/hero.jpg": approved + "high-end-siding-installation.jpg",
+              "hero.jpg": "assets/images/approved-resized-images-for-github-20260530-224527/high-end-siding-installation.jpg",
+          }
+
+          suffixes = {".html", ".css"}
+          skip_parts = {"admin", ".git", "node_modules"}
+          changed = []
+          for path in Path(".").rglob("*"):
+              if not path.is_file() or path.suffix.lower() not in suffixes:
+                  continue
+              if any(part in skip_parts for part in path.parts):
+                  continue
+              text = path.read_text(encoding="utf-8", errors="ignore")
+              new_text = text
+              for old, new in replacements.items():
+                  new_text = new_text.replace(old, new)
+              if new_text != text:
+                  path.write_text(new_text, encoding="utf-8")
+                  changed.append(str(path))
+
+          print(f"Updated {len(changed)} files")
+          for item in changed:
+              print(item)
+
+      - name: Commit cleanup changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No image reference changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Use approved resized image set across site pages"
+          git push
