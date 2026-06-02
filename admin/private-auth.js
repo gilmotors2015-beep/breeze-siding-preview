@@ -66,6 +66,7 @@
   }
 
   function loadDashboardEnhancements() {
+    appendEnhancementScript('/admin/admin-spam-review-lane.js?v=spam-review-1', 'admin-spam-review-lane');
     appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-2', 'admin-static-lead-restore');
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
     const loadStatusController = () => {
@@ -190,7 +191,7 @@
       estimateDate: row.estimate_date || '',
       dueDate: row.due_date || '',
       proposalTotal: total,
-      stage: toDashboardStage(row.stage),
+      stage: row.is_spam ? 'spam' : toDashboardStage(row.stage),
       qualityChecksDone: row.is_spam ? [] : ['real-contact', 'service-area', 'real-project', 'not-spam'],
       folderStatus: row.folder_status || (hasFolder ? 'Folder exists' : 'Qualified, folder not created'),
       folderTasksDone: ['folder', hasEstimate ? 'estimate' : ''].filter((item) => item && (item !== 'folder' || hasFolder)),
