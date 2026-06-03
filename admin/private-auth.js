@@ -66,7 +66,7 @@
   }
 
   function loadDashboardEnhancements() {
-    appendEnhancementScript('/admin/admin-spam-review-lane.js?v=spam-review-1', 'admin-spam-review-lane');
+    appendEnhancementScript('/admin/admin-spam-review-lane.js?v=spam-review-2', 'admin-spam-review-lane');
     appendEnhancementScript('/admin/admin-static-lead-restore.js?v=static-2', 'admin-static-lead-restore');
     const statusScript = appendEnhancementScript('/admin/admin-status-enhancement.js?v=status-8', 'admin-status-enhancement');
     const loadStatusController = () => {
