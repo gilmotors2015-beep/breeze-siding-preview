@@ -7,8 +7,11 @@
   const softNoticeMs = 1400;
   const redirectTimeoutMs = 6500;
   const loadedAt = Date.now();
+  const botTrapNames = ['_honey', 'company', 'website', 'website_url', 'url', 'business_name', 'fax'];
 
   if (!form || !status) return;
+
+  addBotTraps();
 
   function setStatus(message, tone = 'info') {
     status.textContent = message;
@@ -20,6 +23,28 @@
       if (record[key] === '') delete record[key];
     });
     return record;
+  }
+
+  function addBotTraps() {
+    const trapWrap = document.createElement('div');
+    trapWrap.setAttribute('aria-hidden', 'true');
+    trapWrap.style.position = 'absolute';
+    trapWrap.style.left = '-10000px';
+    trapWrap.style.width = '1px';
+    trapWrap.style.height = '1px';
+    trapWrap.style.overflow = 'hidden';
+
+    botTrapNames.slice(1).forEach((name) => {
+      if (form.querySelector(`[name="${name}"]`)) return;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = name;
+      input.tabIndex = -1;
+      input.autocomplete = 'off';
+      trapWrap.appendChild(input);
+    });
+
+    form.appendChild(trapWrap);
   }
 
   function formValue(data, key) {
@@ -70,6 +95,18 @@
   function emailDomain(value) {
     const email = normalizeText(value);
     return email.includes('@') ? email.split('@').pop() : '';
+  }
+
+  function hasBotTrap(data) {
+    return botTrapNames.some((name) => formValue(data, name));
+  }
+
+  function wasRecentlySubmitted() {
+    const lastSubmit = Number(window.sessionStorage.getItem('breeze_last_lead_submit') || 0);
+    const now = Date.now();
+    if (lastSubmit && now - lastSubmit < 30000) return true;
+    window.sessionStorage.setItem('breeze_last_lead_submit', String(now));
+    return false;
   }
 
   function scoreLead(data) {
@@ -133,8 +170,8 @@
     return {
       score,
       reasons,
-      block: score >= 7,
-      markSpam: score >= 4
+      block: score >= 4,
+      markSpam: score >= 3
     };
   }
 
@@ -204,7 +241,7 @@
     if (!form.reportValidity()) return;
 
     const data = new FormData(form);
-    if (formValue(data, '_honey')) {
+    if (hasBotTrap(data) || wasRecentlySubmitted()) {
       openConfirmation();
       return;
     }
