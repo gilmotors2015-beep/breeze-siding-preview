@@ -7,11 +7,28 @@
   const softNoticeMs = 1400;
   const redirectTimeoutMs = 6500;
   const loadedAt = Date.now();
+  const repeatWindowMs = 120000;
+  const quickRepeatWindowMs = 15000;
   const botTrapNames = ['_honey', 'company', 'website', 'website_url', 'url', 'business_name', 'fax'];
+  const suspiciousEmailPatterns = [
+    /international\.inquiry/i,
+    /chameleongroup/i,
+    /7-11\.com/i,
+    /\.ru$/i,
+    /\.xyz$/i,
+    /\.top$/i
+  ];
+  let firstInteractionAt = 0;
 
   if (!form || !status) return;
 
   addBotTraps();
+  form.addEventListener('focusin', noteInteraction, true);
+  form.addEventListener('input', noteInteraction, true);
+
+  function noteInteraction() {
+    if (!firstInteractionAt) firstInteractionAt = Date.now();
+  }
 
   function setStatus(message, tone = 'info') {
     status.textContent = message;
@@ -55,6 +72,10 @@
     return String(value || '').trim().toLowerCase();
   }
 
+  function compactText(value) {
+    return String(value || '').replace(/[^a-z0-9]/gi, '');
+  }
+
   function digitCount(value) {
     return String(value || '').replace(/\D/g, '').length;
   }
@@ -64,21 +85,58 @@
     return digits.length >= 7 && /(\d)\1{5,}/.test(digits);
   }
 
+  function hasLongNumberBlob(value) {
+    return /\d{8,}/.test(String(value || ''));
+  }
+
+  function caseSwitchCount(value) {
+    const letters = String(value || '').replace(/[^a-z]/gi, '');
+    let switches = 0;
+    for (let index = 1; index < letters.length; index += 1) {
+      const previous = letters[index - 1];
+      const current = letters[index];
+      if (previous.toLowerCase() === previous.toUpperCase()) continue;
+      if (current.toLowerCase() === current.toUpperCase()) continue;
+      if ((previous === previous.toUpperCase()) !== (current === current.toUpperCase())) switches += 1;
+    }
+    return switches;
+  }
+
   function looksRandomToken(value) {
     const text = String(value || '').trim();
-    if (text.length < 10 || /\s/.test(text)) return false;
-    const letters = text.replace(/[^a-z]/gi, '');
-    if (letters.length < 10) return false;
+    if (text.length < 9 || /\s/.test(text)) return false;
+
+    const compact = compactText(text);
+    if (compact.length < 10) return false;
+
+    const letters = compact.replace(/[^a-z]/gi, '');
+    if (letters.length < 9) return false;
 
     const vowels = (letters.match(/[aeiou]/gi) || []).length;
-    const upper = (text.match(/[A-Z]/g) || []).length;
-    const lower = (text.match(/[a-z]/g) || []).length;
+    const upper = (compact.match(/[A-Z]/g) || []).length;
+    const lower = (compact.match(/[a-z]/g) || []).length;
+    const numbers = (compact.match(/\d/g) || []).length;
     const mixedCase = upper >= 2 && lower >= 2;
     const vowelRatio = vowels / letters.length;
+    const switches = caseSwitchCount(compact);
     const consonantRun = /[bcdfghjklmnpqrstvwxyz]{6,}/i.test(letters);
-    const oddCaseRun = /[a-z][A-Z][a-z][A-Z]|[A-Z][a-z][A-Z][a-z]/.test(text);
+    const oddCaseRun = /[a-z][A-Z][a-z]|[A-Z][a-z][A-Z]/.test(compact);
+    const rareLetterCluster = /[qxz][a-z]{0,2}[qxz]|[bcdfghjklmnpqrstvwxyz]{4}[aeiou]?[bcdfghjklmnpqrstvwxyz]{3}/i.test(letters);
 
-    return (mixedCase && vowelRatio < 0.34) || consonantRun || oddCaseRun;
+    return (
+      (mixedCase && switches >= 3 && compact.length >= 12) ||
+      (mixedCase && oddCaseRun && compact.length >= 10) ||
+      (mixedCase && numbers >= 2 && compact.length >= 10) ||
+      (letters.length >= 12 && vowelRatio < 0.26) ||
+      consonantRun ||
+      rareLetterCluster
+    );
+  }
+
+  function looksFakeLocation(value) {
+    const text = String(value || '').trim();
+    if (!text) return false;
+    return looksRandomToken(text) || hasLongNumberBlob(text) || /,\s*wa\s*[-,]\s*\d{6,}/i.test(text);
   }
 
   function looksLikeRealName(value) {
@@ -97,15 +155,65 @@
     return email.includes('@') ? email.split('@').pop() : '';
   }
 
+  function emailLocalPart(value) {
+    return normalizeText(value).split('@')[0] || '';
+  }
+
+  function hasOddEmailLocalPart(value) {
+    const local = emailLocalPart(value);
+    const dots = (local.match(/\./g) || []).length;
+    return looksRandomToken(local) || dots >= 4 || /^[a-z]{1,2}\d{5,}/i.test(local);
+  }
+
+  function hasSuspiciousEmailDomain(value) {
+    const domain = emailDomain(value);
+    return suspiciousEmailPatterns.some((pattern) => pattern.test(domain));
+  }
+
   function hasBotTrap(data) {
     return botTrapNames.some((name) => formValue(data, name));
   }
 
-  function wasRecentlySubmitted() {
-    const lastSubmit = Number(window.sessionStorage.getItem('breeze_last_lead_submit') || 0);
+  function storageGet(key) {
+    try {
+      return window.localStorage.getItem(key) || window.sessionStorage.getItem(key) || '';
+    } catch (_error) {
+      return '';
+    }
+  }
+
+  function storageSet(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      window.sessionStorage.setItem(key, value);
+    } catch (_error) {}
+  }
+
+  function leadFingerprint(data) {
+    return [
+      normalizeText(formValue(data, 'email')),
+      formValue(data, 'phone').replace(/\D/g, ''),
+      normalizeText(formValue(data, 'name')),
+      normalizeText(formValue(data, 'project'))
+    ].join('|');
+  }
+
+  function wasRecentlySubmitted(data) {
     const now = Date.now();
-    if (lastSubmit && now - lastSubmit < 30000) return true;
-    window.sessionStorage.setItem('breeze_last_lead_submit', String(now));
+    const fingerprint = leadFingerprint(data);
+    let last = null;
+
+    try {
+      last = JSON.parse(storageGet('breeze_last_lead_submit') || 'null');
+    } catch (_error) {}
+
+    if (last?.at) {
+      const age = now - Number(last.at);
+      if (age < quickRepeatWindowMs) return true;
+      if (last.fingerprint === fingerprint && age < repeatWindowMs) return true;
+    }
+
+    storageSet('breeze_last_lead_submit', JSON.stringify({ at: now, fingerprint }));
     return false;
   }
 
@@ -114,34 +222,41 @@
     const phone = formValue(data, 'phone');
     const email = formValue(data, 'email');
     const city = formValue(data, 'city');
+    const project = formValue(data, 'project');
     const notes = formValue(data, 'message');
     const elapsedSeconds = (Date.now() - loadedAt) / 1000;
-    const domain = emailDomain(email);
-    const localPart = normalizeText(email).split('@')[0] || '';
     let score = 0;
     const reasons = [];
 
     if (elapsedSeconds < 3) {
       score += 3;
       reasons.push('submitted_too_fast');
+    } else if (!firstInteractionAt && elapsedSeconds < 8) {
+      score += 2;
+      reasons.push('no_form_interaction');
+    }
+
+    if (window.navigator?.webdriver) {
+      score += 2;
+      reasons.push('automated_browser');
     }
 
     if (name && looksRandomToken(name)) {
-      score += 4;
+      score += 5;
       reasons.push('random_name');
     } else if (name && !looksLikeRealName(name)) {
       score += 1;
       reasons.push('unusual_name');
     }
 
-    if (city && looksRandomToken(city)) {
-      score += 3;
-      reasons.push('random_city');
+    if (city && looksFakeLocation(city)) {
+      score += 4;
+      reasons.push('fake_city_or_address');
     }
 
     if (phone) {
       const digits = digitCount(phone);
-      if (digits < 10 || digits > 11 || hasRepeatingDigits(phone)) {
+      if (digits < 10 || digits > 11 || hasRepeatingDigits(phone) || hasLongNumberBlob(phone)) {
         score += 2;
         reasons.push('invalid_phone_pattern');
       }
@@ -152,19 +267,34 @@
         score += 3;
         reasons.push('invalid_email');
       }
-      if (looksRandomToken(localPart)) {
+      if (hasOddEmailLocalPart(email)) {
         score += 2;
-        reasons.push('random_email_local');
+        reasons.push('odd_email_local_part');
       }
-      if (/7-11\.com|chameleongroup\.co|international\.inquiry/i.test(domain) || domain.endsWith('.ru')) {
-        score += 2;
+      if (hasSuspiciousEmailDomain(email)) {
+        score += 3;
         reasons.push('suspicious_domain');
       }
+    }
+
+    if (!email && !phone) {
+      score += 4;
+      reasons.push('missing_contact');
     }
 
     if (hasLink(notes)) {
       score += 3;
       reasons.push('notes_include_link');
+    }
+
+    if (notes && looksRandomToken(notes)) {
+      score += 3;
+      reasons.push('random_notes');
+    }
+
+    if (!project) {
+      score += 1;
+      reasons.push('missing_project_type');
     }
 
     return {
@@ -241,7 +371,7 @@
     if (!form.reportValidity()) return;
 
     const data = new FormData(form);
-    if (hasBotTrap(data) || wasRecentlySubmitted()) {
+    if (hasBotTrap(data) || wasRecentlySubmitted(data)) {
       openConfirmation();
       return;
     }
