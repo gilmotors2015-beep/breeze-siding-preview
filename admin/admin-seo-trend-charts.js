@@ -159,6 +159,54 @@
     return rows.map((row) => numberFrom(row[key]));
   }
 
+  function metricHasData(rows, key) {
+    return rows.some((row) => {
+      const value = row[key];
+      return value !== null && value !== undefined && value !== '' && numberFrom(value) > 0;
+    });
+  }
+
+  function metricTotal(rows, key) {
+    return rows.reduce((total, row) => total + numberFrom(row[key]), 0);
+  }
+
+  function firstHalfSecondHalfChange(values) {
+    const clean = values.map(numberFrom);
+    if (clean.length < 4 || clean.every((value) => value === 0)) return null;
+    const midpoint = Math.max(1, Math.floor(clean.length / 2));
+    const first = clean.slice(0, midpoint).reduce((total, value) => total + value, 0);
+    const second = clean.slice(midpoint).reduce((total, value) => total + value, 0);
+    if (!first && !second) return null;
+    if (!first) return 100;
+    return Math.round(((second - first) / first) * 100);
+  }
+
+  function latestSnapshotValue(item) {
+    if (!latestSnapshot || !item.fallbackKey) return 0;
+    return numberFrom(latestSnapshot[item.fallbackKey]);
+  }
+
+  function metricSummary(rows, item) {
+    const values = seriesValues(rows, item.key);
+    const total = metricTotal(rows, item.key);
+    const fallback = latestSnapshotValue(item);
+    const hasDailyData = metricHasData(rows, item.key);
+    const hasFallbackData = fallback > 0;
+
+    if (item.key === 'searchClicks' && !hasDailyData && !hasFallbackData) {
+      return { value: 'Pending', note: 'Search Console not synced yet', tone: 'neutral' };
+    }
+
+    const value = hasDailyData ? total : fallback;
+    const change = firstHalfSecondHalfChange(values);
+    const note = change === null
+      ? (hasDailyData ? '28-day total' : 'Latest synced value')
+      : `${change >= 0 ? '+' : ''}${formatNumber(change)}% vs prior half`;
+    const tone = change === null ? 'neutral' : change >= 0 ? 'positive' : 'negative';
+
+    return { value: formatNumber(value), note, tone };
+  }
+
   function pointPath(values, width, height, padding, maxValue) {
     if (values.length < 2) return '';
     return values.map((value, index) => {
@@ -170,16 +218,14 @@
 
   function renderSeriesControls(rows) {
     return seriesConfig.map((item) => {
-      const values = seriesValues(rows, item.key);
-      const last = values.length ? values[values.length - 1] : (latestSnapshot ? numberFrom(latestSnapshot[item.fallbackKey]) : 0);
-      const change = percentChange(values);
-      const className = change > 0 ? 'seo-positive' : change < 0 ? 'seo-negative' : '';
+      const summary = metricSummary(rows, item);
+      const className = summary.tone === 'positive' ? 'seo-positive' : summary.tone === 'negative' ? 'seo-negative' : '';
       return `
         <label class="seo-series-chip ${visibleSeries.has(item.key) ? '' : 'is-off'}" style="--series-color:${item.color}">
           <input type="checkbox" data-seo-series="${escapeHtml(item.key)}" ${visibleSeries.has(item.key) ? 'checked' : ''}>
           <span><i class="seo-series-dot"></i>${escapeHtml(item.label)}</span>
-          <strong>${escapeHtml(formatNumber(last))}</strong>
-          <small class="${className}">${change >= 0 ? '+' : ''}${escapeHtml(formatNumber(change))}% over history</small>
+          <strong>${escapeHtml(summary.value)}</strong>
+          <small class="${className}">${escapeHtml(summary.note)}</small>
         </label>
       `;
     }).join('');
