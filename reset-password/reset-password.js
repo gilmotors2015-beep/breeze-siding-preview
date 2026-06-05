@@ -27,6 +27,14 @@
     return `${window.location.origin}/reset-password/`;
   }
 
+  function passwordStrengthMessage(password) {
+    if (password.length < 12) return 'Use at least 12 characters.';
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return 'Use uppercase, lowercase, and a number.';
+    }
+    return '';
+  }
+
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
     setMessage(requestMessage, 'Secure reset could not load. Refresh the page and try again.', 'error');
     return;
@@ -65,8 +73,9 @@
     event.preventDefault();
     const password = passwordInput?.value || '';
     const confirm = confirmInput?.value || '';
-    if (password.length < 8) {
-      setMessage(updateMessage, 'Use at least 8 characters.', 'error');
+    const strengthMessage = passwordStrengthMessage(password);
+    if (strengthMessage) {
+      setMessage(updateMessage, strengthMessage, 'error');
       return;
     }
     if (password !== confirm) {
