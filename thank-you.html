@@ -9,12 +9,15 @@
     <link rel="stylesheet" href="styles.css">
     <style>
       .thanks-page{min-height:calc(100vh - 180px);display:grid;align-items:center;padding:clamp(70px,10vw,130px) clamp(18px,5vw,72px);background:linear-gradient(90deg,rgba(244,248,251,.96),rgba(244,248,251,.9)),url("assets/images/approved-resized-images-for-github-20260530-224527/full-exterior-renovation.jpg") center/cover}
-      .thanks-card{max-width:820px;padding:clamp(30px,5vw,54px);border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}
+      .thanks-card{max-width:900px;padding:clamp(30px,5vw,54px);border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}
       .thanks-card h1{max-width:12ch;color:var(--ink)}
-      .thanks-card p{max-width:42rem;color:var(--muted);font-size:1.1rem}
-      .rendering-offer{margin-top:26px;padding:22px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
-      .rendering-offer h2{font-size:1.28rem;margin:0 0 8px;color:var(--ink)}
-      .rendering-offer p{font-size:1rem;margin:0 0 16px}
+      .thanks-card p{max-width:44rem;color:var(--muted);font-size:1.1rem}
+      .thanks-next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:28px 0;padding:16px;border:1px solid rgba(18,100,216,.24);border-radius:8px;background:linear-gradient(135deg,rgba(18,100,216,.07),rgba(68,114,96,.08))}
+      .thanks-next span{display:grid;align-content:start;gap:5px;min-height:96px;padding:14px;border:1px solid rgba(188,200,216,.8);border-radius:6px;background:rgba(255,255,255,.82);color:var(--muted);font-weight:800}
+      .thanks-next strong{color:var(--ink);font-size:1rem}
+      .thanks-note{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+      .thanks-note p{margin:0 0 14px;font-size:1rem}
+      @media(max-width:760px){.thanks-next{grid-template-columns:1fr}.thanks-next span{min-height:auto}}
     </style>
       <script src="/analytics.js?v=ga-1" defer></script>
   </head>
@@ -36,15 +39,19 @@
       <section class="thanks-card">
         <p class="eyebrow">Request received</p>
         <h1>Thanks for reaching out.</h1>
-        <p>Your estimate request has been sent to Breeze Siding. We will review the project details and follow up about the next step.</p>
+        <p>Your estimate request has been sent to Breeze Siding. We will review the details and follow up for a useful first conversation, usually within one business day.</p>
+        <div class="thanks-next" aria-label="What happens next">
+          <span><strong>1. We review the scope</strong>Project type, city, timing, notes, and any obvious next questions.</span>
+          <span><strong>2. We call or email</strong>You can expect a practical follow-up, not a sales script.</span>
+          <span><strong>3. We plan the estimate</strong>If the project looks like a fit, we schedule a free on-site visit.</span>
+        </div>
         <div class="hero-actions">
           <a class="button primary" href="tel:12532280531">Call 253-228-0531</a>
           <a class="button secondary" href="index.html#top">Back to homepage</a>
         </div>
-        <div class="rendering-offer">
-          <h2>Want a free exterior design preview?</h2>
-          <p>Send one clear photo of the front of your home and a few color or material ideas. We can help prepare a simple exterior rendering so you can picture the siding, trim, and finish before the estimate conversation.</p>
-          <a class="button secondary" href="mailto:service@breezesiding.com?subject=Free%20Exterior%20Rendering%20Request&body=Hi%20Breeze%20Siding%2C%0A%0AI%20would%20like%20a%20free%20exterior%20design%20preview.%0A%0AI%20will%20attach%20one%20clear%20photo%20of%20my%20home.%0A%0ASiding%20material%20ideas%3A%0ABody%20color%20ideas%3A%0ATrim%20color%20ideas%3A%0AOther%20notes%3A%0A">Request Free Rendering</a>
+        <div class="thanks-note">
+          <p>If you already have photos of damaged siding, trim, windows, or the side of the home you want improved, you can send them before the call.</p>
+          <a class="button secondary" href="mailto:service@breezesiding.com?subject=Photos%20for%20my%20Breeze%20Siding%20estimate&body=Hi%20Breeze%20Siding%2C%0A%0AI%20submitted%20an%20estimate%20request%20and%20wanted%20to%20send%20a%20few%20photos%20before%20we%20talk.%0A%0AName%3A%0ACity%3A%0AProject%20notes%3A%0A">Send project photos</a>
         </div>
       </section>
     </main>
