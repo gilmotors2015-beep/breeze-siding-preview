@@ -3,7 +3,6 @@
   const supabaseFactory = window.supabase;
   const requestForm = document.querySelector('#reset-request-form');
   const updateForm = document.querySelector('#reset-update-form');
-  const emailInput = document.querySelector('#reset-email');
   const passwordInput = document.querySelector('#reset-password');
   const confirmInput = document.querySelector('#reset-password-confirm');
   const requestMessage = document.querySelector('#reset-request-message');
@@ -17,14 +16,21 @@
     target.classList.toggle('is-success', type === 'success');
   }
 
+  function loginUrl() {
+    return `/admin-login/?next=${encodeURIComponent('/reset-password/')}`;
+  }
+
+  function showLoginRequired() {
+    requestForm.hidden = false;
+    updateForm.hidden = true;
+    if (copy) copy.textContent = 'Sign in with the admin account before changing the password.';
+    setMessage(requestMessage, 'Password changes require an active admin login.', 'error');
+  }
+
   function showUpdateMode() {
     requestForm.hidden = true;
     updateForm.hidden = false;
     if (copy) copy.textContent = 'Enter a new password for the admin dashboard.';
-  }
-
-  function resetRedirectUrl() {
-    return `${window.location.origin}/reset-password/`;
   }
 
   function passwordStrengthMessage(password) {
@@ -36,37 +42,26 @@
   }
 
   if (!config?.enabled || config.provider !== 'supabase' || !supabaseFactory?.createClient) {
-    setMessage(requestMessage, 'Secure reset could not load. Refresh the page and try again.', 'error');
+    showLoginRequired();
+    setMessage(requestMessage, 'Secure password change could not load. Refresh the page and try again.', 'error');
     return;
   }
 
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
-  if (emailInput) emailInput.value = '';
-
-  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  if (hash.get('type') === 'recovery' || hash.has('access_token') || hash.has('refresh_token')) {
-    showUpdateMode();
-  }
 
   client.auth.getSession().then(({ data }) => {
-    if (data.session && (window.location.hash || updateForm?.hidden === false)) showUpdateMode();
+    if (data.session) {
+      showUpdateMode();
+      return;
+    }
+    showLoginRequired();
+  }).catch(() => {
+    showLoginRequired();
   });
 
   requestForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const email = emailInput?.value.trim();
-    if (!email) {
-      setMessage(requestMessage, 'Enter the admin email address.', 'error');
-      return;
-    }
-
-    setMessage(requestMessage, 'Sending reset email...');
-    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: resetRedirectUrl() });
-    if (error) {
-      setMessage(requestMessage, `Reset failed: ${error.message}`, 'error');
-      return;
-    }
-    setMessage(requestMessage, 'Check your email for the secure reset link.', 'success');
+    window.location.assign(loginUrl());
   });
 
   updateForm?.addEventListener('submit', async (event) => {
@@ -89,7 +84,8 @@
       setMessage(updateMessage, `Update failed: ${error.message}`, 'error');
       return;
     }
-    setMessage(updateMessage, 'Password updated. You can sign in now.', 'success');
-    window.setTimeout(() => window.location.replace('/admin-login/'), 1600);
+    setMessage(updateMessage, 'Password updated. Sign in again with the new password.', 'success');
+    await client.auth.signOut({ scope: 'local' }).catch(() => {});
+    window.setTimeout(() => window.location.replace('/admin-login/?fresh=1'), 1600);
   });
 })();

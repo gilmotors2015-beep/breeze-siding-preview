@@ -31,7 +31,8 @@
 
   function nextUrl() {
     const next = searchParams.get('next');
-    const destination = next && next.startsWith('/admin/') ? next : '/admin/';
+    const isAllowedNext = next && (next.startsWith('/admin/') || next === '/reset-password/');
+    const destination = isAllowedNext ? next : '/admin/';
     const separator = destination.includes('?') ? '&' : '?';
     return `${destination}${separator}v=auth-${Date.now()}`;
   }
