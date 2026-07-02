@@ -57,7 +57,7 @@
 
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
   const isFreshLogin = searchParams.get('fresh') === '1';
-  if (emailInput && config.ownerEmail) emailInput.value = config.ownerEmail;
+  if (emailInput) emailInput.value = '';
 
   if (isFreshLogin) {
     clearSavedAuthStorage();
