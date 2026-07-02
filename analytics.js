@@ -65,10 +65,15 @@
     const footer = document.querySelector('.footer > div');
     if (!footer || footer.querySelector('.social-links')) return;
 
+    const buttonStyle = 'width:42px;min-height:42px;padding:0;border-radius:999px;display:inline-grid;place-items:center';
+    const labelStyle = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0';
+    const instagramIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle></svg>';
+    const facebookIcon = '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14.7 8.3V6.9c0-.7.5-1.1 1.2-1.1h1.4V3.2c-.7-.1-1.6-.2-2.4-.2-2.4 0-4 1.5-4 4.1v1.2H8.3v3h2.6V21h3.1v-9.7h2.7l.4-3h-3.1Z"></path></svg>';
+
     const social = document.createElement('nav');
     social.className = 'social-links';
     social.setAttribute('aria-label', 'Breeze Siding social media');
-    social.innerHTML = '<a href="https://instagram.com/breezesiding" target="_blank" rel="me noopener">Instagram</a><a href="https://www.facebook.com/breezesiding" target="_blank" rel="me noopener">Facebook</a>';
+    social.innerHTML = `<a href="https://instagram.com/breezesiding" target="_blank" rel="me noopener" aria-label="Breeze Siding on Instagram" title="Instagram" style="${buttonStyle}">${instagramIcon}<span style="${labelStyle}">Instagram</span></a><a href="https://www.facebook.com/breezesiding" target="_blank" rel="me noopener" aria-label="Breeze Siding on Facebook" title="Facebook" style="${buttonStyle}">${facebookIcon}<span style="${labelStyle}">Facebook</span></a>`;
     footer.appendChild(social);
   }
 
