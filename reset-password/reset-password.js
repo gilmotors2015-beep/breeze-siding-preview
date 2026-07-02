@@ -41,7 +41,7 @@
   }
 
   const client = supabaseFactory.createClient(config.supabaseUrl, config.supabaseAnonKey);
-  if (emailInput && config.ownerEmail) emailInput.value = config.ownerEmail;
+  if (emailInput) emailInput.value = '';
 
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   if (hash.get('type') === 'recovery' || hash.has('access_token') || hash.has('refresh_token')) {
