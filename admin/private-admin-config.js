@@ -3,12 +3,14 @@ window.BREEZE_PRIVATE_ADMIN = {
   provider: 'supabase',
   supabaseUrl: 'https://nwvsriwsbpdhszmmousi.supabase.co',
   supabaseAnonKey: 'sb_publishable_SHsFk0DcYRACTjzr_xZsAA_e-wX-Vt7',
-  ownerEmail: 'gilmotors2015@gmail.com'
+  ownerEmail: 'gilmotors2015@gmail.com',
+  reauthAfter: '2026-07-02T02:20:00Z'
 };
 
 (() => {
   const config = window.BREEZE_PRIVATE_ADMIN || {};
   const ownerEmail = String(config.ownerEmail || '').trim().toLowerCase();
+  const reauthAfterMs = Date.parse(config.reauthAfter || '') || 0;
   const lockKey = 'breeze-admin-login-lock-v1';
   const maxAttempts = 5;
   const lockMs = 15 * 60 * 1000;
@@ -19,6 +21,12 @@ window.BREEZE_PRIVATE_ADMIN = {
 
   function isOwnerEmail(value) {
     return !ownerEmail || normalizeEmail(value) === ownerEmail;
+  }
+
+  function sessionNeedsReauth(session) {
+    if (!reauthAfterMs || !session) return false;
+    const lastSignInMs = Date.parse(session.user?.last_sign_in_at || '');
+    return !lastSignInMs || lastSignInMs < reauthAfterMs;
   }
 
   function readLock() {
@@ -97,8 +105,13 @@ window.BREEZE_PRIVATE_ADMIN = {
     if (originalGetSession) {
       auth.getSession = async (...sessionArgs) => {
         const result = await originalGetSession(...sessionArgs);
-        const sessionEmail = result?.data?.session?.user?.email;
+        const session = result?.data?.session;
+        const sessionEmail = session?.user?.email;
         if (sessionEmail && !isOwnerEmail(sessionEmail)) {
+          await auth.signOut?.({ scope: 'local' }).catch(() => {});
+          return { ...result, data: { ...(result.data || {}), session: null } };
+        }
+        if (sessionNeedsReauth(session)) {
           await auth.signOut?.({ scope: 'local' }).catch(() => {});
           return { ...result, data: { ...(result.data || {}), session: null } };
         }
