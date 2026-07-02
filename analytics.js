@@ -61,6 +61,17 @@
     }
   }
 
+  function addFooterSocialLinks() {
+    const footer = document.querySelector('.footer > div');
+    if (!footer || footer.querySelector('.social-links')) return;
+
+    const social = document.createElement('nav');
+    social.className = 'social-links';
+    social.setAttribute('aria-label', 'Breeze Siding social media');
+    social.innerHTML = '<a href="https://instagram.com/breezesiding" target="_blank" rel="me noopener">Instagram</a><a href="https://www.facebook.com/breezesiding" target="_blank" rel="me noopener">Facebook</a>';
+    footer.appendChild(social);
+  }
+
   function addLegacyLocationForm() {
     const config = legacyLocationPages[window.location.pathname];
     if (!config) return;
@@ -74,7 +85,7 @@
 
     const trust = document.createElement('section');
     trust.className = 'trust-strip';
-    trust.innerHTML = '<span>Licensed and insured</span><span>James Hardie preferred installer</span><span>Free on-site estimates</span><span>Seattle to Tacoma service</span>';
+    trust.innerHTML = '<span>Licensed and insured</span><span>James Hardie and fiber cement installs</span><span>Free on-site estimates</span><span>Seattle to Tacoma service</span>';
 
     const mount = document.createElement('div');
     mount.dataset.estimateForm = '';
@@ -90,9 +101,14 @@
     loadOnce('/lead-submit.js?v=lead-7');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addLegacyLocationForm, { once: true });
-  } else {
+  function init() {
+    addFooterSocialLinks();
     addLegacyLocationForm();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
   }
 })();
