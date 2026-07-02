@@ -4,7 +4,7 @@ window.BREEZE_PRIVATE_ADMIN = {
   supabaseUrl: 'https://nwvsriwsbpdhszmmousi.supabase.co',
   supabaseAnonKey: 'sb_publishable_SHsFk0DcYRACTjzr_xZsAA_e-wX-Vt7',
   ownerEmail: 'gilmotors2015@gmail.com',
-  reauthAfter: '2026-07-02T02:20:00Z'
+  reauthAfter: '2026-07-02T02:17:00Z'
 };
 
 (() => {
