@@ -5,7 +5,7 @@
   const status = document.querySelector('#estimate-form-status');
   const thankYouUrl = '/thank-you.html';
   const softNoticeMs = 1400;
-  const redirectTimeoutMs = 6500;
+  const requestTimeoutMs = 15000;
   const loadedAt = Date.now();
   const repeatWindowMs = 120000;
   const quickRepeatWindowMs = 15000;
@@ -336,12 +336,16 @@
   }
 
   async function insertLead(record) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), requestTimeoutMs);
     let response;
+
     try {
       response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
         method: 'POST',
         mode: 'cors',
         credentials: 'omit',
+        signal: controller.signal,
         headers: {
           apikey: supabaseAnonKey,
           Authorization: `Bearer ${supabaseAnonKey}`,
@@ -351,7 +355,12 @@
         body: JSON.stringify(record)
       });
     } catch (error) {
-      throw new Error(error?.message || 'The request was blocked by the browser.');
+      const message = error?.name === 'AbortError'
+        ? 'The request took too long. Please try again or call 253-228-0531.'
+        : (error?.message || 'The request was blocked by the browser.');
+      throw new Error(message);
+    } finally {
+      window.clearTimeout(timeoutId);
     }
 
     if (!response.ok) {
@@ -363,6 +372,30 @@
 
   function openConfirmation() {
     window.location.assign(thankYouUrl);
+  }
+
+  function trackConfirmedLead(record) {
+    if (typeof window.gtag !== 'function') {
+      openConfirmation();
+      return;
+    }
+
+    let redirected = false;
+    const finish = () => {
+      if (redirected) return;
+      redirected = true;
+      openConfirmation();
+    };
+
+    window.gtag('event', 'generate_lead', {
+      event_category: 'estimate',
+      form_id: 'estimate-lead-form',
+      project_type: record.project_type || 'not_specified',
+      landing_page: window.location.pathname,
+      event_callback: finish,
+      event_timeout: 1000
+    });
+    window.setTimeout(finish, 1100);
   }
 
   async function submitLead(event) {
@@ -395,25 +428,13 @@
       if (button) button.textContent = 'Opening confirmation...';
     }, softNoticeMs);
 
-    const sendPromise = insertLead(leadFromForm(data, spamCheck));
-    sendPromise.catch(() => {});
-
     try {
-      const result = await Promise.race([
-        sendPromise,
-        delay(redirectTimeoutMs, { timedOut: true })
-      ]);
+      const record = leadFromForm(data, spamCheck);
+      await insertLead(record);
 
       window.clearTimeout(noticeTimer);
-
-      if (result?.timedOut) {
-        setStatus('Request received. Opening the confirmation page...', 'success');
-        openConfirmation();
-        return;
-      }
-
       setStatus('Request received. Opening the confirmation page...', 'success');
-      openConfirmation();
+      trackConfirmedLead(record);
     } catch (_error) {
       window.clearTimeout(noticeTimer);
       setStatus('The form could not send right now. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
