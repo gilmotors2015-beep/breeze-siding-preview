@@ -331,10 +331,6 @@
     });
   }
 
-  function delay(ms, value) {
-    return new Promise((resolve) => window.setTimeout(() => resolve(value), ms));
-  }
-
   async function insertLead(record) {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), requestTimeoutMs);
@@ -424,8 +420,8 @@
     setStatus('Sending your request securely...', 'info');
 
     const noticeTimer = window.setTimeout(() => {
-      setStatus('Request received. Opening the confirmation page...', 'success');
-      if (button) button.textContent = 'Opening confirmation...';
+      setStatus('Still sending your request securely...', 'info');
+      if (button) button.textContent = 'Still sending...';
     }, softNoticeMs);
 
     try {
