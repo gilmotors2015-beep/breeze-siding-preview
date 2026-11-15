@@ -61,6 +61,28 @@
     }
   }
 
+  function trackContactActions() {
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('a[href]');
+      if (!link) return;
+
+      const href = link.getAttribute('href') || '';
+      const eventName = href.startsWith('tel:')
+        ? 'click_to_call'
+        : href.startsWith('mailto:')
+          ? 'click_to_email'
+          : '';
+
+      if (!eventName) return;
+
+      window.gtag('event', eventName, {
+        contact_method: eventName === 'click_to_call' ? 'phone' : 'email',
+        link_location: link.closest('header, footer, main')?.tagName.toLowerCase() || 'other',
+        landing_page: window.location.pathname
+      });
+    });
+  }
+
   function addFooterSocialLinks() {
     const footer = document.querySelector('.footer > div');
     if (!footer || footer.querySelector('.social-links')) return;
@@ -107,6 +129,7 @@
   }
 
   function init() {
+    trackContactActions();
     addFooterSocialLinks();
     addLegacyLocationForm();
   }
