@@ -1,0 +1,12 @@
+.location-landing main>.local-projects{order:5;background:var(--soft)}
+.local-project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+.local-project{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:var(--white)}
+.local-project figure{border-radius:0;background:var(--white)}
+.local-project figure img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:var(--soft);filter:none}
+.local-project figcaption{padding:14px 22px;color:var(--muted);font-size:.92rem;font-weight:700;border-bottom:1px solid var(--line)}
+.local-project-copy{padding:24px}.local-project-copy h3{font-size:1.4rem;line-height:1.25}
+.local-project-copy dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
+.local-project-copy dt{color:var(--muted);font-size:.85rem}.local-project-copy dd{margin:3px 0 0;font-weight:700;overflow-wrap:anywhere}
+.local-project-copy p,.local-projects>.section-heading p:not(.eyebrow){color:var(--muted)}
+@media(max-width:800px){.local-project-grid{grid-template-columns:1fr}}
+@media(max-width:420px){.local-project-copy{padding:20px}.local-project-copy dl{grid-template-columns:1fr}}
