@@ -213,7 +213,6 @@
       if (last.fingerprint === fingerprint && age < repeatWindowMs) return true;
     }
 
-    storageSet('breeze_last_lead_submit', JSON.stringify({ at: now, fingerprint }));
     return false;
   }
 
@@ -401,13 +400,13 @@
 
     const data = new FormData(form);
     if (hasBotTrap(data) || wasRecentlySubmitted(data)) {
-      openConfirmation();
+      setStatus('This request could not be sent. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       return;
     }
 
     const spamCheck = scoreLead(data);
     if (spamCheck.block) {
-      openConfirmation();
+      setStatus('This request could not be sent. Please call 253-228-0531 or email service@breezesiding.com.', 'error');
       return;
     }
 
@@ -427,6 +426,7 @@
     try {
       const record = leadFromForm(data, spamCheck);
       await insertLead(record);
+      storageSet('breeze_last_lead_submit', JSON.stringify({ at: Date.now(), fingerprint: leadFingerprint(data) }));
 
       window.clearTimeout(noticeTimer);
       setStatus('Request received. Opening the confirmation page...', 'success');
